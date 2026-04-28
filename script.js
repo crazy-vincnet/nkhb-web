@@ -349,6 +349,12 @@ document.addEventListener('DOMContentLoaded', () => {
           if (koreanSupport) koreanSupport.style.display = 'block';
           if (englishSupport) englishSupport.style.display = 'none';
       }
+
+      // Point Donate nav to the visible support section for the current language
+      const supportNavLink = document.querySelector('.nav-links a[data-i18n-key="nav_support"]');
+      if (supportNavLink) {
+          supportNavLink.setAttribute('href', lang === 'en' ? '#support-en' : '#support');
+      }
     };
 
     const langSelector = document.querySelector('.lang-selector');
