@@ -89,9 +89,14 @@ h2 {
     letter-spacing: -0.5px;
 }
 
-.description {
-    font-size: 17px;
-    color: var(--text-light);
+.sub-description {
+    text-align: center;
+    font-size: 18px;
+    line-height: 1.8;
+    background: var(--accent-light);
+    padding: 20px;
+    border-radius: 12px;
+    color: var(--text-main);
     word-break: keep-all;
 }
 
@@ -769,7 +774,7 @@ nav {
 }
 
 .impact-box li {
-    font-size: 15px;
+    font-size: 17px;
     margin-bottom: 14px;
     padding-left: 25px;
     position: relative;
@@ -876,11 +881,17 @@ nav {
 }
 
 .production-support h5 {
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 800;
     margin-bottom: 25px;
     text-align: center;
     color: var(--accent-color);
+    background-color: rgba(255, 255, 255, 0.5);
+    padding: 10px;
+    border-radius: 10px;
+    display: inline-block;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .production-grid {
