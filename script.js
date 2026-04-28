@@ -9,7 +9,7 @@ const translations = {
     nav_support: "Support",
     nav_schedule: "Schedule",
     // Hero Section
-    hero_title: "New Korea Hope Broadcasting<br>Waves Towards the North",
+    hero_title: "Waves of Hope,Towards the North",
     hero_subtitle: "Broadcasting hope, truth, and the gospel to the people of North Korea through radio waves.",
     hero_button_about: "Learn More",
     hero_button_letter: "Send a Letter of Hope",
@@ -156,7 +156,7 @@ const translations = {
     nav_support: "후원하기",
     nav_schedule: "방송 시간 및 주파수",
     // Hero Section
-    hero_title: "뉴코리아 희망방송<br>희망의 전파, 북녘을 향하여",
+    hero_title: "희망의 전파, 북녘을 향하여",
     hero_subtitle: "라디오 전파를 통해 북한 주민들에게 희망과 진실, 그리고 복음을 전합니다.",
     hero_button_about: "방송소개 보기",
     hero_button_letter: "희망의 편지 보내기",
