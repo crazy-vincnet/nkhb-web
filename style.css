@@ -49,12 +49,24 @@ svg {
     flex-shrink: 0;
 }
 
-/* --- Layout Components --- */
-.container {
-    max-width: var(--max-width);
-    margin: 0 auto;
-    padding: 0 24px;
-    width: 100%;
+@media (max-width: 768px) {
+    :root {
+        --section-padding: 60px;
+    }
+
+    .container {
+        padding: 0 20px;
+    }
+
+    .content-grid, .support-grid, .impact-info-container {
+        gap: 30px;
+    }
+
+    .btn-hero {
+        padding: 14px 20px;
+        min-width: 100%;
+        font-size: 15px;
+    }
 }
 
 .section {
