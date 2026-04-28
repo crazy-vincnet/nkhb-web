@@ -58,7 +58,9 @@ svg {
         padding: 0 20px;
     }
 
-    .content-grid, .support-grid, .impact-info-container {
+    .content-grid,
+    .support-grid,
+    .impact-info-container {
         gap: 30px;
     }
 
@@ -1134,6 +1136,7 @@ nav {
         grid-template-columns: 1fr;
     }
 }
+
 .modal {
     display: none;
     position: fixed;
@@ -1497,6 +1500,13 @@ footer {
         font-size: 12px;
 
     }
+
+    [lang="en"] .nav-links li a {
+        padding: 10px 11px;
+        font-size: 15px;
+        word-break: break-word;
+        text-align: center;
+    }
 }
 
 
@@ -1516,6 +1526,8 @@ footer {
 
 [lang="en"] .prod-btn strong {
     font-size: 12px;
-}rong {
+}
+
+rong {
     font-size: 12px;
 }
