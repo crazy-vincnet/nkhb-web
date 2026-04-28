@@ -268,36 +268,58 @@ nav {
 }
 .participation-sub-section h3 { font-size: 28px; font-weight: 800; margin-bottom: 35px; text-align: center; color: #000; }
 
-/* Letter of Hope Section Intro */
-.section-intro {
+/* Trust Card Style for Letter of Hope */
+.trust-card {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 50px 40px;
+    border: 1px solid #e1e8ef;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.04);
     max-width: 800px;
-    margin: -20px auto 30px;
+    margin: -10px auto 70px;
     text-align: center;
+    position: relative;
 }
 
-.section-intro p {
+.card-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    background-color: var(--accent-light);
+    color: var(--accent-color);
+    border-radius: 50%;
+    margin-bottom: 30px;
+}
+
+.card-icon svg {
+    width: 32px !important;
+    height: 32px !important;
+}
+
+.trust-card .intro-text {
     font-size: 16px;
     color: var(--text-main);
     line-height: 1.8;
     word-break: keep-all;
+    max-width: 650px;
+    margin: 0 auto;
 }
 
-/* Daily Notice (Style C Enhanced) */
-.daily-notice {
-    margin: 0 auto 50px;
-    padding: 15px 25px;
-    border-left: 4px solid var(--accent-color);
-    background-color: var(--accent-light);
-    max-width: 800px;
-    text-align: left;
+.card-divider {
+    height: 1px;
+    background: #e1e8ef;
+    margin: 35px auto;
+    max-width: 100px;
 }
 
-.daily-notice p {
+.trust-card .notice-text {
     font-size: 15px;
     color: var(--accent-color);
     line-height: 1.7;
     word-break: keep-all;
-    font-weight: 600;
+    font-weight: 700;
 }
 
 .guide-steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
