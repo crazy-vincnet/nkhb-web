@@ -268,14 +268,14 @@ nav {
 }
 .participation-sub-section h3 { font-size: 28px; font-weight: 800; margin-bottom: 35px; text-align: center; color: #000; }
 
-/* Trust Card Style for Letter of Hope */
+/* Trust Card Style (Readability Enhanced) */
 .trust-card {
     background: #ffffff;
     border-radius: 20px;
-    padding: 50px 40px;
+    padding: 60px 45px;
     border: 1px solid #e1e8ef;
     box-shadow: 0 15px 40px rgba(0,0,0,0.04);
-    max-width: 800px;
+    max-width: 850px;
     margin: -10px auto 70px;
     text-align: center;
     position: relative;
@@ -299,27 +299,39 @@ nav {
 }
 
 .trust-card .intro-text {
-    font-size: 16px;
-    color: var(--text-main);
-    line-height: 1.8;
+    font-size: 17px;
+    color: #111;
+    line-height: 1.9;
     word-break: keep-all;
-    max-width: 650px;
+    max-width: 700px;
     margin: 0 auto;
+}
+
+.trust-card .intro-text strong {
+    color: var(--accent-color);
+    font-weight: 700;
 }
 
 .card-divider {
     height: 1px;
     background: #e1e8ef;
-    margin: 35px auto;
-    max-width: 100px;
+    margin: 40px auto;
+    max-width: 120px;
 }
 
 .trust-card .notice-text {
-    font-size: 15px;
+    font-size: 16px;
     color: var(--accent-color);
-    line-height: 1.7;
+    line-height: 1.8;
     word-break: keep-all;
-    font-weight: 700;
+    font-weight: 600;
+}
+
+.trust-card .notice-text strong {
+    font-weight: 800;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    text-decoration-thickness: 2px;
 }
 
 .guide-steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
