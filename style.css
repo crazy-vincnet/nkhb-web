@@ -235,7 +235,10 @@ nav {
 /* --- Composition Section --- */
 .composition { background-color: var(--bg-light); }
 .theme-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; }
-.theme-card { background: #ffffff; padding: 45px 25px; border-radius: var(--border-radius-lg); text-align: center; border: 1px solid #eef0f2; transition: var(--transition); }
+.theme-card { background: #ffffff; padding: 45px 25px; border-radius: var(--border-radius-lg); text-align: center; border: 1px solid #eef0f2; transition: var(--transition); display: flex; flex-direction: column; }
+.theme-card p {
+    flex-grow: 1;
+}
 .theme-card:hover { transform: translateY(-10px); border-color: var(--accent-color); box-shadow: 0 15px 30px rgba(0,0,0,0.05); }
 .card-num { font-size: 44px; font-weight: 800; color: var(--accent-color); margin-bottom: 15px; }
 .theme-card h3 { font-size: 22px; font-weight: 800; margin-bottom: 15px; }
@@ -243,7 +246,10 @@ nav {
 /* --- Effects Section --- */
 .effects { background-color: #ffffff; }
 .effects-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
-.effect-card { padding: 0 0 25px 0; border-bottom: 1.5px solid #f0f0f0; transition: var(--transition); }
+.effect-card { padding: 0 0 25px 0; border-bottom: 1.5px solid #f0f0f0; transition: var(--transition); display: flex; flex-direction: column; }
+.effect-card p {
+    flex-grow: 1;
+}
 .effect-card:hover { border-color: var(--accent-color); }
 .effect-num { font-size: 13px; font-weight: 800; color: var(--accent-color); margin-bottom: 12px; display: block; }
 .effect-card h4 { font-size: 20px; font-weight: 800; margin-bottom: 10px; }
@@ -710,3 +716,15 @@ footer { background-color: var(--bg-dark); color: #ffffff; padding: 80px 20px; t
     }
 }
 
+
+/* --- i18n Language-Specific Fixes --- */
+[lang="en"] .nav-links li a {
+    padding: 10px 11px; /* Slightly reduce horizontal padding */
+    font-size: 14.5px; /* Slightly reduce font size */
+}
+
+[lang="en"] .prod-btn span {
+    font-size: 12px;
+    word-break: break-word;
+    text-align: center;
+}

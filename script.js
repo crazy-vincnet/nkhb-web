@@ -276,6 +276,7 @@ const translations = {
 document.addEventListener('DOMContentLoaded', () => {
     // --- I18n Logic ---
     const setLanguage = (lang) => {
+      document.documentElement.lang = lang;
       // Update text content
       document.querySelectorAll('[data-i18n-key]').forEach(element => {
         const key = element.getAttribute('data-i18n-key');
