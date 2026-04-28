@@ -399,7 +399,46 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    if (letterForm) {
+        letterForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const btnSubmit = letterForm.querySelector('.btn-submit');
+            btnSubmit.disabled = true;
+            btnSubmit.textContent = '전송 중...';
+
+            const formData = new FormData(letterForm);
+            const data = {
+                name: formData.get('name'),
+                location: formData.get('location'),
+                reason: formData.get('reason'),
+                email: formData.get('email'),
+                message: formData.get('message')
+            };
+
+            const scriptURL = 'https://script.google.com/macros/s/AKfycbx5M34i7RHI40g3hn0NaB1hVZQPwQV_3m-fq-AlK_ZW1y4o0d3QoErhZTNGr9AXF4E/exec';
+
+            fetch(scriptURL, {
+                method: 'POST',
+                mode: 'no-cors',
+                cache: 'no-cache',
+                body: JSON.stringify(data)
+            })
+            .then(() => {
+                alert('편지가 성공적으로 전송되었습니다.');
+                closeModal();
+                letterForm.reset();
+            })
+            .catch(error => {
+                alert('전송에 실패했습니다. 다시 시도해주세요.');
+                console.error('Error!', error);
+            })
+            .finally(() => {
+                btnSubmit.disabled = false;
+                btnSubmit.textContent = '편지 보내기';
+            });
+        });
+    }
+
     // Set initial language on page load
-    // You can enhance this to detect browser language or use localStorage
     setLanguage('ko');
 });
