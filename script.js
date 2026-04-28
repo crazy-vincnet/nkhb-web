@@ -4,11 +4,11 @@ const translations = {
     page_title: "New Korea Hope Broadcasting (NKHB)",
     // Navigation
     nav_background: "Background",
-    nav_composition: "Composition",
-    nav_effects: "Effects",
+    nav_composition: "Program",
+    nav_effects: "Impact",
     nav_reach: "Reach",
-    nav_guide: "Participation Guide",
-    nav_support: "Support",
+    nav_guide: "Get Involved",
+    nav_support: "Donate",
     nav_schedule: "Schedule",
     // Hero Section
     hero_tag:"North Korea Hope Broadcasting(NKHB)",
@@ -26,7 +26,7 @@ const translations = {
     background_testimonial_tag: "44% of North Korean defectors have listened to the radio",
     background_testimonial_text: '"I came to know the world through the radio"',
     // Composition Section
-    composition_title: "Broadcast Composition",
+    composition_title: "Program Structure",
     composition_desc: "NKHB produces and broadcasts content tailored to the realities and needs of North Koreans, third-country refugees, and dispatched workers, focusing on the four major themes of Hope, Truth, Verity, and Restoration.",
     composition_card1_title: "Hope",
     composition_card1_desc: '"Letter of Hope" - Delivers encouraging messages from around the world and vivid stories from North Korean defectors who have settled in South Korea.',
@@ -37,7 +37,7 @@ const translations = {
     composition_card4_title: "Restoration",
     composition_card4_desc: "Heals the hearts of residents through the leisure of a piece of music, practical medical information, and psychological healing content.",
     // Effects Section
-    effects_title: "Expected Effects",
+    effects_title: "Expected Impact",
     effects_desc: "The message from a single radio can bring about amazing changes in the lives of North Koreans.",
     effects_card1_title: "Change in Perception",
     effects_card1_desc: "North Koreans come to realize that 'the world they know is not everything.'",
@@ -60,7 +60,7 @@ const translations = {
     reach_feature2: "Reception confirmed in over 10 countries worldwide, including Europe and South America.",
     reach_feature3: "Broadcast delivered to overseas workers and North Korean refugees.",
     // Guide Section
-    guide_title: "Participate Together",
+    guide_title: "Get Involved",
     guide_desc: "Your warm interest and participation become a light of life for the people of North Korea. Please send hope through letters and support.",
     guide_letter_title: "✍️ Send a Letter of Hope",
     guide_letter_intro: "NKHB has a corner called <strong>'Letter of Hope.'</strong> In this corner, we deliver messages from all over the world to <strong>North Korean listeners.</strong> <strong>Anyone</strong> can participate if you have a message you want to share with the people of North Korea. Your letters will be <strong>translated into Korean</strong> and broadcast in the <strong>voice of a North Korean defector.</strong>",
@@ -162,7 +162,7 @@ const translations = {
     nav_reach: "방송 도달 범위",
     nav_guide: "참여 안내",
     nav_support: "후원하기",
-    nav_schedule: "방송 시간 및 주파수",
+    nav_schedule: "방송시간",
     // Hero Section
     hero_tag:"뉴코리아 희망방송(NKHB)",
     hero_title: "희망의 전파, 북녘을 향하여",
