@@ -32,7 +32,7 @@ const translations = {
     composition_card1_desc: '"Letter of Hope" - Delivers encouraging messages from around the world and vivid stories from North Korean defectors who have settled in South Korea.',
     composition_card2_title: "Truth",
     composition_card2_desc: "Conveys comfort and spiritual truth through Bible stories, the gospel, and readings of the North Korean language Bible.",
-    composition_card3_title: "Verity",
+    composition_card3_title: "Facts",
     composition_card3_desc: "Objectively delivers hidden truths such as changes in the outside world, international news, and weather information for all of North Korea.",
     composition_card4_title: "Restoration",
     composition_card4_desc: "Heals the hearts of residents through the leisure of a piece of music, practical medical information, and psychological healing content.",
@@ -505,7 +505,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 message: formData.get('message')
             };
 
-            const scriptURL = 'https://script.google.com/macros/s/AKfycbx5M34i7RHI40g3hn0NaB1hVZQPwQV_3m-fq-AlK_ZW1y4o0d3QoErhZTNGr9AXF4E/exec';
+            const scriptURL = 'https://script.google.com/macros/s/AKfycbyLZ3RwYgeBpR4FLHaKhBiJnuZK9ZRmpOCCF3-axwAiWPXjJwZg1iYy-CG9CFoyCuBx/exec';
 
             fetch(scriptURL, {
                 method: 'POST',
