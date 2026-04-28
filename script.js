@@ -14,7 +14,7 @@ const translations = {
     // Hero Section
     hero_tag:"North Korea Hope Broadcasting(NKHB)",
     hero_title: "In the Night of North Korea</br>Let We Bring Hope",
-    hero_subtitle: "Broadcasting hope, truth, and the gospel to the people of North Korea through radio waves.",
+    hero_subtitle: "The truth will set you free.</br>John 8:32",
     hero_button_about: "Learn More",
     hero_button_letter: "Send a Letter of Hope",
     // Background Section
@@ -205,7 +205,7 @@ const translations = {
     // Hero Section
     hero_tag:"뉴코리아 희망방송(NKHB)",
     hero_title: "북한의 밤에</br>희망을 전합니다",
-    hero_subtitle: "라디오 전파를 통해 북한 주민들에게 희망과 진실, 그리고 복음을 전합니다.",
+    hero_subtitle: "진리가 너희를 자유케 하리니</br>요한복음 8장 32절",
     hero_button_about: "방송소개 보기",
     hero_button_letter: "희망의 편지 보내기",
     // Background Section
