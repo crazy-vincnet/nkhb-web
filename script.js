@@ -357,12 +357,38 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     };
 
+    const detectInitialLang = () => {
+        const path = window.location.pathname.toLowerCase();
+        if (/(^|\/)en(\/|$)/.test(path)) return 'en';
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('lang') === 'en') return 'en';
+        if (window.location.hash.toLowerCase() === '#en') return 'en';
+        return 'ko';
+    };
+
+    const updateUrlForLang = (lang) => {
+        if (!window.history || !window.history.replaceState) return;
+        const currentPath = window.location.pathname;
+        const isEnPath = /(^|\/)en\/?$/.test(currentPath);
+        let newPath = currentPath;
+        if (lang === 'en' && !isEnPath) {
+            newPath = currentPath.replace(/\/?$/, '/') + 'en';
+        } else if (lang === 'ko' && isEnPath) {
+            newPath = currentPath.replace(/\/?en\/?$/, '/');
+        }
+        if (newPath !== currentPath) {
+            window.history.replaceState({}, '', newPath + window.location.search + window.location.hash);
+        }
+    };
+
     const langSelector = document.querySelector('.lang-selector');
     if (langSelector) {
         langSelector.addEventListener('click', (e) => {
           if (e.target.tagName === 'A' && e.target.dataset.lang) {
             e.preventDefault();
-            setLanguage(e.target.dataset.lang);
+            const lang = e.target.dataset.lang;
+            setLanguage(lang);
+            updateUrlForLang(lang);
             if (navContainer && navContainer.classList.contains('active')) {
                 toggleMenu();
             }
@@ -503,6 +529,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Set initial language on page load
-    setLanguage('ko');
+    // Set initial language on page load (detect from URL path)
+    setLanguage(detectInitialLang());
 });
