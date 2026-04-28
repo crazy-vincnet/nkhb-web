@@ -1413,10 +1413,6 @@ footer {
         font-size: 18px;
     }
 
-    .prod-btn strong {
-        font-size: 12px;
-    }
-
     .prod-btn span {
         font-size: 12px;
 
@@ -1436,4 +1432,8 @@ footer {
     font-size: 12px;
     word-break: break-word;
     text-align: center;
+}
+
+[lang="en"] .prod-btn strong {
+    font-size: 12px;
 }
