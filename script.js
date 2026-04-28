@@ -122,6 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
             submitBtn.innerText = originalBtnText;
         }
     });
+}
 
     // Language selector toggle logic
     const langLinks = document.querySelectorAll('.lang-selector a');
