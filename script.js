@@ -10,6 +10,7 @@ const translations = {
     nav_guide: "Get Involved",
     nav_support: "Donate",
     nav_schedule: "Schedule",
+    nav_about: "About Us",
     // Hero Section
     hero_tag:"North Korea Hope Broadcasting(NKHB)",
     hero_title: "In the Night of North Korea</br>Let We Bring Hope",
@@ -200,6 +201,7 @@ const translations = {
     nav_guide: "참여 안내",
     nav_support: "후원하기",
     nav_schedule: "방송시간",
+    nav_about: "소개",
     // Hero Section
     hero_tag:"뉴코리아 희망방송(NKHB)",
     hero_title: "북한의 밤에</br>희망을 전합니다",
