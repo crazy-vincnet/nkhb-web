@@ -294,6 +294,17 @@ document.addEventListener('DOMContentLoaded', () => {
       if (newActiveLink) {
         newActiveLink.classList.add('active');
       }
+
+      // Toggle Support Sections
+      const koreanSupport = document.getElementById('support');
+      const englishSupport = document.getElementById('support-en');
+      if (lang === 'en') {
+          if (koreanSupport) koreanSupport.style.display = 'none';
+          if (englishSupport) englishSupport.style.display = 'block';
+      } else {
+          if (koreanSupport) koreanSupport.style.display = 'block';
+          if (englishSupport) englishSupport.style.display = 'none';
+      }
     };
 
     const langSelector = document.querySelector('.lang-selector');

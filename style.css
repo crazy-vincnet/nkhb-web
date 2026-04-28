@@ -1074,7 +1074,45 @@ nav {
     height: 20px !important;
 }
 
-/* Modal & Form */
+.support-en {
+    background-color: #f9f9f9;
+    padding: 80px 0;
+}
+
+.support-en-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-top: 40px;
+}
+
+.support-en-card {
+    background: #ffffff;
+    padding: 40px;
+    border-radius: 20px;
+    border: 1px solid #e1e8ef;
+}
+
+.support-en-card h3 {
+    margin-bottom: 20px;
+    font-size: 22px;
+}
+
+.support-en-card p {
+    line-height: 1.8;
+    color: #555;
+}
+
+.support-en-cta {
+    text-align: center;
+    margin-top: 50px;
+}
+
+@media (max-width: 768px) {
+    .support-en-grid {
+        grid-template-columns: 1fr;
+    }
+}
 .modal {
     display: none;
     position: fixed;
