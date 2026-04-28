@@ -6,12 +6,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Mobile Menu Toggle
     const toggleMenu = () => {
-        menuBtn.classList.toggle('active');
-        navContainer.classList.toggle('active');
-        document.body.style.overflow = navContainer.classList.contains('active') ? 'hidden' : '';
+        if (menuBtn && navContainer) {
+            menuBtn.classList.toggle('active');
+            navContainer.classList.toggle('active');
+            document.body.style.overflow = navContainer.classList.contains('active') ? 'hidden' : '';
+        }
     };
 
-    menuBtn.addEventListener('click', toggleMenu);
+    if (menuBtn) {
+        menuBtn.addEventListener('click', toggleMenu);
+    }
 
     // Smooth scrolling & Auto-close menu
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -23,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const targetElement = document.querySelector(targetId);
             if (targetElement) {
                 // Close menu if open
-                if (navContainer.classList.contains('active')) {
+                if (navContainer && navContainer.classList.contains('active')) {
                     toggleMenu();
                 }
 
@@ -46,33 +50,44 @@ document.addEventListener('DOMContentLoaded', () => {
     const letterForm = document.getElementById('letter-form');
 
     // Open Modal
-    openModalBtn.addEventListener('click', () => {
-        letterModal.classList.add('active');
-        document.body.style.overflow = 'hidden';
-    });
+    if (openModalBtn && letterModal) {
+        openModalBtn.addEventListener('click', () => {
+            letterModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+    }
 
     // Close Modal
     const closeModal = () => {
-        letterModal.classList.remove('active');
-        document.body.style.overflow = '';
+        if (letterModal) {
+            letterModal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
     };
 
-    closeModalBtn.addEventListener('click', closeModal);
+    if (closeModalBtn) {
+        closeModalBtn.addEventListener('click', closeModal);
+    }
 
     // Close on background click
-    letterModal.addEventListener('click', (e) => {
-        if (e.target === letterModal) closeModal();
-    });
+    if (letterModal) {
+        letterModal.addEventListener('click', (e) => {
+            if (e.target === letterModal) closeModal();
+        });
+    }
 
     // Form Submission to Google Sheets
     // IMPORTANT: Replace this URL after deploying Google Apps Script
     const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx5M34i7RHI40g3hn0NaB1hVZQPwQV_3m-fq-AlK_ZW1y4o0d3QoErhZTNGr9AXF4E/exec';
 
-    letterForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const submitBtn = letterForm.querySelector('.btn-submit');
-        const originalBtnText = submitBtn.innerText;
+    if (letterForm) {
+        letterForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const submitBtn = letterForm.querySelector('.btn-submit');
+            if (!submitBtn) return;
+            
+            const originalBtnText = submitBtn.innerText;
         
         // Disable button and show loading state
         submitBtn.disabled = true;
