@@ -389,6 +389,32 @@ nav {
 .tier-btn { display: flex; align-items: center; justify-content: center; padding: 12px; border-radius: 8px; background-color: #ffffff; color: #333; text-decoration: none; font-weight: 600; border: 1px solid #eee; transition: 0.2s; font-size: 14px; }
 .tier-btn:hover { background-color: var(--accent-color); color: #fff; border-color: var(--accent-color); }
 
+.custom-support-wrap {
+    width: 100%;
+    margin-top: 15px; /* HTML의 인라인 스타일을 CSS로 이동 */
+}
+
+.btn-custom-support {
+    display: block;
+    width: 100%;
+    padding: 16px;
+    border: 1px solid var(--accent-color);
+    border-radius: 10px;
+    color: var(--accent-color);
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 700;
+    text-align: center;
+    transition: var(--transition);
+}
+
+.btn-custom-support:hover {
+    background-color: var(--accent-color);
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 74, 153, 0.1);
+}
+
 /* Production Support */
 .production-support { background-color: var(--accent-light); padding: 40px; border-radius: 20px; margin-bottom: 50px; }
 .production-support h5 { font-size: 18px; font-weight: 800; margin-bottom: 25px; text-align: center; color: var(--accent-color); }
