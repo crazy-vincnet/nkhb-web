@@ -45,7 +45,7 @@
     </nav>
 </header>
 
-<main style="padding-top: 100px;">
+<main>
     <section class="hero" id="hero">
         <div class="container">
             <div class="hero-content">
@@ -76,8 +76,8 @@
                     
                     <p class="description sub-desc" data-i18n-key="background_desc3">북한 사회에서 라디오는 여전히 가장 현실적이고 효과적인 정보 전달 수단입니다. NKHB는 단순한 정보 제공을 넘어, 청취자들이 '지금 내가 알고 있는 세상이 전부가 아닐 수 있다'는 사실을 깨닫도록 돕는 것을 목표로 합니다.</p>
 
-                    <div class="action-area" style="margin-top: 40px;">
-                        <button id="open-article-modal" class="btn-hero btn-outline" style="color: var(--accent-color); border-color: var(--accent-color); display: inline-block; cursor: pointer; background: transparent;" data-i18n-key="background_read_more">대북방송의 역할 자세히 읽기 →</button>
+                    <div class="action-area">
+                        <button id="open-article-modal" class="btn-hero btn-outline" data-i18n-key="background_read_more">대북방송의 역할 자세히 읽기 →</button>
                     </div>
                 </div>
                 <div class="image-content">
@@ -272,7 +272,8 @@
 
     <p class="contact-note" data-i18n-key="guide_contact_note">* 한국어 외 다른 언어로 작성하셔도 한국어로 번역되어 방송됩니다.</p>
 </div>
-</div>
+        </div><!-- /.participation-sub-section -->
+    </div><!-- /.container -->
 </section>
 
 <!-- Letter Modal -->
@@ -322,7 +323,7 @@
                 <p class="description" data-i18n-key="support_desc">북한 주민들에게 진실과 희망을 전하는 전파 선교사가 되어 주세요.</p>
             </div>
             
-            <div class="participation-sub-section" id="support-sub" style="margin: 20px auto 40px;">
+            <div class="participation-sub-section" id="support-sub">
                     <p class="sub-description" data-i18n-key="support_appeal_desc">하루 1,000원, 매달 3만 원을 후원하는 <strong>1,000명의 전파 선교사</strong>가 세워지면, <br>매일 2시간의 방송을 제작하고 송출하여 북한 전역에 희망을 전할 수 있습니다.</p>
                 </div>
 
@@ -384,12 +385,11 @@
                         <p class="account-holder" data-i18n-key="support_account_holder">예금주: 뉴코리아 파운데이션 인터내셔널</p>
                     </div>
                 </div>
-            </div>
-        </div>
+        </div><!-- /.container -->
     </section>
 
     <!-- New English Support Section -->
-    <section class="section support-en" id="support-en" style="display: none;">
+    <section class="section support-en" id="support-en">
         <div class="container">
             <div class="section-header">
                 <h2 data-i18n-key="support_en_title">Support NKHB</h2>
@@ -407,7 +407,7 @@
                 </div>
             </div>
             <div class="support-en-cta">
-                <a href="https://www.paypal.com/donate/?hosted_button_id=C63Y87MR7F4FL" class="btn-hero btn-fill" target="_blank" style="display:inline-block; margin-top: 30px; background-color: var(--accent-color); color: #fff; padding: 18px 40px; border-radius: 10px; text-decoration: none; font-weight: 700;">Donate via PayPal</a>
+                <a href="https://www.paypal.com/donate/?hosted_button_id=C63Y87MR7F4FL" class="btn-paypal" target="_blank" rel="noopener noreferrer">Donate via PayPal</a>
             </div>
         </div>
     </section>
@@ -495,7 +495,7 @@
     <div class="modal-content wide">
         <div class="modal-header">
             <h3 data-i18n-key="article_modal_title">📢 대북방송의 역할</h3>
-            <button class="close-modal-article" style="background: #f5f5f7; border: none; width: 36px; height: 36px; border-radius: 50%; font-size: 24px; color: #86868b; cursor: pointer;">&times;</button>
+            <button class="close-modal-article">&times;</button>
         </div>
         <div class="modal-body-article">
             <div class="article-content-inner">

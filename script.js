@@ -1,5 +1,7 @@
 const translations = {
   en: {
+    // Page
+    page_title: "New Korea Hope Broadcasting (NKHB)",
     // Navigation
     nav_background: "Background",
     nav_composition: "Composition",
@@ -83,12 +85,15 @@ const translations = {
     letter_modal_placeholder_name: "e.g., John Doe or Anonymous",
     letter_modal_label_location: "Region of Residence",
     letter_modal_placeholder_location: "e.g., Seoul, Los Angeles, etc.",
+    letter_modal_label_email: "Email Address",
     letter_modal_label_reason: "Reason for interest in North Korea",
     letter_modal_placeholder_reason: "Please write briefly",
     letter_modal_label_message: "Message of hope you want to convey",
     letter_modal_placeholder_message: "Please write at least 5 sentences of warm words that will give strength to the people of North Korea (please refrain from political content).",
     letter_modal_footer_note: "The content you write will be delivered to the people of North Korea through the NKHB broadcast.",
     letter_modal_button_submit: "Send Letter",
+    // English Support Section
+    support_en_title: "Support NKHB",
     // Support Section
     support_title: "Support",
     support_desc: "Please become a radio wave missionary spreading truth and hope to the people of North Korea.",
@@ -148,6 +153,8 @@ const translations = {
     article_p9: "<strong>That quiet sound will eventually become the greatest force to change the future of the Korean Peninsula.</strong>"
   },
   ko: {
+    // Page
+    page_title: "뉴코리아 희망방송 (NKHB)",
     // Navigation
     nav_background: "방송배경",
     nav_composition: "방송구성",
@@ -231,12 +238,15 @@ const translations = {
     letter_modal_placeholder_name: "예: 홍길동 또는 익명",
     letter_modal_label_location: "거주 지역",
     letter_modal_placeholder_location: "예: 서울, 미국 LA 등",
+    letter_modal_label_email: "이메일 주소",
     letter_modal_label_reason: "북한에 관심을 갖게 된 계기",
     letter_modal_placeholder_reason: "간략히 적어주세요",
     letter_modal_label_message: "전하고 싶은 희망의 메시지",
     letter_modal_placeholder_message: "최소 5문장 이상, 북한 주민들에게 힘이 되는 따뜻한 말을 전해주세요 (정치적 내용은 지양 부탁드립니다)",
     letter_modal_footer_note: "작성하신 내용은 NKHB 방송을 통해 북한 주민들에게 전달됩니다.",
     letter_modal_button_submit: "편지 보내기",
+    // English Support Section
+    support_en_title: "NKHB 후원하기",
     // Support Section
     support_title: "후원하기",
     support_desc: "북한 주민들에게 진실과 희망을 전하는 전파 선교사가 되어 주세요.",
