@@ -357,6 +357,9 @@ document.addEventListener('DOMContentLoaded', () => {
           if (e.target.tagName === 'A' && e.target.dataset.lang) {
             e.preventDefault();
             setLanguage(e.target.dataset.lang);
+            if (navContainer && navContainer.classList.contains('active')) {
+                toggleMenu();
+            }
           }
         });
     }
