@@ -9,7 +9,7 @@ const translations = {
     nav_support: "Support",
     nav_schedule: "Schedule",
     // Hero Section
-    hero_title: "New Korea Hope Broadcasting<br>Waves of Hope Towards the North",
+    hero_title: "New Korea Hope Broadcasting<br>Waves Towards the North",
     hero_subtitle: "Broadcasting hope, truth, and the gospel to the people of North Korea through radio waves.",
     hero_button_about: "Learn More",
     hero_button_letter: "Send a Letter of Hope",

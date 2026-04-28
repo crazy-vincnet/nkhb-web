@@ -235,6 +235,10 @@ nav {
     word-break: keep-all;
 }
 
+.hero .hero-title {
+    font-size: clamp(28px, 6vw, 48px);
+}
+
 .hero p {
     font-size: clamp(17px, 2.2vw, 20px);
     margin-bottom: 40px;
