@@ -67,17 +67,16 @@ svg {
     text-align: center;
 }
 
-.section-tag {
+.hero-tag {
     display: inline-block;
-    font-size: 13px;
+    font-size: 24px;
     font-weight: 700;
-    color: var(--accent-color);
-    margin-bottom: 16px;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    background: var(--accent-light);
-    padding: 4px 12px;
-    border-radius: 4px;
+    color: #ffffff;
+    margin-bottom: 24px;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    letter-spacing: 1px;
 }
 
 h2 {
@@ -212,6 +211,10 @@ nav {
     display: flex;
     align-items: center;
     color: #ffffff;
+}
+
+[lang="en"] .hero h1 {
+    white-space: nowrap;
 }
 
 .hero .container {
