@@ -133,4 +133,28 @@ document.addEventListener('DOMContentLoaded', () => {
             link.classList.add('active');
         });
     });
+
+    // Article Modal Logic
+    const articleModal = document.getElementById('article-modal');
+    const openArticleBtn = document.getElementById('open-article-modal');
+    const closeArticleBtn = document.querySelector('.close-modal-article');
+
+    if (openArticleBtn && articleModal && closeArticleBtn) {
+        openArticleBtn.addEventListener('click', () => {
+            articleModal.classList.add('active');
+            document.body.style.overflow = 'hidden'; // 스크롤 방지
+        });
+
+        closeArticleBtn.addEventListener('click', () => {
+            articleModal.classList.remove('active');
+            document.body.style.overflow = 'auto'; // 스크롤 허용
+        });
+
+        articleModal.addEventListener('click', (e) => {
+            if (e.target === articleModal) {
+                articleModal.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
+        });
+    }
 });
