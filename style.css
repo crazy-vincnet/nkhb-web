@@ -814,18 +814,27 @@ nav {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 12px;
+    padding: 15px;
     border-radius: 8px;
     background-color: #ffffff;
     color: #333;
     text-decoration: none;
-    font-weight: 600;
-    border: 1px solid #eee;
+    font-weight: 700;
+    border: 1px solid #ddd;
     transition: 0.2s;
-    font-size: 14px;
+    font-size: 16px;
 }
 
 .tier-btn:hover {
+    background-color: var(--accent-color);
+    color: #fff;
+    border-color: var(--accent-color);
+}
+
+.tier-btn.tier-btn-main {
+    grid-column: 1 / -1;
+    font-size: 18px;
+    padding: 20px;
     background-color: var(--accent-color);
     color: #fff;
     border-color: var(--accent-color);
@@ -1291,7 +1300,8 @@ footer {
     .content-grid,
     .reach-grid,
     .impact-info-container,
-    .schedule-modern-grid {
+    .schedule-modern-grid,
+    .support-boxes-container {
         grid-template-columns: 1fr;
         gap: 40px;
     }
@@ -1435,5 +1445,7 @@ footer {
 }
 
 [lang="en"] .prod-btn strong {
+    font-size: 12px;
+}rong {
     font-size: 12px;
 }
