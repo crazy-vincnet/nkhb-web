@@ -317,6 +317,16 @@ document.addEventListener('DOMContentLoaded', () => {
         newActiveLink.classList.add('active');
       }
 
+      // Handle Title Font Size based on language
+      const heroTitle = document.querySelector('[data-i18n-key="hero_title"]');
+      if (heroTitle) {
+          if (lang === 'en') {
+              heroTitle.classList.add('hero-title-en');
+          } else {
+              heroTitle.classList.remove('hero-title-en');
+          }
+      }
+
       // Toggle Support Sections
       const koreanSupport = document.getElementById('support');
       const englishSupport = document.getElementById('support-en');
