@@ -1806,10 +1806,10 @@ footer {
 }
 
 .ministry-card {
-    padding: 30px;
+    padding: clamp(25px, 4vw, 40px);
     background: white;
     border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.06);
     transition: transform 0.3s ease;
     text-align: center;
 }
@@ -1855,15 +1855,18 @@ footer {
 }
 
 .profile-list li {
-    margin-bottom: 8px;
+    margin-bottom: 12px;
     position: relative;
     padding-left: 15px;
+    line-height: 1.7;
+    font-size: 1.05rem;
 }
 
 .profile-list li::before {
     content: "•";
     position: absolute;
     left: 0;
+    top: 2px;
     color: var(--accent-color);
 }
 
@@ -1907,11 +1910,24 @@ footer {
 }
 
 @media (max-width: 768px) {
-    .founder-grid {
-        grid-template-columns: 1fr;
+    .about-hero {
+        padding: 100px 0 60px;
     }
     .about-hero h1 {
         font-size: 2rem;
+    }
+    .founder-grid {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+    .founder-image img {
+        max-width: 100%;
+        margin: 0 auto;
+        display: block;
+    }
+    .mission-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
     }
     .cta-buttons {
         flex-direction: column;
@@ -1920,5 +1936,6 @@ footer {
     .cta-buttons .btn-fill-accent,
     .cta-buttons .btn-outline-dark {
         width: 100%;
+        padding: 16px 20px;
     }
 }
