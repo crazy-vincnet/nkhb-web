@@ -1729,3 +1729,135 @@ footer {
         text-align: center;
     }
 }
+
+/* About Page Styles */
+.about-hero {
+    padding: 120px 0 80px;
+    background: var(--primary-color);
+    color: white;
+    text-align: center;
+}
+
+.about-hero h1 {
+    font-size: 3rem;
+    margin-bottom: 20px;
+}
+
+.about-hero .subtitle {
+    font-size: 1.5rem;
+    opacity: 0.9;
+}
+
+.about-intro .info-list {
+    margin-top: 20px;
+    list-style: none;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.vision-box {
+    background: #f8f9fa;
+    padding: 40px;
+    border-radius: 12px;
+    margin-bottom: 60px;
+    text-align: center;
+    border-left: 5px solid var(--accent-color);
+}
+
+.mission-box {
+    margin-bottom: 80px;
+}
+
+.mission-desc {
+    margin-bottom: 30px;
+    font-weight: 500;
+}
+
+.mission-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.mission-item {
+    padding: 20px;
+    background: white;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    font-size: 0.95rem;
+}
+
+.ministry-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 25px;
+}
+
+.ministry-card {
+    padding: 30px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease;
+    text-align: center;
+}
+
+.ministry-card:hover {
+    transform: translateY(-5px);
+    border-bottom: 3px solid var(--accent-color);
+}
+
+.founder-grid {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 50px;
+    align-items: start;
+}
+
+.founder-image img {
+    width: 100%;
+    border-radius: 12px;
+}
+
+.founder-image .caption {
+    margin-top: 10px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.highlight-title {
+    color: var(--accent-color);
+    margin: 15px 0;
+}
+
+.profile-list {
+    list-style: none;
+    margin-bottom: 20px;
+}
+
+.profile-list li {
+    margin-bottom: 8px;
+    position: relative;
+    padding-left: 15px;
+}
+
+.profile-list li::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: var(--accent-color);
+}
+
+.book-info {
+    font-weight: 500;
+    color: var(--primary-color);
+}
+
+@media (max-width: 768px) {
+    .founder-grid {
+        grid-template-columns: 1fr;
+    }
+    .about-hero h1 {
+        font-size: 2rem;
+    }
+}
