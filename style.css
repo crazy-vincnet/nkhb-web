@@ -54,10 +54,6 @@ svg {
         --section-padding: 60px;
     }
 
-    .container {
-        padding: 0 20px;
-    }
-
     .content-grid,
     .support-grid,
     .impact-info-container {
