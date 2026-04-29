@@ -138,7 +138,7 @@ const translations = {
     schedule_notice: "Available for listening throughout North Korea on Short Wave Radio.",
     // Footer
     footer_contact: "New Korea Hope Broadcasting (NKHB) | Contact: nkhb316@gmail.com",
-    footer_schedule: "Mon·Wed·Fri 02:30 (5920 kHz) / Tue·Thu·Sat 23:00 (9470 kHz)",
+    footer_schedule: "Mon·Wed·Fri 02:30-03:00 (5920 kHz) / Tue·Thu·Sat 23:00-23:30 (9470 kHz)",
     footer_copyright: "&copy; 2026 New Korea Hope Broadcasting. All rights reserved.",
     // Article Modal
     article_modal_title: "📢 The Role of North Korean Broadcasts",
