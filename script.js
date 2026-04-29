@@ -13,8 +13,8 @@ const translations = {
     nav_about: "About Us",
     // Hero Section
     hero_tag:"North Korea Hope Broadcasting(NKHB)",
-    hero_title: "In the Night of North Korea</br>Let We Bring Hope",
-    hero_subtitle: "The truth will set you free.</br>John 8:32",
+    hero_title: "In the Night of North Korea</br>We Bring Truth and Hope",
+    hero_subtitle: "“The truth will set you free.”",
     hero_button_about: "Learn More",
     hero_button_letter: "Send a Letter of Hope",
     // Background Section
@@ -114,6 +114,7 @@ const translations = {
     support_regular_200k: "200,000 KRW",
     support_regular_300k: "300,000 KRW",
     support_regular_500k: "500,000 KRW",
+    support_regular_1m: "1,000,000 KRW",
     support_custom_amount: "Support with a custom amount (enter directly) →",
     support_production_title: "🎙️ Broadcast Production & Transmission Support",
     support_production_200k: "<strong>200,000 KRW</strong> <span>30-min broadcast</span>",
@@ -155,11 +156,12 @@ const translations = {
     // NKFI About Page
     about_hero_title: "NKFI (New Korea Foundation International)",
     about_hero_subtitle: "Toward Restoration, Freedom, and Dignity for North Koreans",
+    about_intro_top: "NKHB (New Korea Hope Broadcasting) is the North Korean radio broadcasting ministry of NKFI (New Korea Foundation International).",
     about_intro_title: "About NKFI",
     about_intro_p1: "New Korea Foundation International (NKFI) is an international NGO started in the US in 2016 by missionary Kenneth Bae, who was detained in North Korea for two years, to help forgotten and marginalized North Korean refugees around the world and prepare for a unified Korea.",
     about_intro_p2: "NKFI prepares for the spiritual reconstruction of North Korea in anticipation of the upcoming unification of the South and North, activating the evangelization of a unified New Korea through mobilization, networking, training, and relief.",
     about_intro_info1: "* Integrated from predecessor organizations Nehemiah Global Initiative (NGI) and NKRelief",
-    about_intro_info2: "* US-based 501(c)(3) non-profit organization (NGO) based in Minneapolis, MN and Seoul, Korea",
+    about_intro_info2: "* A US-based 501(c)(3) non-profit organization (NGO) operating in Minneapolis, MN, USA and Seoul, Korea",
     about_intro_info3: "* Member of KAICAM (Korea Association of Independent Churches and Missions)",
     about_vision_title: "Vision Statement",
     about_vision_desc: "To restore the recovery, freedom, and dignity of North Korean residents, and to achieve the unification of the Korean Peninsula where equality and freedom are guaranteed for all in Christ. NKFI takes the lead in the unification of South and North Korea and the spiritual reconstruction of North Korea through the power of the Gospel and the Holy Spirit.",
@@ -201,11 +203,11 @@ const translations = {
     nav_guide: "참여 안내",
     nav_support: "후원하기",
     nav_schedule: "방송시간",
-    nav_about: "소개",
+    nav_about: "NKFI 소개",
     // Hero Section
     hero_tag:"뉴코리아 희망방송(NKHB)",
-    hero_title: "북한의 밤에</br>희망을 전합니다",
-    hero_subtitle: "진리가 너희를 자유케 하리니</br>요한복음 8장 32절",
+    hero_title: "북한의 밤에</br>진실과 희망을 전합니다",
+    hero_subtitle: "“진리가 너희를 자유케 하리니”",
     hero_button_about: "방송소개 보기",
     hero_button_letter: "희망의 편지 보내기",
     // Background Section
@@ -225,7 +227,7 @@ const translations = {
     composition_card2_title: "진리",
     composition_card2_desc: "성경 이야기와 복음, 그리고 북한어 성경 낭독을 통해 위로와 영적인 진리를 전달합니다.",
     composition_card3_title: "진실",
-    composition_card3_desc: "외부 세계의 변화와 국제 소식, 북한 전역의 날씨 정보 등 숨겨진 진실을 객관적으로 전달합니다.",
+    composition_card3_desc: "외부 세계의 변화와 국제 소식, 북한 전역의 날씨 정보 등 을 객관적으로 전달합니다.",
     composition_card4_title: "회복",
     composition_card4_desc: "음악 한 곡의 여유와 실질적인 의학 정보, 심리 치유 콘텐츠를 통해 주민들의 마음을 회복시킵니다.",
     // Effects Section
@@ -346,11 +348,12 @@ const translations = {
     // NKFI About Page
     about_hero_title: "NKFI (뉴코리아 파운데이션 인터내셔널)",
     about_hero_subtitle: "북한 주민의 회복, 자유, 그리고 존엄을 향하여",
+    about_intro_top: "NKHB(뉴코리아 희망방송)는 NKFI(뉴코리아 파운데이션 인터내셔널)의 대북 라디오 방송 사역입니다.",
     about_intro_title: "NKFI 소개",
     about_intro_p1: "뉴코리아 파운데이션 인터내셔널(NKFI)은 북한에 2년간 억류됐던 케네스 배(Kenneth Bae) 선교사가 세계 각지의 잊혀져가고 소외된 탈북 난민들을 돕고, 통일한국을 준비하기 위하여 2016년 미국에서 시작한 국제 NGO 입니다.",
     about_intro_p2: "NKFI는 눈 앞으로 다가온 남북통일에 대비하여 북한의 영적 재건을 위해 동원과 네트워킹, 훈련, 구호를 통해 통일된 뉴코리아의 복음화를 본격화합니다.",
     about_intro_info1: "* 전신인 느헤미야 글로벌 이니셔티브(NGI)와 엔케이릴리프(NKRelief)가 통합",
-    about_intro_info2: "* 미네소타주 미니애폴리스와 한국 서울에 기반을 둔 미국 기반 501(c)(3) 비영리 기관(NGO)",
+    about_intro_info2: "* 미국 미네소타주 미니애폴리스와 한국 서울을 거점으로 활동하는 미국 501(c)(3) 비영리기관(NGO)",
     about_intro_info3: "* KAICAM(한국독립교회선교단체연합회) 소속",
     about_vision_title: "비전 선언문",
     about_vision_desc: "북한 주민의 회복, 자유, 그리고 존엄을 회복하고, 그리스도 안에서 모든 이에게 평등과 자유가 보장되는 한반도의 통일을 이루는 것입니다. 뉴코리아 파운데이션 인터내셔널은 복음과 성령의 능력을 힘입어 남북한 통일과 북한의 영적 재건에 앞장섭니다.",
@@ -370,7 +373,7 @@ const translations = {
     about_ministry_card3_title: "네트워킹 / Networking",
     about_ministry_card3_desc: "통일을 준비하는 단체들과 연합합니다.",
     about_ministry_card4_title: "구호 / Relief",
-    about_ministry_card4_desc: "북한 주민과 탈북 난민을 구출하고, 구호합니다.",
+    about_ministry_card4_desc: "북한 주민과 탈북 난민을 구호합니다.",
     about_founder_title: "설립자 : 케네스 배(Kenneth Bae)",
     about_founder_desc_title: "735일간의 북한 억류, 그리고 그 이후의 사명",
     about_founder_profile1: "현) 뉴코리아 파운데이션 인터내셔널(NKFI) 대표",
@@ -379,7 +382,8 @@ const translations = {
     about_founder_profile4: "미국 커버넌트 신학대학원(Covenant Theological Seminary) 졸업",
     about_founder_profile5: "미국 남침례교(Southern Baptist) 안수",
     about_founder_profile6: "국제 YWAM 파송 선교사로 중국과 북한에서 사역 중 735일간 북한 억류(2012~2014)",
-    about_founder_book: "저서 ‘잊지 않았다’"
+    about_founder_book: "저서 ‘잊지 않았다’",
+    about_cta_website: "NKFI 홈페이지 방문하기",
   }
 };
 
@@ -394,6 +398,11 @@ document.addEventListener('DOMContentLoaded', () => {
           element.innerHTML = translations[lang][key];
         }
       });
+
+      // Save to localStorage
+      try {
+          localStorage.setItem('nkhb_lang', lang);
+      } catch (e) {}
 
       // Update active class on language switcher
       const currentActive = document.querySelector('.lang-selector a.active');
@@ -444,17 +453,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const updateUrlForLang = (lang) => {
         if (!window.history || !window.history.replaceState) return;
-        const currentPath = window.location.pathname;
-        const isEnPath = /(^|\/)en\/?$/.test(currentPath);
-        let newPath = currentPath;
-        if (lang === 'en' && !isEnPath) {
-            newPath = currentPath.replace(/\/?$/, '/') + 'en';
-        } else if (lang === 'ko' && isEnPath) {
-            newPath = currentPath.replace(/\/?en\/?$/, '/');
+        const url = new URL(window.location);
+        if (lang === 'en') {
+            url.searchParams.set('lang', 'en');
+        } else {
+            url.searchParams.delete('lang');
         }
-        if (newPath !== currentPath) {
-            window.history.replaceState({}, '', newPath + window.location.search + window.location.hash);
-        }
+        window.history.replaceState({}, '', url);
     };
 
     const langSelector = document.querySelector('.lang-selector');

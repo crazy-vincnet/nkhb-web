@@ -238,7 +238,7 @@ nav {
     width: 100%;
     min-height: calc(100vh - 100px);
     background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.5)),
-        url('https://cdn.imweb.me/thumbnail/20260424/ae13dd489d8ac.png') center/cover no-repeat;
+        url('images/main-hero.png') center/cover no-repeat;
     display: flex;
     align-items: center;
     color: #ffffff;
@@ -1754,6 +1754,37 @@ footer {
     font-size: 1.05rem;
 }
 
+.intro-top-banner {
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.intro-top-text {
+    background-color: var(--accent-light);
+    color: var(--accent-color);
+    padding: 24px 40px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 1.25rem;
+    line-height: 1.6;
+    display: inline-block;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.about-intro-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: start;
+}
+
+.poster-image img {
+    width: 100%;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    display: block;
+}
+
 .about-intro .info-list {
     margin-top: 20px;
     list-style: none;
@@ -1797,6 +1828,10 @@ footer {
     font-size: 0.95rem;
     box-shadow: 0 4px 10px rgba(0,0,0,0.03);
     line-height: 1.6;
+}
+
+.about-ministry {
+    padding-top: 60px;
 }
 
 .ministry-grid {
@@ -1910,6 +1945,17 @@ footer {
 }
 
 @media (max-width: 768px) {
+    .intro-top-banner {
+        margin-bottom: 40px;
+    }
+    .intro-top-text {
+        padding: 16px 20px;
+        font-size: 1.1rem;
+        display: block;
+    }
+    .about-intro-grid {
+        grid-template-columns: 1fr;
+    }
     .about-hero {
         padding: 100px 0 60px;
     }
