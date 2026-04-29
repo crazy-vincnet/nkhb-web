@@ -435,6 +435,29 @@ document.addEventListener('DOMContentLoaded', () => {
           if (englishSupport) englishSupport.style.display = 'none';
       }
 
+      // Update internal links to persist language safely
+      document.querySelectorAll('a').forEach(a => {
+          let href = a.getAttribute('href');
+          if (href && !href.startsWith('http') && !href.startsWith('mailto')) {
+              // Skip simple anchor links on the same page
+              if (href.startsWith('#')) return;
+              
+              // Remove existing lang param if any
+              href = href.replace(/([?&])lang=(en|ko)(&|$)/, '$1').replace(/[?&]$/, '');
+              
+              if (lang === 'en') {
+                  const separator = href.includes('?') ? '&' : '?';
+                  const hashIndex = href.indexOf('#');
+                  if (hashIndex !== -1) {
+                      href = href.slice(0, hashIndex) + separator + 'lang=en' + href.slice(hashIndex);
+                  } else {
+                      href += separator + 'lang=en';
+                  }
+              }
+              a.setAttribute('href', href);
+          }
+      });
+
       // Point Donate nav to the visible support section for the current language
       const supportNavLink = document.querySelector('.nav-links a[data-i18n-key="nav_support"]');
       if (supportNavLink) {
@@ -443,10 +466,22 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const detectInitialLang = () => {
+        const params = new URLSearchParams(window.location.search);
+        const langParam = params.get('lang');
+        if (langParam === 'en' || langParam === 'ko') {
+            return langParam;
+        }
+        
         const path = window.location.pathname.toLowerCase();
         if (/(^|\/)en(\/|$)/.test(path)) return 'en';
-        const params = new URLSearchParams(window.location.search);
-        if (params.get('lang') === 'en') return 'en';
+        
+        try {
+            const savedLang = localStorage.getItem('nkhb_lang');
+            if (savedLang === 'ko' || savedLang === 'en') {
+                return savedLang;
+            }
+        } catch (e) {}
+        
         if (window.location.hash.toLowerCase() === '#en') return 'en';
         return 'ko';
     };
