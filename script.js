@@ -34,6 +34,7 @@ const translations = {
         background_desc2: "New Korea Hope Broadcasting (NKHB) was started to once again bring hope, truth, and the gospel to the North Korean people through radio waves amidst this blocked reality.",
         background_desc3: "In North Korean society, radio remains the most realistic and effective means of information transmission. NKHB aims not just to provide information, but to help listeners realize that \'the world I know may not be all there is.\'",
         background_read_more: "Read More About the Role of North Korean Broadcasts →",
+        background_about_nkfi: "About NKFI →",
         background_testimonial_tag: "44% of North Korean defectors have listened to the radio",
         background_testimonial_text: '"I came to know the world through the radio"',
         // Composition Section
@@ -235,10 +236,11 @@ const translations = {
         // Background Section
         background_title: "왜 라디오 방송이 필요한가",
         background_desc1: "오늘날 약 2,500만 명의 북한 주민들은 외부 세계와 단절된 채 살아가고 있습니다. 최근 대북 라디오 방송의 축소와 북한 당국의 정보 통제 강화로 인해, 그들에게 남아 있던 마지막 '희망의 창'마저 점점 닫히고 있습니다.",
-        background_quote: '"케네스 배는 735일간의 억류 기간 동안 전 세계에서 보내온 400여 통의 편지를 통해 힘을 얻었습니다. NKHB는 바로 그 희망의 메시지를 북한 주민들에게 전하기 위해 시작된 사역입니다."',
+        background_quote: '"케네스 배 선교사(NKFI 대표)는 735일간의 억류 기간 동안 전 세계에서 보내온 400여 통의 편지를 통해 힘을 얻었습니다. NKHB는 바로 그 희망의 메시지를 북한 주민들에게 전하기 위해 시작된 사역입니다."',
         background_desc2: "뉴코리아 희망방송(NKHB)은 이러한 차단된 현실 속에서 라디오 전파를 통해 북한 주민들에게 다시금 희망과 진실, 그리고 복음을 전하기 위해 시작되었습니다.",
         background_desc3: "북한 사회에서 라디오는 여전히 가장 현실적이고 효과적인 정보 전달 수단입니다. NKHB는 단순한 정보 제공을 넘어, 청취자들이 '지금 내가 알고 있는 세상이 전부가 아닐 수 있다'는 사실을 깨닫도록 돕는 것을 목표로 합니다.",
         background_read_more: "대북방송의 역할 자세히 읽기 →",
+        background_about_nkfi: "NKFI 소개 →",
         background_testimonial_tag: "탈북민 라디오 청취 경험 44%",
         background_testimonial_text: '"라디오를 통해 세상을 알게 되었습니다"',
         // Composition Section
