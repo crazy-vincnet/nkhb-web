@@ -1,11 +1,11 @@
 const audioTracks = [
-    { id: 'track1', ko: '우리가 왜 방송을 시작하는가', en: 'Why We Started Broadcasting', url: 'audio/우리가 왜 방송을 시작하는가.mp3' },
-    { id: 'track2', ko: '희망의 편지', en: 'Letter of Hope', url: 'audio/희망의 편지.mp3' },
-    { id: 'track3', ko: '자유 시리즈 01_자유란 무엇입니까', en: 'Freedom Series 01: What is Freedom?', url: 'audio/자유 시리즈 01_자유란 무엇입니까.mp3' },
-    { id: 'track4', ko: '통일 이야기 01_우리는 원래 하나의 나라였습니다', en: 'Unification Story 01: We Were Originally One Nation', url: 'audio/통일 이야기 01_우리는 원래 하나의 나라였습니다.mp3' },
-    { id: 'track5', ko: '마음의 쉼표, 음악 한 곡', en: 'A Pause for the Heart, A Piece of Music', url: 'audio/마음의 쉼표, 음악 한 곡.mp3' },
-    { id: 'track6', ko: '국제뉴스', en: 'International News', url: 'audio/국제뉴스.mp3' },
-    { id: 'track7', ko: '조선 종합 날씨', en: 'North Korea Weather Forecast', url: 'audio/조선 종합 날씨.mp3' }
+    { id: 'track1', ko: '우리가 왜 방송을 시작하는가', en: 'Why We Started Broadcasting', url: 'https://pub-7ae274a6d9464c61bcc16d57b6f3dbef.r2.dev/우리가 왜 방송을 시작하는가.mp3' },
+    { id: 'track2', ko: '희망의 편지', en: 'Letter of Hope', url: 'https://pub-7ae274a6d9464c61bcc16d57b6f3dbef.r2.dev/희망의 편지.mp3' },
+    { id: 'track3', ko: '자유 시리즈 01_자유란 무엇입니까', en: 'Freedom Series 01: What is Freedom?', url: 'https://pub-7ae274a6d9464c61bcc16d57b6f3dbef.r2.dev/자유 시리즈 01_자유란 무엇입니까.mp3' },
+    { id: 'track4', ko: '통일 이야기 01_우리는 원래 하나의 나라였습니다', en: 'Unification Story 01: We Were Originally One Nation', url: 'https://pub-7ae274a6d9464c61bcc16d57b6f3dbef.r2.dev/통일 이야기 01_우리는 원래 하나의 나라였습니다.mp3' },
+    { id: 'track5', ko: '마음의 쉼표, 음악 한 곡', en: 'A Pause for the Heart, A Piece of Music', url: 'https://pub-7ae274a6d9464c61bcc16d57b6f3dbef.r2.dev/마음의 쉼표, 음악 한 곡.mp3' },
+    { id: 'track6', ko: '국제뉴스', en: 'International News', url: 'https://pub-7ae274a6d9464c61bcc16d57b6f3dbef.r2.dev/국제뉴스.mp3' },
+    { id: 'track7', ko: '조선 종합 날씨', en: 'North Korea Weather Forecast', url: 'https://pub-7ae274a6d9464c61bcc16d57b6f3dbef.r2.dev/조선 종합 날씨.mp3' }
 ];
 
 const translations = {
