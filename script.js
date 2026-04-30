@@ -1,3 +1,13 @@
+const audioTracks = [
+    { id: 'track1', ko: '우리가 왜 방송을 시작하는가', en: 'Why We Started Broadcasting', url: 'audio/우리가 왜 방송을 시작하는가.mp3' },
+    { id: 'track2', ko: '희망의 편지', en: 'Letter of Hope', url: 'audio/희망의 편지.mp3' },
+    { id: 'track3', ko: '자유 시리즈 01_자유란 무엇입니까', en: 'Freedom Series 01: What is Freedom?', url: 'audio/자유 시리즈 01_자유란 무엇입니까.mp3' },
+    { id: 'track4', ko: '통일 이야기 01_우리는 원래 하나의 나라였습니다', en: 'Unification Story 01: We Were Originally One Nation', url: 'audio/통일 이야기 01_우리는 원래 하나의 나라였습니다.mp3' },
+    { id: 'track5', ko: '마음의 쉼표, 음악 한 곡', en: 'A Pause for the Heart, A Piece of Music', url: 'audio/마음의 쉼표, 음악 한 곡.mp3' },
+    { id: 'track6', ko: '국제뉴스', en: 'International News', url: 'audio/국제뉴스.mp3' },
+    { id: 'track7', ko: '조선 종합 날씨', en: 'North Korea Weather Forecast', url: 'audio/조선 종합 날씨.mp3' }
+];
+
 const translations = {
     en: {
         // Page
@@ -22,13 +32,14 @@ const translations = {
         background_desc1: "Today, approximately 25 million North Koreans live cut off from the outside world. With the recent reduction in radio broadcasts to North Korea and the strengthening of information control by the authorities, the last 'window of hope' available to them is gradually closing.",
         background_quote: '"During his 735 days of captivity, Kenneth Bae gained strength from over 400 letters sent from around the world. NKHB is a ministry that began to deliver that same message of hope to the people of North Korea."',
         background_desc2: "New Korea Hope Broadcasting (NKHB) was started to once again bring hope, truth, and the gospel to the North Korean people through radio waves amidst this blocked reality.",
-        background_desc3: "In North Korean society, radio remains the most realistic and effective means of information transmission. NKHB aims not just to provide information, but to help listeners realize that 'the world I know may not be all there is.'",
+        background_desc3: "In North Korean society, radio remains the most realistic and effective means of information transmission. NKHB aims not just to provide information, but to help listeners realize that \'the world I know may not be all there is.\'",
         background_read_more: "Read More About the Role of North Korean Broadcasts →",
         background_testimonial_tag: "44% of North Korean defectors have listened to the radio",
         background_testimonial_text: '"I came to know the world through the radio"',
         // Composition Section
         composition_title: "Program Structure",
         composition_desc: "NKHB produces and broadcasts content tailored to the realities and needs of North Koreans, third-country refugees, and dispatched workers, focusing on the four major themes of Hope, Truth, Verity, and Restoration.",
+        composition_button_sample: "🎙️ Sample Listen",
         composition_card1_title: "Hope",
         composition_card1_desc: '"Letter of Hope" - Delivers encouraging messages from around the world and vivid stories from North Korean defectors who have settled in South Korea.',
         composition_card2_title: "Truth",
@@ -37,6 +48,17 @@ const translations = {
         composition_card3_desc: "Objectively delivers hidden truths such as changes in the outside world, international news, and weather information for all of North Korea.",
         composition_card4_title: "Restoration",
         composition_card4_desc: "Heals the hearts of residents through the leisure of a piece of music, practical medical information, and psychological healing content.",
+        // Sample Modal
+        sample_modal_title: "🎙️ Listen to Broadcast Sample",
+        sample_modal_desc: "Broadcast sample audio is being prepared.",
+        // Tracks
+        track1: "Why We Started Broadcasting",
+        track2: "Letter of Hope",
+        track3: "Freedom Series 01: What is Freedom?",
+        track4: "Unification Story 01: We Were Originally One Nation",
+        track5: "A Pause for the Heart, A Piece of Music",
+        track6: "International News",
+        track7: "North Korea Weather Forecast",
         // Effects Section
         effects_title: "Expected Impact",
         effects_desc: "The message from a single radio can bring about amazing changes in the lives of North Koreans.",
@@ -222,6 +244,7 @@ const translations = {
         // Composition Section
         composition_title: "방송 구성",
         composition_desc: "NKHB는 북한 주민과 제3국 거주 탈북난민과 해외파견 노동자들의 현실과 필요를 반영하여, 희망·진리·진실·회복을 4대 테마로 한 북한 맞춤형 콘텐츠를 제작·방송합니다.",
+        composition_button_sample: "🎙️ 샘플듣기",
         composition_card1_title: "희망",
         composition_card1_desc: '"희망의 편지" - 전 세계 사람들이 보내온 격려 메시지와 한국에 정착한 탈북민들의 생생한 이야기를 전합니다.',
         composition_card2_title: "진리",
@@ -230,6 +253,17 @@ const translations = {
         composition_card3_desc: "외부 세계의 변화와 국제 소식, 북한 전역의 날씨 정보 등 을 객관적으로 전달합니다.",
         composition_card4_title: "회복",
         composition_card4_desc: "음악 한 곡의 여유와 실질적인 의학 정보, 심리 치유 콘텐츠를 통해 주민들의 마음을 회복시킵니다.",
+        // Sample Modal
+        sample_modal_title: "🎙️ 방송 샘플 듣기",
+        sample_modal_desc: "방송 샘플 오디오가 준비 중입니다.",
+        // Tracks
+        track1: "우리가 왜 방송을 시작하는가",
+        track2: "희망의 편지",
+        track3: "자유 시리즈 01_자유란 무엇입니까",
+        track4: "통일 이야기 01_우리는 원래 하나의 나라였습니다",
+        track5: "마음의 쉼표, 음악 한 곡",
+        track6: "국제뉴스",
+        track7: "조선 종합 날씨",
         // Effects Section
         effects_title: "기대 효과",
         effects_desc: "라디오 한 대가 전하는 메시지는 북한 주민들의 삶에 놀라운 변화를 일으킵니다.",
@@ -389,6 +423,63 @@ const translations = {
 
 document.addEventListener('DOMContentLoaded', () => {
     // --- I18n Logic ---
+    const renderTrackList = (lang) => {
+        const trackListContainer = document.getElementById('track-list');
+        if (!trackListContainer) return;
+
+        trackListContainer.innerHTML = '';
+        audioTracks.forEach(track => {
+            const btn = document.createElement('button');
+            btn.className = 'track-btn';
+            btn.dataset.trackId = track.id;
+            btn.dataset.i18nKey = track.id;
+            btn.textContent = translations[lang][track.id] || track[lang];
+            btn.addEventListener('click', () => playTrack(track.id));
+            trackListContainer.appendChild(btn);
+        });
+
+        // Update active state in list if a track is already playing
+        const sampleAudio = document.getElementById('sample-audio');
+        if (sampleAudio && sampleAudio.src && sampleAudio.src !== window.location.href) {
+            const currentId = audioTracks.find(t => {
+                try {
+                    return new URL(sampleAudio.src).href === new URL(t.url).href;
+                } catch (e) {
+                    return sampleAudio.src === t.url;
+                }
+            })?.id;
+
+            if (currentId) {
+                document.querySelectorAll('.track-btn').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.trackId === currentId);
+                });
+            }
+        }
+    };
+
+    const playTrack = (trackId) => {
+        const track = audioTracks.find(t => t.id === trackId);
+        if (!track) return;
+
+        const sampleAudio = document.getElementById('sample-audio');
+        const currentTrackTitle = document.getElementById('current-track-title');
+        const lang = document.documentElement.lang || 'ko';
+
+        if (sampleAudio) {
+            sampleAudio.src = track.url;
+            sampleAudio.play();
+        }
+
+        if (currentTrackTitle) {
+            currentTrackTitle.textContent = translations[lang][track.id] || track[lang];
+        }
+
+        // Update active state
+        document.querySelectorAll('.track-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.trackId === trackId);
+        });
+    };
+
     const setLanguage = (lang) => {
         document.documentElement.lang = lang;
         // Update text content
@@ -398,6 +489,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 element.innerHTML = translations[lang][key];
             }
         });
+
+        // Update track list labels
+        renderTrackList(lang);
+
+        // Update current track title if visible
+        const currentTrackTitle = document.getElementById('current-track-title');
+        const sampleAudio = document.getElementById('sample-audio');
+        if (currentTrackTitle && sampleAudio && sampleAudio.src && sampleAudio.src !== window.location.href) {
+            const currentTrack = audioTracks.find(t => {
+                try {
+                    return new URL(sampleAudio.src).href === new URL(t.url).href;
+                } catch (e) {
+                    return sampleAudio.src === t.url;
+                }
+            });
+            if (currentTrack) {
+                currentTrackTitle.textContent = translations[lang][currentTrack.id] || currentTrack[lang];
+            }
+        }
 
         // Save to localStorage
         try {
@@ -602,6 +712,44 @@ document.addEventListener('DOMContentLoaded', () => {
                 articleModal.classList.remove('active');
                 document.body.style.overflow = 'auto';
             }
+        });
+    }
+
+    // Sample Listen Modal Logic
+    const sampleModal = document.getElementById('sample-modal');
+    const openSampleBtn = document.getElementById('open-sample-modal');
+    const closeSampleBtn = document.querySelector('.close-modal-sample');
+    const sampleAudio = document.getElementById('sample-audio');
+
+    if (openSampleBtn && sampleModal) {
+        openSampleBtn.addEventListener('click', () => {
+            sampleModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            // Select first track by default if nothing is playing
+            if (!sampleAudio.src || sampleAudio.src === window.location.href || sampleAudio.src === '') {
+                playTrack(audioTracks[0].id);
+            }
+        });
+    }
+
+    const closeSampleModal = () => {
+        if (sampleModal) {
+            sampleModal.classList.remove('active');
+            document.body.style.overflow = '';
+            if (sampleAudio) {
+                sampleAudio.pause();
+                sampleAudio.currentTime = 0;
+            }
+        }
+    };
+
+    if (closeSampleBtn) {
+        closeSampleBtn.addEventListener('click', closeSampleModal);
+    }
+
+    if (sampleModal) {
+        sampleModal.addEventListener('click', (e) => {
+            if (e.target === sampleModal) closeSampleModal();
         });
     }
 

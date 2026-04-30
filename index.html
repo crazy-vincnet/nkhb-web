@@ -109,6 +109,9 @@
                     <h2 data-i18n-key="composition_title">방송 구성</h2>
                     <p class="description" data-i18n-key="composition_desc">NKHB는 북한 주민과 제3국 거주 탈북난민과 해외파견 노동자들의 현실과 필요를
                         반영하여, 희망·진리·진실·회복을 4대 테마로 한 북한 맞춤형 콘텐츠를 제작·방송합니다.</p>
+                    <div class="action-area" style="margin-top: 30px; text-align: center;">
+                        <button id="open-sample-modal" class="btn-hero btn-fill-accent" data-i18n-key="composition_button_sample">🎙️ 샘플듣기</button>
+                    </div>
                 </div>
 
                 <div class="theme-grid">
@@ -636,6 +639,24 @@
 
                     <p data-i18n-key="article_p9"><strong>그 조용한 소리가, 결국 한반도의 미래를 바꾸는 가장 큰 힘이 될 것이다.</strong></p>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sample Listen Modal -->
+    <div id="sample-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 data-i18n-key="sample_modal_title">🎙️ 방송 샘플 듣기</h3>
+                <button class="close-modal-sample" style="background: none; border: none; font-size: 2rem; cursor: pointer; color: var(--text-muted);">&times;</button>
+            </div>
+            <div class="modal-body-sample" style="padding: 40px; text-align: center;">
+                <audio id="sample-audio" controls style="width: 100%; margin-bottom: 20px;">
+                    <source src="" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                </audio>
+                <div id="current-track-title" style="margin-bottom: 20px; font-weight: bold; color: var(--primary-color);"></div>
+                <div id="track-list" class="track-list" style="margin-bottom: 30px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;"></div>
             </div>
         </div>
     </div>
