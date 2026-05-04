@@ -1,0 +1,3 @@
+## 2026-05-04 - Preloading CSS Background LCP Images
+**Learning:** LCP (Largest Contentful Paint) images that are defined in CSS (like `background: url(...)`) cannot be discovered by the browser's preload scanner until the CSS file is fully downloaded and parsed. This creates a significant performance bottleneck for the initial page load if the hero section relies on a CSS background image.
+**Action:** Always verify if the hero/LCP image is loaded via CSS. If so, add a `<link rel="preload" as="image" href="...">` tag directly in the HTML `<head>` to allow the browser to start fetching it immediately in parallel with other critical resources.
