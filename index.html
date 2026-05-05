@@ -5,6 +5,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title data-i18n-key="page_title">뉴코리아 희망방송 (NKHB)</title>
+    <meta name="description" content="뉴코리아 희망방송(NKHB)은 라디오 전파를 통해 북한 주민들에게 희망과 진실, 그리고 복음을 전하는 대북 라디오 방송입니다." data-i18n-key="meta_description">
+    
+    <!-- SEO & Social Sharing -->
+    <meta property="og:title" content="뉴코리아 희망방송 (NKHB)">
+    <meta property="og:description" content="뉴코리아 희망방송(NKHB)은 라디오 전파를 통해 북한 주민들에게 희망과 진실, 그리고 복음을 전하는 대북 라디오 방송입니다.">
+    <meta property="og:image" content="images/main-hero.png">
+    <meta property="og:url" content="https://nkhb.org">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="뉴코리아 희망방송 (NKHB)">
+    <meta name="twitter:description" content="뉴코리아 희망방송(NKHB)은 라디오 전파를 통해 북한 주민들에게 희망과 진실, 그리고 복음을 전하는 대북 라디오 방송입니다.">
+    <meta name="twitter:image" content="images/main-hero.png">
+
     <!-- Fonts -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
     <!-- Styles -->
@@ -17,7 +30,7 @@
         <nav>
             <div class="logo">
                 <a href="index.html">
-                    <img src="https://cdn.imweb.me/thumbnail/20260424/16a5ea55af28a.png" alt="NKHB 로고">
+                    <img src="https://cdn.imweb.me/thumbnail/20260424/16a5ea55af28a.png" alt="NKHB 로고" data-i18n-alt="alt_logo">
                 </a>
             </div>
 
@@ -92,7 +105,7 @@
                     <div class="image-content">
                         <div class="image-placeholder">
                             <!-- ⚡ Bolt Optimization: Lazy load image to improve initial page load performance -->
-                            <img src="https://cdn.imweb.me/thumbnail/20260424/ae13dd489d8ac.png" alt="방송 배경 이미지" loading="lazy">
+                            <img src="https://cdn.imweb.me/thumbnail/20260424/ae13dd489d8ac.png" alt="방송 배경 이미지" data-i18n-alt="alt_background" loading="lazy">
                         </div>
                         <div class="testimonial-box">
                             <span class="testimonial-tag" data-i18n-key="background_testimonial_tag">탈북민 라디오 청취 경험
@@ -197,7 +210,7 @@
                     <div class="reach-visual">
                         <div class="map-container">
                             <!-- ⚡ Bolt Optimization: Lazy load below-the-fold image to save bandwidth -->
-                            <img src="https://cdn.imweb.me/thumbnail/20260424/ae13dd489d8ac.png" alt="북한 지도"
+                            <img src="https://cdn.imweb.me/thumbnail/20260424/ae13dd489d8ac.png" alt="북한 지도" data-i18n-alt="alt_map"
                                 class="map-bg" loading="lazy">
                             <div class="pulse-ring"></div>
                             <div class="pulse-ring delay-1"></div>
@@ -318,7 +331,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h3 data-i18n-key="letter_modal_title">✍️ 희망의 편지 작성</h3>
-                    <button class="close-modal">&times;</button>
+                    <button class="close-modal" data-i18n-aria-label="alt_close" aria-label="닫기">&times;</button>
                 </div>
                 <form id="letter-form">
                     <div class="form-group-row">
@@ -581,7 +594,7 @@
                 <div class="footer-content">
                     <div class="footer-logo">
                         <!-- ⚡ Bolt Optimization: Lazy load footer logo since it is far below the fold -->
-                        <img src="https://cdn.imweb.me/thumbnail/20260424/16a5ea55af28a.png" alt="NKHB 로고" loading="lazy">
+                        <img src="https://cdn.imweb.me/thumbnail/20260424/16a5ea55af28a.png" alt="NKHB 로고" data-i18n-alt="alt_logo" loading="lazy">
                     </div>
                     <div class="footer-info">
                         <p data-i18n-key="footer_contact">뉴코리아 희망방송 (NKHB) | 연락처: nkhb316@gmail.com</p>
@@ -600,7 +613,7 @@
         <div class="modal-content wide">
             <div class="modal-header">
                 <h3 data-i18n-key="article_modal_title">📢 대북방송의 역할</h3>
-                <button class="close-modal-article">&times;</button>
+                <button class="close-modal-article" data-i18n-aria-label="alt_close" aria-label="닫기">&times;</button>
             </div>
             <div class="modal-body-article">
                 <div class="article-content-inner">
@@ -653,7 +666,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3 data-i18n-key="sample_modal_title">🎙️ 방송 샘플 듣기</h3>
-                <button class="close-modal-sample" style="background: none; border: none; font-size: 2rem; cursor: pointer; color: var(--text-muted);">&times;</button>
+                <button class="close-modal-sample" data-i18n-aria-label="alt_close" aria-label="닫기" style="background: none; border: none; font-size: 2rem; cursor: pointer; color: var(--text-muted);">&times;</button>
             </div>
             <div class="modal-body-sample" style="padding: 40px; text-align: center;">
                 <audio id="sample-audio" controls style="width: 100%; margin-bottom: 20px;">
@@ -667,6 +680,7 @@
     </div>
 
     <!-- Scripts -->
+    <script src="lang.js"></script>
     <script src="script.js"></script>
 </body>
 
