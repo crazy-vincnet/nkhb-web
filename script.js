@@ -63,45 +63,47 @@ document.addEventListener('DOMContentLoaded', () => {
     const setLanguage = (lang) => {
         document.documentElement.lang = lang;
         
-        // Update document title and description
-        if (translations[lang]) {
-            if (translations[lang].page_title) document.title = translations[lang].page_title;
-            
-            // Meta Description
-            const metaDesc = document.querySelector('meta[name="description"]');
-            if (metaDesc && translations[lang].meta_description) {
-                metaDesc.setAttribute('content', translations[lang].meta_description);
-            }
+        // ⚡ Bolt Optimization: Cache the current language translation object to avoid duplicate key lookups during DOM iteration
+        const dict = translations[lang];
+        if (!dict) return;
 
-            // OpenGraph tags
-            const ogTitle = document.querySelector('meta[property="og:title"]');
-            if (ogTitle && translations[lang].page_title) ogTitle.setAttribute('content', translations[lang].page_title);
-            
-            const ogDesc = document.querySelector('meta[property="og:description"]');
-            if (ogDesc && translations[lang].meta_description) ogDesc.setAttribute('content', translations[lang].meta_description);
+        // Update document title and description
+        if (dict.page_title) document.title = dict.page_title;
+
+        // Meta Description
+        const metaDesc = document.querySelector('meta[name="description"]');
+        if (metaDesc && dict.meta_description) {
+            metaDesc.setAttribute('content', dict.meta_description);
         }
+
+        // OpenGraph tags
+        const ogTitle = document.querySelector('meta[property="og:title"]');
+        if (ogTitle && dict.page_title) ogTitle.setAttribute('content', dict.page_title);
+
+        const ogDesc = document.querySelector('meta[property="og:description"]');
+        if (ogDesc && dict.meta_description) ogDesc.setAttribute('content', dict.meta_description);
 
         // Update text content
         document.querySelectorAll('[data-i18n-key]').forEach(element => {
             const key = element.getAttribute('data-i18n-key');
-            if (translations[lang] && translations[lang][key]) {
-                element.innerHTML = translations[lang][key];
+            if (dict[key]) {
+                element.innerHTML = dict[key];
             }
         });
 
         // Update alt attributes
         document.querySelectorAll('[data-i18n-alt]').forEach(img => {
             const key = img.getAttribute('data-i18n-alt');
-            if (translations[lang] && translations[lang][key]) {
-                img.alt = translations[lang][key];
+            if (dict[key]) {
+                img.alt = dict[key];
             }
         });
 
         // Update aria-labels
         document.querySelectorAll('[data-i18n-aria-label]').forEach(el => {
             const key = el.getAttribute('data-i18n-aria-label');
-            if (translations[lang] && translations[lang][key]) {
-                el.setAttribute('aria-label', translations[lang][key]);
+            if (dict[key]) {
+                el.setAttribute('aria-label', dict[key]);
             }
         });
 
@@ -120,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
             if (currentTrack) {
-                currentTrackTitle.textContent = translations[lang][currentTrack.id] || currentTrack[lang];
+                currentTrackTitle.textContent = dict[currentTrack.id] || currentTrack[lang];
             }
         }
 
