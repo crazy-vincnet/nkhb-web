@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { Save, Upload, Image as ImageIcon } from 'lucide-react';
+import { Save, Upload } from 'lucide-react';
 
 interface ContentItem {
   id: string;
