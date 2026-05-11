@@ -13,7 +13,7 @@ const Header: React.FC = () => {
             <nav>
                 <div className="logo">
                     <Link to="/">
-                        <img src="https://cdn.imweb.me/thumbnail/20260424/16a5ea55af28a.png" alt={t('alt_logo')} />
+                        <img src={logoUrl} alt={t('alt_logo')} />
                     </Link>
                 </div>
 
@@ -40,6 +40,29 @@ const Header: React.FC = () => {
                         <a 
                             href="#" 
                             className={lang === 'en' ? 'active' : ''} 
+                            onClick={(e) => { e.preventDefault(); setLang('en'); }}
+                        >
+                            EN
+                        </a>
+                    </div>
+                </div>
+
+                <button 
+                    className="mobile-menu-btn" 
+                    aria-label="메뉴 열기"
+                    onClick={toggleMenu}
+                >
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </nav>
+        </header>
+    );
+};
+
+export default Header;
+assName={lang === 'en' ? 'active' : ''} 
                             onClick={(e) => { e.preventDefault(); setLang('en'); }}
                         >
                             EN
