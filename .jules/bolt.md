@@ -1,0 +1,3 @@
+## 2024-05-11 - Unnecessary API Refetching on State Change
+**Learning:** In `Header.tsx`, the `logo_url` fetching logic was inside a `useEffect` that had `lang` in its dependency array. However, the Supabase query `select('value_ko, value_en')` fetches the localized URLs for *both* languages at once. This caused an unnecessary network request to Supabase every time the user switched the language, even though the data for both languages was already retrieved in the first call.
+**Action:** Always inspect the payload of an API call. If a single request returns data for multiple states (e.g., all localizations), decouple the API call (which should run once on mount) from the local state update (which should react to state changes using the already-fetched data).

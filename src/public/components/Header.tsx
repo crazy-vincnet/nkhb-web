@@ -6,8 +6,13 @@ import { supabase } from '../lib/supabase';
 const Header: React.FC = () => {
     const { lang, setLang, t } = useI18n();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [logoUrl, setLogoUrl] = useState('https://cdn.imweb.me/thumbnail/20260424/16a5ea55af28a.png');
+    // ⚡ Bolt Optimization: Cache localized URLs instead of refetching on lang change
+    const [logoUrls, setLogoUrls] = useState({
+        ko: 'https://cdn.imweb.me/thumbnail/20260424/16a5ea55af28a.png',
+        en: 'https://cdn.imweb.me/thumbnail/20260424/16a5ea55af28a.png'
+    });
 
+    // Fetch once on mount
     useEffect(() => {
         const fetchLogo = async () => {
             const { data, error } = await supabase
@@ -17,11 +22,13 @@ const Header: React.FC = () => {
                 .single();
 
             if (data && !error) {
-                setLogoUrl(lang === 'ko' ? data.value_ko : data.value_en);
+                setLogoUrls({ ko: data.value_ko, en: data.value_en });
             }
         };
         fetchLogo();
-    }, [lang]);
+    }, []);
+
+    const logoUrl = lang === 'ko' ? logoUrls.ko : logoUrls.en;
 
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
