@@ -1,10 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useI18n } from '../lib/i18n';
+import { supabase } from '../lib/supabase';
 
 const Header: React.FC = () => {
     const { lang, setLang, t } = useI18n();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [logoUrl, setLogoUrl] = useState('https://cdn.imweb.me/thumbnail/20260424/16a5ea55af28a.png');
+
+    useEffect(() => {
+        const fetchLogo = async () => {
+            const { data, error } = await supabase
+                .from('content')
+                .select('value_ko, value_en')
+                .eq('key', 'logo_url')
+                .single();
+
+            if (data && !error) {
+                setLogoUrl(lang === 'ko' ? data.value_ko : data.value_en);
+            }
+        };
+        fetchLogo();
+    }, [lang]);
 
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
@@ -40,29 +57,6 @@ const Header: React.FC = () => {
                         <a 
                             href="#" 
                             className={lang === 'en' ? 'active' : ''} 
-                            onClick={(e) => { e.preventDefault(); setLang('en'); }}
-                        >
-                            EN
-                        </a>
-                    </div>
-                </div>
-
-                <button 
-                    className="mobile-menu-btn" 
-                    aria-label="메뉴 열기"
-                    onClick={toggleMenu}
-                >
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </button>
-            </nav>
-        </header>
-    );
-};
-
-export default Header;
-assName={lang === 'en' ? 'active' : ''} 
                             onClick={(e) => { e.preventDefault(); setLang('en'); }}
                         >
                             EN
