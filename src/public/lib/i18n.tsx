@@ -1,3 +1,5 @@
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+
 const translations = {
     en: {
         // Meta & SEO
@@ -127,7 +129,7 @@ const translations = {
         support_regular_50k: "50,000 KRW",
         support_regular_100k: "100,000 KRW",
         support_regular_200k: "200,000 KRW",
-        support_regular_300k: "300,000 KRW",
+        support_regular_300k: "30,000 KRW",
         support_regular_500k: "50,000 KRW",
         support_regular_1m: "1,000,000 KRW",
         support_custom_amount: "Support with a custom amount (enter directly) →",
@@ -206,7 +208,9 @@ const translations = {
         about_founder_profile5: "Ordained by Southern Baptist Convention",
         about_founder_profile6: "Served as YWAM missionary in China and North Korea, detained for 735 days in North Korea (2012-2014)",
         about_founder_book: "Author of 'Not Forgotten'",
+        about_cta_title: "Want more information?",
         about_cta_website: "Visit NKFI Official Website",
+        about_cta_home: "Back to Main Page",
         // Image Alts
         alt_logo: "NKHB Logo",
         alt_background: "Broadcasting background image",
@@ -373,7 +377,7 @@ const translations = {
         footer_copyright: "&copy; 2026 뉴코리아 희망방송. All rights reserved.",
         // Article Modal
         article_modal_title: "📢 대북방송의 역할",
-        article_p1: "한반도의 통일은 단지 국경을 하나로 잇는 일이 아니다. 그것은 서로 다른 체제 속에서 살아온 사람들의 인식과 가치, 그리고 미래에 대한 이해를 연결하는 과정이다. 그렇기에 통일은 군사나 외교만으로 이루어지지 않는다. 사람의 마음과 생각을 변화시키는 일이 반드시 함께 이루어져야 한다. 바로 이 지점에서 대북방송, 특히 뉴코리아 희망방송과 같은 민간방송의 역할은 결정적으로 중요해진다.",
+        article_p1: "한반도의 통일은 단지 국경을 하나로 잇는 일이 아니다. 그것은 서로 다른 체제 속에서 살아온 사람들의 인식과 가치, 그리고 미래에 대한 이해를 연결하는 과정이다. 그렇기에 통일은 군사나 외교만으로 이루어지지 않는다. 사람의 마음과 생각을 변화시키는 일이 반드시 함께 이루어야 한다. 바로 이 지점에서 대북방송, 특히 뉴코리아 희망방송과 같은 민간방송의 역할은 결정적으로 중요해진다.",
         article_p2: "북한 사회는 정보가 철저히 통제된 공간이다. 외부 세계에 대한 객관적인 정보는 차단되고, 체제에 유리한 내용만 반복적으로 주입된다. 이러한 환경에서는 주민들이 스스로 다른 선택지를 상상하는 것조차 어려워진다. 대북방송은 바로 이 ‘정보의 장벽’을 넘는 통로다. 외부의 사실, 자유로운 사회의 모습, 그리고 인간의 보편적 권리에 대한 이야기를 전달함으로써, 주민들이 처음으로 “다른 삶이 가능하다”는 인식을 갖게 만든다.",
         article_quote1: '"사람은 알게 되는 순간부터 이전과 같은 방식으로 세상을 받아들일 수 없기 때문이다."',
         article_p3: "이 변화는 작아 보일 수 있지만, 매우 근본적이다. 대북방송은 단순한 뉴스 전달을 넘어, 생각의 기준을 바꾸고 질문을 만들어내는 역할을 한다. “왜 우리는 자유롭게 말할 수 없는가?”, “왜 우리는 이동의 자유가 없는가?”와 같은 질문이 생겨나는 순간, 이미 변화는 시작된 것이다.",
@@ -412,7 +416,7 @@ const translations = {
         about_ministry_card3_title: "네트워킹 / Networking",
         about_ministry_card3_desc: "통일을 준비하는 단체들과 연합합니다.",
         about_ministry_card4_title: "구호 / Relief",
-        about_ministry_card4_desc: "북한 주민과 탈북 난민을 구호합니다.",
+        about_ministry_card4_desc: "북한 주민과 탈북난민들을 구출하고 구호합니다.",
         about_founder_title: "설립자 : 케네스 배(Kenneth Bae)",
         about_founder_desc_title: "735일간의 북한 억류, 그리고 그 이후의 사명",
         about_founder_profile1: "현) 뉴코리아 파운데이션 인터내셔널(NKFI) 대표",
@@ -422,7 +426,9 @@ const translations = {
         about_founder_profile5: "미국 남침례교(Southern Baptist) 안수",
         about_founder_profile6: "국제 YWAM 파송 선교사로 중국과 북한에서 사역 중 735일간 북한 억류(2012~2014)",
         about_founder_book: "저서 ‘잊지 않았다’",
+        about_cta_title: "더 자세한 정보를 원하시나요?",
         about_cta_website: "NKFI 홈페이지 방문하기",
+        about_cta_home: "메인 페이지로 돌아가기",
         // Image Alts
         alt_logo: "NKHB 로고",
         alt_background: "방송 배경 이미지",
@@ -431,4 +437,55 @@ const translations = {
         alt_kenneth: "케네스 배 선교사",
         alt_close: "닫기"
     }
+};
+
+type Language = 'ko' | 'en';
+type TranslationKeys = keyof typeof translations.ko;
+
+interface I18nContextType {
+    lang: Language;
+    setLang: (lang: Language) => void;
+    t: (key: TranslationKeys) => string;
+}
+
+const I18nContext = createContext<I18nContextType | undefined>(undefined);
+
+export const I18nProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+    const [lang, setLangState] = useState<Language>('ko');
+
+    useEffect(() => {
+        const savedLang = localStorage.getItem('lang') as Language;
+        if (savedLang && (savedLang === 'ko' || savedLang === 'en')) {
+            setLangState(savedLang);
+        } else {
+            const browserLang = navigator.language.split('-')[0];
+            if (browserLang === 'en') {
+                setLangState('en');
+            }
+        }
+    }, []);
+
+    const setLang = (newLang: Language) => {
+        setLangState(newLang);
+        localStorage.setItem('lang', newLang);
+        document.documentElement.lang = newLang;
+    };
+
+    const t = (key: TranslationKeys): string => {
+        return translations[lang][key] || translations['ko'][key] || key;
+    };
+
+    return (
+        <I18nContext.Provider value={{ lang, setLang, t }}>
+            {children}
+        </I18nContext.Provider>
+    );
+};
+
+export const useI18n = () => {
+    const context = useContext(I18nContext);
+    if (context === undefined) {
+        throw new Error('useI18n must be used within an I18nProvider');
+    }
+    return context;
 };

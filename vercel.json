@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/admin/:path*",
+      "destination": "/admin/index.html"
+    },
+    {
+      "source": "/((?!admin|assets|images|vite.svg).*)",
+      "destination": "/index.html"
+    }
+  ]
+}

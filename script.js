@@ -1,6 +1,57 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- State & Constants ---
     let lastFocusedElement = null;
+    let audioTracks = [];
+    let scheduleData = [];
+
+    // --- Supabase Initialization ---
+    const SUPABASE_URL = 'https://urhnvxswnjgjorezqpnk.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_52HC9S5vM6Yt3nylSF86Dw_4MREHwAF';
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const renderSchedule = (data) => {
+        const container = document.getElementById('schedule-container');
+        if (!container) return;
+
+        const lang = document.documentElement.lang || 'ko';
+        container.innerHTML = '';
+
+        data.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'schedule-modern-card';
+
+            const dayText = item.day;
+            const timeLabel = translations[lang]?.schedule_card1_label_time || (lang === 'en' ? 'Time' : '방송 시간');
+            const freqLabel = translations[lang]?.schedule_card1_label_freq || (lang === 'en' ? 'Frequency' : '주파수');
+
+            card.innerHTML = `
+                <div class="card-bg-glow"></div>
+                <div class="card-content">
+                    <div class="card-header">
+                        <div class="icon-wrap">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                        </div>
+                        <span class="day-text">${dayText}</span>
+                    </div>
+                    <div class="info-group">
+                        <div class="info-label">${timeLabel}</div>
+                        <div class="info-value">${item.time} <span class="unit">KST</span></div>
+                    </div>
+                    <div class="info-group">
+                        <div class="info-label">${freqLabel}</div>
+                        <div class="info-value freq">${item.frequency}</div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    };
 
     // --- I18n Logic ---
     const renderTrackList = (lang) => {
@@ -12,8 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const btn = document.createElement('button');
             btn.className = 'track-btn';
             btn.dataset.trackId = track.id;
-            btn.dataset.i18nKey = track.id;
-            btn.textContent = translations[lang][track.id] || track[lang];
+            btn.textContent = lang === 'en' ? track.title_en : track.title_ko;
             btn.addEventListener('click', () => playTrack(track.id));
             trackListContainer.appendChild(btn);
         });
@@ -51,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (currentTrackTitle) {
-            currentTrackTitle.textContent = translations[lang][track.id] || track[lang];
+            currentTrackTitle.textContent = lang === 'en' ? track.title_en : track.title_ko;
         }
 
         // Update active state
@@ -62,11 +112,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const setLanguage = (lang) => {
         document.documentElement.lang = lang;
-        
+
         // Update document title and description
         if (translations[lang]) {
             if (translations[lang].page_title) document.title = translations[lang].page_title;
-            
+
             // Meta Description
             const metaDesc = document.querySelector('meta[name="description"]');
             if (metaDesc && translations[lang].meta_description) {
@@ -76,7 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // OpenGraph tags
             const ogTitle = document.querySelector('meta[property="og:title"]');
             if (ogTitle && translations[lang].page_title) ogTitle.setAttribute('content', translations[lang].page_title);
-            
+
             const ogDesc = document.querySelector('meta[property="og:description"]');
             if (ogDesc && translations[lang].meta_description) ogDesc.setAttribute('content', translations[lang].meta_description);
         }
@@ -108,6 +158,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // Update track list labels
         renderTrackList(lang);
 
+        // Update schedule
+        if (scheduleData.length > 0) {
+            renderSchedule(scheduleData);
+        }
+
         // Update current track title if visible
         const currentTrackTitle = document.getElementById('current-track-title');
         const sampleAudio = document.getElementById('sample-audio');
@@ -120,7 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
             if (currentTrack) {
-                currentTrackTitle.textContent = translations[lang][currentTrack.id] || currentTrack[lang];
+                currentTrackTitle.textContent = lang === 'en' ? currentTrack.title_en : currentTrack.title_ko;
             }
         }
 
@@ -240,7 +295,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         }
-        
+
         if (e.key === 'Escape') {
             const closeBtn = modal.querySelector('.close-modal, .close-modal-article, .close-modal-sample');
             if (closeBtn) closeBtn.click();
@@ -251,7 +306,7 @@ document.addEventListener('DOMContentLoaded', () => {
         lastFocusedElement = document.activeElement;
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
-        
+
         // Focus first element or close button
         const first = modal.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
         if (first) setTimeout(() => first.focus(), 100);
@@ -265,7 +320,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (modal) {
             modal.classList.remove('active');
             document.body.style.overflow = '';
-            
+
             // Remove focus trap listener
             if (modal._trapFocusListener) {
                 document.removeEventListener('keydown', modal._trapFocusListener);
@@ -404,7 +459,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (letterForm) {
-        letterForm.addEventListener('submit', (e) => {
+        letterForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const btnSubmit = letterForm.querySelector('.btn-submit');
             btnSubmit.disabled = true;
@@ -419,32 +474,74 @@ document.addEventListener('DOMContentLoaded', () => {
                 message: formData.get('message')
             };
 
-            const scriptURL = 'https://script.google.com/macros/s/AKfycbyLZ3RwYgeBpR4FLHaKhBiJnuZK9ZRmpOCCF3-axwAiWPXjJwZg1iYy-CG9CFoyCuBx/exec';
+            try {
+                const { error } = await _supabase
+                    .from('letters')
+                    .insert([data]);
 
-            fetch(scriptURL, {
-                method: 'POST',
-                mode: 'no-cors',
-                cache: 'no-cache',
-                body: JSON.stringify(data)
-            })
-                .then(() => {
-                    const msg = document.documentElement.lang === 'en' ? 'Letter sent successfully.' : '편지가 성공적으로 전송되었습니다.';
-                    alert(msg);
-                    closeModal(letterModal);
-                    letterForm.reset();
-                })
-                .catch(error => {
-                    const msg = document.documentElement.lang === 'en' ? 'Failed to send. Please try again.' : '전송에 실패했습니다. 다시 시도해주세요.';
-                    alert(msg);
-                    console.error('Error!', error);
-                })
-                .finally(() => {
-                    btnSubmit.disabled = false;
-                    btnSubmit.textContent = document.documentElement.lang === 'en' ? 'Send Letter' : '편지 보내기';
-                });
+                if (error) throw error;
+
+                const msg = document.documentElement.lang === 'en' ? 'Letter sent successfully.' : '편지가 성공적으로 전송되었습니다.';
+                alert(msg);
+                closeModal(letterModal);
+                letterForm.reset();
+            } catch (error) {
+                const msg = document.documentElement.lang === 'en' ? 'Failed to send. Please try again.' : '전송에 실패했습니다. 다시 시도해주세요.';
+                alert(msg);
+                console.error('Error!', error);
+            } finally {
+                btnSubmit.disabled = false;
+                btnSubmit.textContent = document.documentElement.lang === 'en' ? 'Send Letter' : '편지 보내기';
+            }
         });
     }
 
+    const fetchData = async () => {
+        try {
+            // Fetch Audio Tracks
+            const { data: tracks, error: tracksError } = await _supabase
+                .from('audio_tracks')
+                .select('*')
+                .eq('is_active', true)
+                .order('order', { ascending: true });
+
+            if (tracksError) throw tracksError;
+            audioTracks = tracks;
+
+            // Fetch Schedule
+            const { data: schedule, error: scheduleError } = await _supabase
+                .from('schedule')
+                .select('*')
+                .eq('is_active', true);
+
+            if (scheduleError) throw scheduleError;
+            scheduleData = schedule;
+
+            // Fetch Content (Translations)
+            const { data: content, error: contentError } = await _supabase
+                .from('content')
+                .select('*');
+
+            if (contentError) throw contentError;
+
+            // Merge content into translations
+            content.forEach(item => {
+                if (!translations['ko']) translations['ko'] = {};
+                if (!translations['en']) translations['en'] = {};
+                translations['ko'][item.key] = item.value_ko;
+                translations['en'][item.key] = item.value_en;
+            });
+
+            // Re-render with new data
+            const currentLang = document.documentElement.lang || 'ko';
+            setLanguage(currentLang);
+
+        } catch (error) {
+            console.error('Error fetching data from Supabase:', error);
+        }
+    };
+
     // Set initial language on page load
     setLanguage(detectInitialLang());
+    fetchData();
 });
