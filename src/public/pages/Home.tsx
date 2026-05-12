@@ -23,7 +23,6 @@ const Home: React.FC = () => {
     const [isLetterModalOpen, setIsLetterModalOpen] = useState(false);
     const [isSampleModalOpen, setIsSampleModalOpen] = useState(false);
     const [pageData, setPageData] = useState<CMSPage | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const fetchPageData = async () => {
@@ -32,8 +31,6 @@ const Home: React.FC = () => {
                 setPageData(data);
             } catch (error) {
                 console.error('Failed to fetch page data:', error);
-            } finally {
-                setIsLoading(false);
             }
         };
 

@@ -8,7 +8,6 @@ import CMSPageRenderer from '../components/CMSPageRenderer';
 const About: React.FC = () => {
     const { t, lang } = useI18n();
     const [pageData, setPageData] = useState<CMSPage | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const fetchPageData = async () => {
@@ -17,8 +16,6 @@ const About: React.FC = () => {
                 setPageData(data);
             } catch (error) {
                 console.error('Failed to fetch page data:', error);
-            } finally {
-                setIsLoading(false);
             }
         };
 
