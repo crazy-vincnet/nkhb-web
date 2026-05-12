@@ -86,4 +86,6 @@ const Guide: React.FC<GuideProps> = ({ onOpenLetter }) => {
     );
 };
 
-export default Guide;
+// ⚡ Bolt: Wrapped with React.memo to prevent unnecessary re-renders
+// when the parent component updates its state (e.g., opening modals).
+export default React.memo(Guide);
