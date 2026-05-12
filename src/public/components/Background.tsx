@@ -56,4 +56,6 @@ const Background: React.FC<BackgroundProps> = ({ onOpenArticle }) => {
     );
 };
 
-export default Background;
+// ⚡ Bolt: Wrapped with React.memo to prevent unnecessary re-renders
+// when the parent component updates its state (e.g., opening modals).
+export default React.memo(Background);
