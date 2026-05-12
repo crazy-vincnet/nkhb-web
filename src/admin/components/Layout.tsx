@@ -22,6 +22,7 @@ const Layout = () => {
     { path: '/audio', icon: Music, label: 'Audio Tracks' },
     { path: '/schedule', icon: Calendar, label: 'Schedule' },
     { path: '/content', icon: FileText, label: 'Content' },
+    { path: '/pages', icon: FileText, label: 'Pages' },
   ];
 
   return (
