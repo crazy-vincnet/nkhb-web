@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import Hero from '../components/Hero';
 import Background from '../components/Background';
 import Composition from '../components/Composition';
@@ -16,37 +17,28 @@ import { useI18n } from '../lib/i18n';
 
 const Home: React.FC = () => {
     const { lang } = useI18n();
+    const location = useLocation();
     const [isArticleModalOpen, setIsArticleModalOpen] = useState(false);
     const [isLetterModalOpen, setIsLetterModalOpen] = useState(false);
     const [isSampleModalOpen, setIsSampleModalOpen] = useState(false);
 
     useEffect(() => {
-        // Handle smooth scrolling for hash links
-        const handleHashChange = () => {
-            const hash = window.location.hash;
-            if (hash) {
-                const element = document.querySelector(hash);
-                if (element) {
-                    const headerOffset = 100;
-                    const elementPosition = element.getBoundingClientRect().top;
-                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+        // Handle smooth scrolling for hash links whenever location changes
+        if (location.hash) {
+            const id = location.hash.replace('#', '');
+            const element = document.getElementById(id);
+            if (element) {
+                const headerOffset = 100;
+                const elementPosition = element.getBoundingClientRect().top;
+                const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
 
-                    window.scrollTo({
-                        top: offsetPosition,
-                        behavior: 'smooth'
-                    });
-                }
+                window.scrollTo({
+                    top: offsetPosition,
+                    behavior: 'smooth'
+                });
             }
-        };
-
-        window.addEventListener('hashchange', handleHashChange);
-        // Initial check
-        if (window.location.hash) {
-            setTimeout(handleHashChange, 100);
         }
-
-        return () => window.removeEventListener('hashchange', handleHashChange);
-    }, []);
+    }, [location]);
 
     return (
         <>
