@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+# Sitemaps
+Sitemap: https://nkhb.org/sitemap.xml
+
+# Disallow admin panel from being indexed
+Disallow: /admin/
+Disallow: /admin/*

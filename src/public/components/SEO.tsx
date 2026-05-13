@@ -41,7 +41,22 @@ const SEO: React.FC<SEOProps> = ({ slug }) => {
   const title = lang === 'ko' ? data.title_ko : data.title_en;
   const description = lang === 'ko' ? data.description_ko : data.description_en;
   const keywords = lang === 'ko' ? data.keywords_ko : data.keywords_en;
-  const ogImage = data.og_image_url || 'https://cdn.imweb.me/thumbnail/20260424/16a5ea55af28a.png'; // Default logo as fallback
+  const ogImage = data.og_image_url || 'https://cdn.imweb.me/thumbnail/20260424/16a5ea55af28a.png';
+  const siteUrl = 'https://nkhb.org';
+  const currentUrl = `${siteUrl}${window.location.pathname === '/' ? '' : window.location.pathname}`;
+
+  // Structured Data (JSON-LD)
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": slug === 'home' ? "Organization" : "WebPage",
+    "name": "뉴코리아 희망방송 (NKHB)",
+    "url": siteUrl,
+    "logo": "https://cdn.imweb.me/thumbnail/20260424/16a5ea55af28a.png",
+    "description": description,
+    "sameAs": [
+        "https://nkfi.org"
+    ]
+  };
 
   return (
     <Helmet>
@@ -49,19 +64,32 @@ const SEO: React.FC<SEOProps> = ({ slug }) => {
       <title>{title}</title>
       <meta name="description" content={description} />
       {keywords && <meta name="keywords" content={keywords} />}
+      <link rel="canonical" href={currentUrl} />
+      
+      {/* Language Alternates (hreflang) */}
+      <link rel="alternate" href={currentUrl} hreflang="ko" />
+      <link rel="alternate" href={currentUrl} hreflang="en" />
+      <link rel="alternate" href={currentUrl} hreflang="x-default" />
 
       {/* Open Graph / Facebook */}
       <meta property="og:type" content="website" />
+      <meta property="og:site_name" content="뉴코리아 희망방송 (NKHB)" />
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />
       <meta property="og:image" content={ogImage} />
-      <meta property="og:url" content={window.location.href} />
+      <meta property="og:url" content={currentUrl} />
+      <meta property="og:locale" content={lang === 'ko' ? 'ko_KR' : 'en_US'} />
 
       {/* Twitter */}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={ogImage} />
+
+      {/* Structured Data */}
+      <script type="application/ld+json">
+        {JSON.stringify(structuredData)}
+      </script>
     </Helmet>
   );
 };
