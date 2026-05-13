@@ -26,7 +26,6 @@ const DynamicPage = () => {
         .from('pages')
         .select('*')
         .eq('slug', slug)
-        .eq('is_published', true)
         .single();
 
       if (!error && data) {
@@ -55,31 +54,32 @@ const DynamicPage = () => {
   const title = lang === 'ko' ? page.title_ko : page.title_en;
   const content = lang === 'ko' ? page.content_ko : page.content_en;
 
+  // Check if it's GrapesJS content (usually contains <style> or specific structures)
+  const isVisualDesign = content?.includes('<style>') || content?.includes('gjs-');
+
   return (
-    <div className="dynamic-page pt-32 pb-20 overflow-hidden">
+    <div className="dynamic-page pt-20 pb-0 overflow-hidden">
       <SEO slug={page.slug} />
       
-      {/* If content starts with <style>, it's GrapesJS content. 
-          We render it without the standard container constraints if it's a full-page design.
-          But for now, let's keep it in a semantic article wrapper. */}
-      <div className="container mx-auto px-4 max-w-5xl">
-        <header className="mb-12 text-center">
+      {/* Standard Header only for non-visual designs */}
+      {!isVisualDesign && (
+        <div className="container mx-auto px-4 max-w-4xl pt-12 mb-12 text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
             {title}
           </h1>
           <div className="w-20 h-1 bg-blue-600 mx-auto rounded-full"></div>
-        </header>
+        </div>
+      )}
 
-        <div 
-          className="grapesjs-content-wrapper"
-          dangerouslySetInnerHTML={{ 
-            __html: DOMPurify.sanitize(content || '', {
-              ADD_TAGS: ['style'], // Allow style tags for GrapesJS CSS
-              FORCE_BODY: true
-            }) 
-          }}
-        />
-      </div>
+      <div 
+        className={`grapesjs-content-wrapper ${!isVisualDesign ? 'container mx-auto px-4 max-w-4xl pb-20' : ''}`}
+        dangerouslySetInnerHTML={{ 
+          __html: DOMPurify.sanitize(content || '', {
+            ADD_TAGS: ['style'], 
+            FORCE_BODY: true
+          }) 
+        }}
+      />
     </div>
   );
 };

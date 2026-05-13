@@ -1670,6 +1670,28 @@ footer {
     width: 100%;
 }
 
+/* GrapesJS Content Styles */
+.grapesjs-content-wrapper {
+    width: 100%;
+}
+
+.grapesjs-content-wrapper img {
+    max-width: 100%;
+    height: auto;
+}
+
+.grapesjs-content-wrapper p {
+    margin-bottom: 1rem;
+}
+
+.grapesjs-content-wrapper a {
+    transition: all 0.3s ease;
+}
+
+.grapesjs-content-wrapper a:hover {
+    opacity: 0.8;
+}
+
 .footer-bottom p {
     font-size: 13px;
     color: rgba(255, 255, 255, 0.3);

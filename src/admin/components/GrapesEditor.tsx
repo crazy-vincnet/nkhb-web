@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import grapesjs from 'grapesjs';
 import 'grapesjs/dist/css/grapes.min.css';
 import webpagePreset from 'grapesjs-preset-webpage';
+import { initNKHBBlocks } from '../lib/grapes-blocks';
 
 interface GrapesEditorProps {
   initialData: any;
@@ -36,6 +37,9 @@ const GrapesEditor = ({ initialData, onChange }: Omit<GrapesEditorProps, 'minHei
       }
     });
 
+    // Initialize Custom NKHB Blocks
+    initNKHBBlocks(editor);
+
     // Handle initialization data
     if (initialData && initialData.components && initialData.components.length > 0) {
       editor.setComponents(initialData.components);
@@ -43,9 +47,10 @@ const GrapesEditor = ({ initialData, onChange }: Omit<GrapesEditorProps, 'minHei
     } else {
       // Add a default welcome section if empty
       editor.addComponents(`
-        <section style="padding: 50px; text-align: center; font-family: sans-serif;">
-          <h1>새로운 페이지를 디자인해 보세요!</h1>
-          <p>오른쪽의 블록들을 이곳으로 드래그하여 내용을 추가할 수 있습니다.</p>
+        <section style="padding: 100px 20px; text-align: center; font-family: 'Pretendard', sans-serif; background: #f8fafc;">
+          <h1 style="font-size: 2.5rem; color: #1e293b; margin-bottom: 20px;">새로운 페이지 디자인을 시작하세요</h1>
+          <p style="color: #64748b; font-size: 1.1rem; max-width: 600px; margin: 0 auto 40px;">오른쪽 사이드바의 'Sections' 카테고리에서 미리 만들어진 블록들을 드래그하여 페이지를 빠르게 구성할 수 있습니다.</p>
+          <div style="display: inline-block; padding: 12px 30px; background: #2563eb; color: white; border-radius: 10px; font-weight: 700;">시작하기</div>
         </section>
       `);
     }
@@ -73,7 +78,7 @@ const GrapesEditor = ({ initialData, onChange }: Omit<GrapesEditorProps, 'minHei
         grapesInstance.current.destroy();
       }
     };
-  }, [initialData]); // This key-based re-init is handled by the parent's key prop
+  }, [initialData]);
 
   return (
     <div className="h-full w-full bg-white">
@@ -85,6 +90,14 @@ const GrapesEditor = ({ initialData, onChange }: Omit<GrapesEditorProps, 'minHei
         }
         .gjs-editor {
           background-color: #fff;
+        }
+        /* Custom scrollbar for GrapesJS panels */
+        .gjs-pn-panels::-webkit-scrollbar {
+          width: 4px;
+        }
+        .gjs-pn-panels::-webkit-scrollbar-thumb {
+          background: rgba(0,0,0,0.1);
+          border-radius: 10px;
         }
       `}</style>
       <div ref={editorRef} className="h-full"></div>
