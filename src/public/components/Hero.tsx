@@ -6,7 +6,13 @@ const Hero: React.FC = () => {
     const { t } = useI18n();
 
     return (
-        <section className="hero" id="hero">
+        <section 
+            className="hero" 
+            id="hero"
+            style={{ 
+                background: `linear-gradient(rgba(10, 25, 47, 0.7), rgba(10, 25, 47, 0.7)), url('${t('image_hero_bg')}') center/cover no-repeat` 
+            }}
+        >
             <div className="container">
                 <div className="hero-content">
                     <span className="hero-tag">{t('hero_tag')}</span>

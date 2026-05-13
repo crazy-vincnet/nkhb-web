@@ -6,22 +6,6 @@ import { supabase } from '../lib/supabase';
 const Header: React.FC = () => {
     const { lang, setLang, t } = useI18n();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [logoUrl, setLogoUrl] = useState('https://cdn.imweb.me/thumbnail/20260424/16a5ea55af28a.png');
-
-    useEffect(() => {
-        const fetchLogo = async () => {
-            const { data, error } = await supabase
-                .from('content')
-                .select('value_ko, value_en')
-                .eq('key', 'logo_url')
-                .single();
-
-            if (data && !error) {
-                setLogoUrl(lang === 'ko' ? data.value_ko : data.value_en);
-            }
-        };
-        fetchLogo();
-    }, [lang]);
 
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
@@ -30,7 +14,7 @@ const Header: React.FC = () => {
             <nav>
                 <div className="logo">
                     <Link to="/">
-                        <img src={logoUrl} alt={t('alt_logo')} />
+                        <img src={t('image_logo')} alt={t('alt_logo')} />
                     </Link>
                 </div>
 

@@ -40,7 +40,7 @@ const Background: React.FC<BackgroundProps> = ({ onOpenArticle }) => {
                     <div className="image-content">
                         <div className="image-placeholder">
                             <img 
-                                src="https://cdn.imweb.me/thumbnail/20260424/ae13dd489d8ac.png" 
+                                src={t('image_background_section')} 
                                 alt={t('alt_background')} 
                                 loading="lazy" 
                             />

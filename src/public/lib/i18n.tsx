@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { supabase } from './supabase';
 
-const translations = {
+const staticTranslations = {
     en: {
         // Meta & SEO
         meta_description: "New Korea Hope Broadcasting (NKHB) is a radio station that delivers hope, truth, and the gospel to the people of North Korea through radio waves.",
@@ -217,7 +218,14 @@ const translations = {
         alt_map: "Map of North Korea",
         alt_poster: "Unification Campaign Poster",
         alt_kenneth: "Missionary Kenneth Bae",
-        alt_close: "Close"
+        alt_close: "Close",
+        // Images (Fallbacks)
+        image_hero_bg: "/images/main-hero.png",
+        image_logo: "https://cdn.imweb.me/thumbnail/20260424/16a5ea55af28a.png",
+        image_background_section: "https://cdn.imweb.me/thumbnail/20260424/ae13dd489d8ac.png",
+        image_reach_map: "https://cdn.imweb.me/thumbnail/20260424/ae13dd489d8ac.png",
+        image_about_poster: "/images/poster.png",
+        image_about_kenneth: "/images/kenneth-bae.png",
     },
     ko: {
         // Meta & SEO
@@ -435,23 +443,32 @@ const translations = {
         alt_map: "북한 지도",
         alt_poster: "통일캠페인 포스터",
         alt_kenneth: "케네스 배 선교사",
-        alt_close: "닫기"
+        alt_close: "닫기",
+        // Images (Fallbacks)
+        image_hero_bg: "/images/main-hero.png",
+        image_logo: "https://cdn.imweb.me/thumbnail/20260424/16a5ea55af28a.png",
+        image_background_section: "https://cdn.imweb.me/thumbnail/20260424/ae13dd489d8ac.png",
+        image_reach_map: "https://cdn.imweb.me/thumbnail/20260424/ae13dd489d8ac.png",
+        image_about_poster: "/images/poster.png",
+        image_about_kenneth: "/images/kenneth-bae.png",
     }
 };
 
 type Language = 'ko' | 'en';
-type TranslationKeys = keyof typeof translations.ko;
 
 interface I18nContextType {
     lang: Language;
     setLang: (lang: Language) => void;
-    t: (key: TranslationKeys) => string;
+    t: (key: string) => string;
+    loading: boolean;
 }
 
 const I18nContext = createContext<I18nContextType | undefined>(undefined);
 
 export const I18nProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [lang, setLangState] = useState<Language>('ko');
+    const [dynamicTranslations, setDynamicTranslations] = useState<any>({ ko: {}, en: {} });
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const savedLang = localStorage.getItem('lang') as Language;
@@ -463,7 +480,31 @@ export const I18nProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 setLangState('en');
             }
         }
+
+        fetchDynamicContent();
     }, []);
+
+    const fetchDynamicContent = async () => {
+        try {
+            const { data, error } = await supabase
+                .from('content')
+                .select('key, value_ko, value_en');
+            
+            if (data && !error) {
+                const ko: any = {};
+                const en: any = {};
+                data.forEach(item => {
+                    ko[item.key] = item.value_ko;
+                    en[item.key] = item.value_en;
+                });
+                setDynamicTranslations({ ko, en });
+            }
+        } catch (err) {
+            console.error('Failed to fetch dynamic content:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const setLang = (newLang: Language) => {
         setLangState(newLang);
@@ -471,12 +512,16 @@ export const I18nProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         document.documentElement.lang = newLang;
     };
 
-    const t = (key: TranslationKeys): string => {
-        return translations[lang][key] || translations['ko'][key] || key;
+    const t = (key: string): string => {
+        // DB value > Static value > Key
+        return dynamicTranslations[lang]?.[key] || 
+               (staticTranslations as any)[lang]?.[key] || 
+               (staticTranslations as any)['ko']?.[key] || 
+               key;
     };
 
     return (
-        <I18nContext.Provider value={{ lang, setLang, t }}>
+        <I18nContext.Provider value={{ lang, setLang, t, loading }}>
             {children}
         </I18nContext.Provider>
     );

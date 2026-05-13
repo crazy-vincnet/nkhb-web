@@ -9,7 +9,7 @@ const Footer: React.FC = () => {
             <div className="container">
                 <div className="footer-content">
                     <div className="footer-logo">
-                        <img src="https://cdn.imweb.me/thumbnail/20260424/16a5ea55af28a.png" alt={t('alt_logo')} loading="lazy" />
+                        <img src={t('image_logo')} alt={t('alt_logo')} loading="lazy" />
                     </div>
                     <div className="footer-info">
                         <p>{t('footer_contact')}</p>

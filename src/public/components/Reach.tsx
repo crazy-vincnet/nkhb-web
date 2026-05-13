@@ -11,7 +11,7 @@ const Reach: React.FC = () => {
                     <div className="reach-visual">
                         <div className="map-container">
                             <img 
-                                src="https://cdn.imweb.me/thumbnail/20260424/ae13dd489d8ac.png" 
+                                src={t('image_reach_map')} 
                                 alt={t('alt_map')}
                                 className="map-bg" 
                                 loading="lazy" 

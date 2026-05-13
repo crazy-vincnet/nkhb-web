@@ -32,7 +32,7 @@ const About: React.FC = () => {
                                 </ul>
                             </div>
                             <div className="image-content poster-image">
-                                <img src="/images/poster.png" alt={t('alt_poster')} loading="lazy" />
+                                <img src={t('image_about_poster')} alt={t('alt_poster')} loading="lazy" />
                             </div>
                         </div>
                     </div>
@@ -99,7 +99,7 @@ const About: React.FC = () => {
                     <div className="container">
                         <div className="founder-grid">
                             <div className="founder-image">
-                                <img src="/images/kenneth-bae.png" alt={t('alt_kenneth')} loading="lazy" />
+                                <img src={t('image_about_kenneth')} alt={t('alt_kenneth')} loading="lazy" />
                                 <p className="caption">Kenneth Bae | NKFI 대표</p>
                             </div>
                             <div className="founder-info">
