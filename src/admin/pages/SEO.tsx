@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { Save, Search, Globe, Image as ImageIcon, Layout } from 'lucide-react';
+import { Save, Search, Globe, Image as ImageIcon, Layout, Type } from 'lucide-react';
 
 interface SEOSettings {
   id: string;
