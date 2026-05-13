@@ -10,6 +10,7 @@ import Content from './pages/Content';
 import SEO from './pages/SEO';
 import Menu from './pages/Menu';
 import Pages from './pages/Pages';
+import PageEditor from './pages/PageEditor';
 
 function App() {
   const [session, setSession] = useState<any>(null);
@@ -38,6 +39,13 @@ function App() {
     <Router basename="/admin">
       <Routes>
         <Route path="/login" element={!session ? <Login /> : <Navigate to="/" />} />
+        
+        {/* Full-screen Editor Route (No Layout) */}
+        <Route 
+          path="/editor/:id" 
+          element={session ? <PageEditor /> : <Navigate to="/login" />} 
+        />
+
         <Route
           path="/"
           element={session ? <Layout /> : <Navigate to="/login" />}
