@@ -46,7 +46,7 @@ const SEOAdmin = () => {
   const fetchData = async () => {
     setLoading(true);
     const { data: seoData } = await supabase.from('seo_settings').select('*').order('page_slug');
-    const { data: siteData } = await supabase.from('site_settings').select('*');
+    const { data: siteData } = await supabase.from('sites_settings').select('*');
     
     if (seoData) setSettings(seoData);
     if (siteData) setSiteSettings(siteData);
@@ -79,7 +79,7 @@ const SEOAdmin = () => {
   const handleUpdateSite = async (key: string, value_ko: string, value_en: string) => {
     setSaving(key);
     const { error } = await supabase
-        .from('site_settings')
+        .from('sites_settings')
         .upsert({ key, value_ko, value_en, updated_at: new Date().toISOString() });
     
     if (error) alert('저장 실패: ' + error.message);
