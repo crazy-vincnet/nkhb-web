@@ -3,6 +3,7 @@ import grapesjs from 'grapesjs';
 import 'grapesjs/dist/css/grapes.min.css';
 import webpagePreset from 'grapesjs-preset-webpage';
 import { initNKHBBlocks } from '../lib/grapes-blocks';
+import { grapesKo } from '../lib/grapes-ko';
 
 interface GrapesEditorProps {
   initialData: any;
@@ -17,7 +18,6 @@ const GrapesEditor = ({ initialData, onChange }: Omit<GrapesEditorProps, 'minHei
   useEffect(() => {
     if (!editorRef.current) return;
 
-    // Clean up previous instance
     if (grapesInstance.current) {
       grapesInstance.current.destroy();
     }
@@ -29,6 +29,10 @@ const GrapesEditor = ({ initialData, onChange }: Omit<GrapesEditorProps, 'minHei
       width: 'auto',
       storageManager: false,
       plugins: [webpagePreset],
+      i18n: {
+        locale: 'ko',
+        messages: { ko: grapesKo },
+      },
       canvas: {
         styles: [
           'https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css',
@@ -45,20 +49,17 @@ const GrapesEditor = ({ initialData, onChange }: Omit<GrapesEditorProps, 'minHei
       editor.setComponents(initialData.components);
       editor.setStyle(initialData.style || '');
     } else {
-      // Add a default welcome section if empty
       editor.addComponents(`
         <section style="padding: 100px 20px; text-align: center; font-family: 'Pretendard', sans-serif; background: #f8fafc;">
           <h1 style="font-size: 2.5rem; color: #1e293b; margin-bottom: 20px;">새로운 페이지 디자인을 시작하세요</h1>
-          <p style="color: #64748b; font-size: 1.1rem; max-width: 600px; margin: 0 auto 40px;">오른쪽 사이드바의 'Sections' 카테고리에서 미리 만들어진 블록들을 드래그하여 페이지를 빠르게 구성할 수 있습니다.</p>
+          <p style="color: #64748b; font-size: 1.1rem; max-width: 600px; margin: 0 auto 40px;">오른쪽 사이드바의 '섹션' 카테고리에서 미리 만들어진 블록들을 드래그하여 페이지를 빠르게 구성할 수 있습니다.</p>
           <div style="display: inline-block; padding: 12px 30px; background: #2563eb; color: white; border-radius: 10px; font-weight: 700;">시작하기</div>
         </section>
       `);
     }
 
-    // Explicitly show panels that might be hidden
     editor.Panels.getPanels().forEach((p: any) => p.set('visible', true));
 
-    // Setup change event
     const handleUpdate = () => {
       onChange({
         html: editor.getHtml() || '',
@@ -91,7 +92,6 @@ const GrapesEditor = ({ initialData, onChange }: Omit<GrapesEditorProps, 'minHei
         .gjs-editor {
           background-color: #fff;
         }
-        /* Custom scrollbar for GrapesJS panels */
         .gjs-pn-panels::-webkit-scrollbar {
           width: 4px;
         }
