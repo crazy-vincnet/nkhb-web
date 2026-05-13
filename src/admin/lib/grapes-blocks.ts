@@ -38,6 +38,92 @@ export const initNKHBBlocks = (editor: Editor) => {
               </div>`,
   });
 
+  bm.add('nkhb-grid-4', {
+    label: '4단 그리드',
+    category: 'Layout',
+    media: createIcon('▦'),
+    content: `<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; padding: 20px;">
+                <div style="padding: 15px; background: #f8fafc; border-radius: 10px; border: 1px dashed #eee;">1</div>
+                <div style="padding: 15px; background: #f8fafc; border-radius: 10px; border: 1px dashed #eee;">2</div>
+                <div style="padding: 15px; background: #f8fafc; border-radius: 10px; border: 1px dashed #eee;">3</div>
+                <div style="padding: 15px; background: #f8fafc; border-radius: 10px; border: 1px dashed #eee;">4</div>
+              </div>`,
+  });
+
+  // --- Category: Basic (기본 요소) ---
+  bm.add('text-h1', {
+    label: '대제목 (H1)',
+    category: 'Basic',
+    media: createIcon('➊'),
+    content: '<h1 style="font-size: 3rem; font-weight: 800; margin: 20px 0; color: #1e293b;">여기에 대제목을 입력하세요</h1>',
+  });
+
+  bm.add('text-h2', {
+    label: '중제목 (H2)',
+    category: 'Basic',
+    media: createIcon('➋'),
+    content: '<h2 style="font-size: 2rem; font-weight: 700; margin: 15px 0; color: #1e293b;">중간 제목</h2>',
+  });
+
+  bm.add('text-p', {
+    label: '본문 텍스트',
+    category: 'Basic',
+    media: createIcon('¶'),
+    content: '<p style="font-size: 1rem; line-height: 1.6; color: #64748b; margin-bottom: 15px;">여기에 본문 내용을 입력하세요. 문단 단위로 작성하기에 좋습니다.</p>',
+  });
+
+  bm.add('basic-image', {
+    label: '이미지',
+    category: 'Basic',
+    media: createIcon('🖼️'),
+    content: { type: 'image', style: { width: '100%', height: 'auto', 'border-radius': '10px' } },
+  });
+
+  bm.add('basic-link', {
+    label: '링크',
+    category: 'Basic',
+    media: createIcon('🔗'),
+    content: { type: 'link', content: '링크 텍스트', style: { color: '#2563eb', 'text-decoration': 'underline' } },
+  });
+
+  bm.add('basic-button', {
+    label: '기본 버튼',
+    category: 'Basic',
+    media: createIcon('🔘'),
+    content: '<a href="#" style="display: inline-block; padding: 12px 25px; background: #2563eb; color: white; border-radius: 8px; text-decoration: none; font-weight: 600;">버튼 텍스트</a>',
+  });
+
+  bm.add('basic-list', {
+    label: '목록 (List)',
+    category: 'Basic',
+    media: createIcon('•'),
+    content: `
+      <ul style="padding-left: 20px; color: #475569; line-height: 1.8;">
+        <li>목록 항목 1</li>
+        <li>목록 항목 2</li>
+        <li>목록 항목 3</li>
+      </ul>
+    `,
+  });
+
+  bm.add('basic-map', {
+    label: '지도 (Map)',
+    category: 'Basic',
+    media: createIcon('🗺️'),
+    content: `
+      <div style="width: 100%; height: 350px; background: #eee; display: flex; align-items: center; justify-content: center; border-radius: 15px;">
+        <p style="color: #999;">여기에 구글 지도 임베드 코드를 넣으세요</p>
+      </div>
+    `,
+  });
+
+  bm.add('basic-spacer', {
+    label: '여백 (Spacer)',
+    category: 'Basic',
+    media: createIcon('↕'),
+    content: '<div style="height: 50px; width: 100%;"></div>',
+  });
+
   // --- Category: Sections (섹션) ---
   bm.add('nkhb-hero-modern', {
     label: '모던 히어로',
