@@ -8,7 +8,9 @@ import {
   Layout, 
   ShieldAlert,
   Share2,
-  Eye
+  Eye,
+  Trash2,
+  AlertCircle
 } from 'lucide-react';
 
 interface SEOSettings {
@@ -24,6 +26,7 @@ interface SEOSettings {
   meta_robots: string;
   canonical_url: string;
   twitter_card: string;
+  is_orphan?: boolean;
 }
 
 interface SiteSettings {
@@ -47,10 +50,33 @@ const SEOAdmin = () => {
     setLoading(true);
     const { data: seoData } = await supabase.from('seo_settings').select('*').order('page_slug');
     const { data: siteData } = await supabase.from('sites_settings').select('*');
+    const { data: pagesData } = await supabase.from('pages').select('slug');
     
-    if (seoData) setSettings(seoData);
+    if (seoData) {
+      const pageSlugs = new Set((pagesData || []).map(p => p.slug));
+      // home and about are protected system slugs
+      pageSlugs.add('home');
+      pageSlugs.add('about');
+
+      const processedSEO = seoData.map(item => ({
+        ...item,
+        is_orphan: !pageSlugs.has(item.page_slug)
+      }));
+      setSettings(processedSEO);
+    }
     if (siteData) setSiteSettings(siteData);
     setLoading(false);
+  };
+
+  const handleRemoveSEO = async (id: string) => {
+    if (!window.confirm('이 SEO 설정을 영구적으로 삭제하시겠습니까? (연결된 페이지가 없는 경우 추천)')) return;
+    
+    const { error } = await supabase.from('seo_settings').delete().eq('id', id);
+    if (!error) {
+        setSettings(prev => prev.filter(s => s.id !== id));
+    } else {
+        alert('삭제 실패: ' + error.message);
+    }
   };
 
   const handleUpdateSEO = async (item: SEOSettings) => {
@@ -182,10 +208,25 @@ const SEOAdmin = () => {
                             </div>
                             <div>
                                 <h3 className="font-black text-xl tracking-tight text-gray-900 dark:text-white uppercase">/{item.page_slug}</h3>
-                                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Individual Page SEO</p>
+                                {item.is_orphan ? (
+                                    <div className="flex items-center gap-1.5 text-red-500 font-bold text-[10px] mt-0.5 animate-pulse">
+                                        <AlertCircle size={10} /> 연결된 페이지 없음
+                                    </div>
+                                ) : (
+                                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Individual Page SEO</p>
+                                )}
                             </div>
                         </div>
                         <div className="flex items-center gap-3">
+                            {item.is_orphan && (
+                                <button
+                                    onClick={() => handleRemoveSEO(item.id)}
+                                    className="p-3 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-2xl transition-all"
+                                    title="불필요한 SEO 설정 삭제"
+                                >
+                                    <Trash2 className="w-5 h-5" />
+                                </button>
+                            )}
                             <button
                                 onClick={() => handleUpdateSEO(item)}
                                 disabled={saving === item.id}
