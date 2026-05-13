@@ -9,6 +9,7 @@ import Schedule from './pages/Schedule';
 import Content from './pages/Content';
 import SEO from './pages/SEO';
 import Menu from './pages/Menu';
+import Pages from './pages/Pages';
 
 function App() {
   const [session, setSession] = useState<any>(null);
@@ -48,6 +49,7 @@ function App() {
           <Route path="content" element={<Content />} />
           <Route path="seo" element={<SEO />} />
           <Route path="menu" element={<Menu />} />
+          <Route path="pages" element={<Pages />} />
         </Route>
       </Routes>
     </Router>

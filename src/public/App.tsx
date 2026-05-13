@@ -5,6 +5,7 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import Home from './pages/Home';
 import About from './pages/About';
+import DynamicPage from './pages/DynamicPage';
 import ScrollToTop from './components/ScrollToTop';
 import { useI18n } from './lib/i18n';
 
@@ -20,6 +21,7 @@ const App: React.FC = () => {
                     <Routes>
                         <Route path="/" element={<Home />} />
                         <Route path="/about" element={<About />} />
+                        <Route path="/p/:slug" element={<DynamicPage />} />
                     </Routes>
                     <Footer />
                 </div>

@@ -12,9 +12,9 @@ interface SEOData {
   title_en: string;
   description_ko: string;
   description_en: string;
-  keywords_ko: string;
-  keywords_en: string;
-  og_image_url: string;
+  keywords_ko?: string;
+  keywords_en?: string;
+  og_image_url?: string;
 }
 
 const SEO: React.FC<SEOProps> = ({ slug }) => {
@@ -23,14 +23,31 @@ const SEO: React.FC<SEOProps> = ({ slug }) => {
 
   useEffect(() => {
     const fetchSEO = async () => {
-      const { data: seoData, error } = await supabase
+      // 1. Try to fetch from seo_settings first
+      const { data: seoData, error: seoError } = await supabase
         .from('seo_settings')
         .select('*')
         .eq('page_slug', slug)
         .single();
 
-      if (!error && seoData) {
+      if (!seoError && seoData) {
         setData(seoData);
+      } else {
+        // 2. If not found, try to fetch from pages table (for dynamic sub-pages)
+        const { data: pageData, error: pageError } = await supabase
+          .from('pages')
+          .select('title_ko, title_en, content_ko, content_en')
+          .eq('slug', slug)
+          .single();
+
+        if (!pageError && pageData) {
+          setData({
+            title_ko: `${pageData.title_ko} | 뉴코리아 희망방송`,
+            title_en: `${pageData.title_en} | NKHB`,
+            description_ko: pageData.content_ko?.substring(0, 160).replace(/<[^>]*>/g, '') || '',
+            description_en: pageData.content_en?.substring(0, 160).replace(/<[^>]*>/g, '') || '',
+          });
+        }
       }
     };
     fetchSEO();
@@ -45,7 +62,6 @@ const SEO: React.FC<SEOProps> = ({ slug }) => {
   const siteUrl = 'https://nkhb.org';
   const currentUrl = `${siteUrl}${window.location.pathname === '/' ? '' : window.location.pathname}`;
 
-  // Structured Data (JSON-LD)
   const structuredData = {
     "@context": "https://schema.org",
     "@type": slug === 'home' ? "Organization" : "WebPage",
@@ -60,18 +76,15 @@ const SEO: React.FC<SEOProps> = ({ slug }) => {
 
   return (
     <Helmet>
-      {/* Standard tags */}
       <title>{title}</title>
       <meta name="description" content={description} />
       {keywords && <meta name="keywords" content={keywords} />}
       <link rel="canonical" href={currentUrl} />
       
-      {/* Language Alternates (hreflang) */}
       <link rel="alternate" href={currentUrl} hrefLang="ko" />
       <link rel="alternate" href={currentUrl} hrefLang="en" />
       <link rel="alternate" href={currentUrl} hrefLang="x-default" />
 
-      {/* Open Graph / Facebook */}
       <meta property="og:type" content="website" />
       <meta property="og:site_name" content="뉴코리아 희망방송 (NKHB)" />
       <meta property="og:title" content={title} />
@@ -80,13 +93,11 @@ const SEO: React.FC<SEOProps> = ({ slug }) => {
       <meta property="og:url" content={currentUrl} />
       <meta property="og:locale" content={lang === 'ko' ? 'ko_KR' : 'en_US'} />
 
-      {/* Twitter */}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={ogImage} />
 
-      {/* Structured Data */}
       <script type="application/ld+json">
         {JSON.stringify(structuredData)}
       </script>
