@@ -114,8 +114,8 @@ const Pages = () => {
   };
 
   const filteredPages = pages.filter(p => 
-    p.title_ko.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.slug.toLowerCase().includes(searchQuery.toLowerCase())
+    (p.title_ko?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+    (p.slug?.toLowerCase() || '').includes(searchQuery.toLowerCase())
   );
 
   if (loading && pages.length === 0) return (

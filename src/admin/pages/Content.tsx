@@ -62,9 +62,9 @@ const Content = () => {
     // Search filter
     if (searchQuery) {
       result = result.filter(item => 
-        item.key.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.value_ko?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.value_en?.toLowerCase().includes(searchQuery.toLowerCase())
+        (item.key?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+        (item.value_ko?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+        (item.value_en?.toLowerCase() || '').includes(searchQuery.toLowerCase())
       );
     }
 
@@ -73,7 +73,7 @@ const Content = () => {
       const section = SECTIONS.find(s => s.id === activeSection);
       if (section?.pattern) {
         result = result.filter(item => 
-          section.pattern?.some(p => item.key.toLowerCase().startsWith(p) || item.key.toLowerCase().includes(p))
+          section.pattern?.some(p => (item.key?.toLowerCase() || '').startsWith(p) || (item.key?.toLowerCase() || '').includes(p))
         );
       }
     }

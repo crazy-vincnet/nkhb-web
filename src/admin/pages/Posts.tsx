@@ -53,8 +53,8 @@ const Posts = () => {
   };
 
   const filteredPosts = posts.filter(p => 
-    p.author_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.content.toLowerCase().includes(searchQuery.toLowerCase())
+    (p.author_name?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+    (p.content?.toLowerCase() || '').includes(searchQuery.toLowerCase())
   );
 
   return (
