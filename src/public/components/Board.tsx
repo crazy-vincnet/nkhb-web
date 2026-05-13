@@ -12,9 +12,11 @@ interface Post {
 interface BoardProps {
   pageId: string;
   lang: 'ko' | 'en';
+  titleKo?: string;
+  titleEn?: string;
 }
 
-const Board: React.FC<BoardProps> = ({ pageId, lang }) => {
+const Board: React.FC<BoardProps> = ({ pageId, lang, titleKo, titleEn }) => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [name, setName] = useState('');
   const [content, setContent] = useState('');
@@ -73,8 +75,10 @@ const Board: React.FC<BoardProps> = ({ pageId, lang }) => {
     setSubmitting(false);
   };
 
+  const boardTitle = lang === 'ko' ? (titleKo || '공지 및 소식') : (titleEn || 'Board & Updates');
+
   return (
-    <section className="mt-32 border-t dark:border-gray-800 pt-20 pb-32 bg-gradient-to-b from-gray-50/50 to-white dark:from-gray-900/10 dark:to-transparent">
+    <section className="mt-32 border-t dark:border-gray-800 pt-20 pb-32 bg-gradient-to-b from-gray-50/50 to-white dark:from-gray-900/10 dark:to-transparent font-pretendard">
       <div className="container mx-auto px-4 max-w-4xl">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
           <div className="flex items-center gap-4">
@@ -83,7 +87,7 @@ const Board: React.FC<BoardProps> = ({ pageId, lang }) => {
             </div>
             <div>
               <h2 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">
-                {lang === 'ko' ? '공지 및 소식' : 'Board & Updates'}
+                {boardTitle}
               </h2>
               <p className="text-gray-500 text-sm mt-1 font-medium">
                 {lang === 'ko' ? 'NKHB의 소중한 소식들을 전해드립니다.' : 'Official updates and news from NKHB.'}
@@ -120,7 +124,7 @@ const Board: React.FC<BoardProps> = ({ pageId, lang }) => {
               <textarea 
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                placeholder={lang === 'ko' ? '북한 주민들과 동역자들에게 전할 소식을 입력하세요...' : 'Write an announcement...'}
+                placeholder={lang === 'ko' ? '내용을 입력하세요...' : 'Write an announcement...'}
                 className="w-full px-6 py-5 bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-3xl outline-none focus:ring-2 focus:ring-blue-500 transition-all min-h-[150px] text-sm leading-relaxed"
                 required
               />

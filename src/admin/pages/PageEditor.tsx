@@ -10,7 +10,8 @@ import {
   Globe,
   X,
   Trash2,
-  Calendar
+  Calendar,
+  Type
 } from 'lucide-react';
 import GrapesEditor from '../components/GrapesEditor';
 
@@ -24,6 +25,8 @@ interface Page {
   layout_ko: any;
   layout_en: any;
   has_board: boolean;
+  board_title_ko: string;
+  board_title_en: string;
 }
 
 interface SEOData {
@@ -157,6 +160,8 @@ const PageEditor = () => {
 
       const pageUpdate: any = {
         has_board: page.has_board,
+        board_title_ko: page.board_title_ko,
+        board_title_en: page.board_title_en,
         updated_at: new Date().toISOString()
       };
 
@@ -204,7 +209,7 @@ const PageEditor = () => {
 
   if (loading) return (
     <div className="fixed inset-0 flex items-center justify-center bg-white dark:bg-gray-900 z-[2000]">
-      <div className="flex flex-col items-center gap-4 text-center">
+      <div className="flex flex-col items-center gap-4 text-center font-pretendard">
         <Loader2 className="w-12 h-12 text-blue-600 animate-spin" />
         <div>
           <p className="text-gray-900 dark:text-white font-bold text-lg">NKHB Visual Studio</p>
@@ -309,7 +314,7 @@ const PageEditor = () => {
               </button>
             </div>
             
-            <div className="p-6">
+            <div className="p-6 font-pretendard">
               {settingsTab === 'seo' ? (
                 <div className="space-y-6">
                   <div className="space-y-4">
@@ -376,40 +381,73 @@ const PageEditor = () => {
                   </div>
 
                   {page.has_board && (
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <h4 className="font-bold text-xs text-gray-500 uppercase tracking-widest">최근 게시글</h4>
-                        <button onClick={fetchPosts} className="text-[10px] font-bold text-blue-600 hover:underline">새로고침</button>
+                    <div className="space-y-6">
+                      {/* Board Title Customization */}
+                      <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-2xl border dark:border-gray-700 space-y-4">
+                        <div className="flex items-center gap-2 text-[10px] font-black text-blue-600 uppercase tracking-widest px-1">
+                          <Type className="w-3 h-3" /> 게시판 이름 설정
+                        </div>
+                        <div className="space-y-3">
+                            <div className="space-y-1">
+                                <label className="text-[9px] font-bold text-gray-400 ml-1">한국어 이름</label>
+                                <input 
+                                    type="text"
+                                    value={page.board_title_ko}
+                                    onChange={(e) => setPage({...page, board_title_ko: e.target.value})}
+                                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg text-xs outline-none focus:ring-1 focus:ring-blue-500"
+                                    placeholder="공지 및 소식"
+                                />
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-[9px] font-bold text-gray-400 ml-1">English Title</label>
+                                <input 
+                                    type="text"
+                                    value={page.board_title_en}
+                                    onChange={(e) => setPage({...page, board_title_en: e.target.value})}
+                                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg text-xs outline-none focus:ring-1 focus:ring-blue-500"
+                                    placeholder="Board & Updates"
+                                />
+                            </div>
+                        </div>
                       </div>
 
-                      {loadingPosts ? (
-                        <div className="py-10 text-center"><Loader2 className="w-5 h-5 animate-spin mx-auto text-gray-300" /></div>
-                      ) : posts.length === 0 ? (
-                        <div className="py-10 text-center bg-gray-50 dark:bg-gray-900 rounded-2xl border border-dashed border-gray-200 dark:border-gray-800">
-                          <p className="text-[11px] text-gray-400">등록된 게시글이 없습니다.</p>
+                      <div className="h-px bg-gray-100 dark:bg-gray-800 mx-2"></div>
+
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between px-1">
+                          <h4 className="font-bold text-xs text-gray-500 uppercase tracking-widest">최근 게시글</h4>
+                          <button onClick={fetchPosts} className="text-[10px] font-bold text-blue-600 hover:underline">새로고침</button>
                         </div>
-                      ) : (
-                        <div className="space-y-3">
-                          {posts.map(post => (
-                            <div key={post.id} className="p-4 bg-gray-50 dark:bg-gray-900 rounded-2xl border dark:border-gray-700 group relative">
-                              <div className="flex justify-between items-start mb-2">
-                                <span className="font-bold text-xs">{post.author_name}</span>
-                                <button 
-                                  onClick={() => deletePost(post.id)}
-                                  className="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
+
+                        {loadingPosts ? (
+                          <div className="py-10 text-center"><Loader2 className="w-5 h-5 animate-spin mx-auto text-gray-300" /></div>
+                        ) : posts.length === 0 ? (
+                          <div className="py-10 text-center bg-gray-50 dark:bg-gray-900 rounded-2xl border border-dashed border-gray-200 dark:border-gray-800">
+                            <p className="text-[11px] text-gray-400">등록된 게시글이 없습니다.</p>
+                          </div>
+                        ) : (
+                          <div className="space-y-3">
+                            {posts.map(post => (
+                              <div key={post.id} className="p-4 bg-gray-50 dark:bg-gray-900 rounded-2xl border dark:border-gray-700 group relative">
+                                <div className="flex justify-between items-start mb-2">
+                                  <span className="font-bold text-xs">{post.author_name}</span>
+                                  <button 
+                                    onClick={() => deletePost(post.id)}
+                                    className="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                                <p className="text-[11px] text-gray-500 line-clamp-3 leading-relaxed mb-2">{post.content}</p>
+                                <div className="flex items-center gap-1 text-[9px] text-gray-400">
+                                  <Calendar className="w-2.5 h-2.5" />
+                                  {new Date(post.created_at).toLocaleDateString()}
+                                </div>
                               </div>
-                              <p className="text-[11px] text-gray-500 line-clamp-3 leading-relaxed mb-2">{post.content}</p>
-                              <div className="flex items-center gap-1 text-[9px] text-gray-400">
-                                <Calendar className="w-2.5 h-2.5" />
-                                {new Date(post.created_at).toLocaleDateString()}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>

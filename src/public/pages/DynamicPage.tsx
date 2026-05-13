@@ -14,6 +14,8 @@ interface PageData {
   content_ko: string;
   content_en: string;
   has_board: boolean;
+  board_title_ko: string;
+  board_title_en: string;
 }
 
 const DynamicPage = () => {
@@ -61,7 +63,7 @@ const DynamicPage = () => {
   const isVisualDesign = content?.includes('<style>') || content?.includes('gjs-');
 
   return (
-    <div className="dynamic-page pt-20 pb-0 overflow-hidden">
+    <div className="dynamic-page pt-20 pb-0 overflow-hidden font-pretendard">
       <SEO slug={page.slug} />
       
       {!isVisualDesign && (
@@ -85,7 +87,12 @@ const DynamicPage = () => {
 
       {/* Bulletin Board Section */}
       {page.has_board && (
-        <Board pageId={page.id} lang={lang} />
+        <Board 
+          pageId={page.id} 
+          lang={lang} 
+          titleKo={page.board_title_ko} 
+          titleEn={page.board_title_en} 
+        />
       )}
     </div>
   );
