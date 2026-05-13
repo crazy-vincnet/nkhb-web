@@ -54,4 +54,5 @@ const Composition: React.FC<CompositionProps> = ({ onOpenSample }) => {
     );
 };
 
-export default Composition;
+// Performance: Export memoized component to skip re-renders when props haven't changed
+export default React.memo(Composition);

@@ -1,0 +1,3 @@
+## 2024-06-25 - Prevent Full Page Re-renders from Modal State in Home.tsx
+**Learning:** In the React application (`src/public`), managing modal states (e.g., `isArticleModalOpen`, `isSampleModalOpen`) at the page level (`Home.tsx`) can trigger unnecessary full-page re-renders. By default, passing inline arrow functions to child components breaks referential equality, forcing large static sections like Background, Composition, and Guide to re-render every time any modal state changes.
+**Action:** Always wrap event handler props in `useCallback` when passing them down from a page-level component that manages multiple local states, and apply `React.memo` to large static child components to skip unnecessary re-renders.

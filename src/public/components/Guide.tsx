@@ -86,4 +86,5 @@ const Guide: React.FC<GuideProps> = ({ onOpenLetter }) => {
     );
 };
 
-export default Guide;
+// Performance: Export memoized component to skip re-renders when props haven't changed
+export default React.memo(Guide);
