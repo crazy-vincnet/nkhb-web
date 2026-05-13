@@ -6,7 +6,8 @@ import {
   Calendar, 
   FileText, 
   LogOut,
-  Search
+  Search,
+  Menu as MenuIcon
 } from 'lucide-react';
 
 const Layout = () => {
@@ -22,6 +23,7 @@ const Layout = () => {
     { path: '/letters', icon: Mail, label: 'Letters' },
     { path: '/audio', icon: Music, label: 'Audio Tracks' },
     { path: '/schedule', icon: Calendar, label: 'Schedule' },
+    { path: '/menu', icon: MenuIcon, label: 'Menu' },
     { path: '/content', icon: FileText, label: 'Content' },
     { path: '/seo', icon: Search, label: 'SEO' },
   ];
