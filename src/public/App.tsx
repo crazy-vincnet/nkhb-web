@@ -10,7 +10,15 @@ import ScrollToTop from './components/ScrollToTop';
 import { useI18n } from './lib/i18n';
 
 const App: React.FC = () => {
-    const { lang } = useI18n();
+    const { lang, loading } = useI18n();
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-screen bg-white">
+                <div className="w-10 h-10 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin"></div>
+            </div>
+        );
+    }
 
     return (
         <HelmetProvider>

@@ -220,8 +220,8 @@ const staticTranslations = {
         alt_kenneth: "Missionary Kenneth Bae",
         alt_close: "Close",
         // Images (Fallbacks)
-        image_hero_bg: "/images/main-hero.png",
         image_logo: "https://cdn.imweb.me/thumbnail/20260424/16a5ea55af28a.png",
+        image_hero_bg: "/images/main-hero.png",
         image_background_section: "https://cdn.imweb.me/thumbnail/20260424/ae13dd489d8ac.png",
         image_reach_map: "https://cdn.imweb.me/thumbnail/20260424/ae13dd489d8ac.png",
         image_about_poster: "/images/poster.png",
@@ -416,7 +416,7 @@ const staticTranslations = {
         about_mission_li4: "4. 탈북난민 다음세대를 복음화하고 주님의 제자로 길러냅니다.",
         about_mission_li5: "5. 구호를 통해 북한 주민과 탈북난민에게 그리스도의 사랑을 나눕니다.",
         about_mission_li6: "6. 상처받은 북한주민과 탈북난민들의 영혼과 삶을 치유하고 회복시킵니다.",
-        about_ministry_title: "NKFI Ministry",
+        about_ministry_title: "NKFI 사역",
         about_ministry_card1_title: "동원 / Mobilization",
         about_ministry_card1_desc: "뉴코리아를 준비하는 사람들을 일으킵니다",
         about_ministry_card2_title: "훈련 / Training",
@@ -445,8 +445,8 @@ const staticTranslations = {
         alt_kenneth: "케네스 배 선교사",
         alt_close: "닫기",
         // Images (Fallbacks)
-        image_hero_bg: "/images/main-hero.png",
         image_logo: "https://cdn.imweb.me/thumbnail/20260424/16a5ea55af28a.png",
+        image_hero_bg: "/images/main-hero.png",
         image_background_section: "https://cdn.imweb.me/thumbnail/20260424/ae13dd489d8ac.png",
         image_reach_map: "https://cdn.imweb.me/thumbnail/20260424/ae13dd489d8ac.png",
         image_about_poster: "/images/poster.png",
@@ -513,9 +513,15 @@ export const I18nProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
 
     const t = (key: string): string => {
-        // DB value > Static value > Key
-        return dynamicTranslations[lang]?.[key] || 
-               (staticTranslations as any)[lang]?.[key] || 
+        const dynamicValue = dynamicTranslations[lang]?.[key];
+        
+        // Use dynamic value if it exists and is not just whitespace
+        if (dynamicValue && typeof dynamicValue === 'string' && dynamicValue.trim() !== '') {
+            return dynamicValue;
+        }
+
+        // Fallback to static translations
+        return (staticTranslations as any)[lang]?.[key] || 
                (staticTranslations as any)['ko']?.[key] || 
                key;
     };
