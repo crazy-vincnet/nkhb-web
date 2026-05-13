@@ -4,13 +4,16 @@ import { supabase } from '../lib/supabase';
 import { useI18n } from '../lib/i18n';
 import DOMPurify from 'dompurify';
 import SEO from '../components/SEO';
+import Board from '../components/Board';
 
 interface PageData {
+  id: string;
   slug: string;
   title_ko: string;
   title_en: string;
   content_ko: string;
   content_en: string;
+  has_board: boolean;
 }
 
 const DynamicPage = () => {
@@ -26,6 +29,7 @@ const DynamicPage = () => {
         .from('pages')
         .select('*')
         .eq('slug', slug)
+        .eq('is_published', true)
         .single();
 
       if (!error && data) {
@@ -54,14 +58,12 @@ const DynamicPage = () => {
   const title = lang === 'ko' ? page.title_ko : page.title_en;
   const content = lang === 'ko' ? page.content_ko : page.content_en;
 
-  // Check if it's GrapesJS content (usually contains <style> or specific structures)
   const isVisualDesign = content?.includes('<style>') || content?.includes('gjs-');
 
   return (
     <div className="dynamic-page pt-20 pb-0 overflow-hidden">
       <SEO slug={page.slug} />
       
-      {/* Standard Header only for non-visual designs */}
       {!isVisualDesign && (
         <div className="container mx-auto px-4 max-w-4xl pt-12 mb-12 text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
@@ -80,6 +82,11 @@ const DynamicPage = () => {
           }) 
         }}
       />
+
+      {/* Bulletin Board Section */}
+      {page.has_board && (
+        <Board pageId={page.id} lang={lang} />
+      )}
     </div>
   );
 };

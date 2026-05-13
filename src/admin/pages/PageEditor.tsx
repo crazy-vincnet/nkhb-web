@@ -9,7 +9,8 @@ import {
   Settings, 
   Globe,
   X,
-  Search
+  Trash2,
+  Calendar
 } from 'lucide-react';
 import GrapesEditor from '../components/GrapesEditor';
 
@@ -22,6 +23,7 @@ interface Page {
   content_en: string;
   layout_ko: any;
   layout_en: any;
+  has_board: boolean;
 }
 
 interface SEOData {
@@ -30,6 +32,14 @@ interface SEOData {
   description_ko: string;
   description_en: string;
   og_image_url: string;
+}
+
+interface Post {
+  id: string;
+  author_name: string;
+  content: string;
+  created_at: string;
+  is_approved: boolean;
 }
 
 const PageEditor = () => {
@@ -49,18 +59,27 @@ const PageEditor = () => {
   const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [activeLang, setActiveLang] = useState<'ko' | 'en'>('ko');
   const [showSettings, setShowSettings] = useState(false);
+  const [settingsTab, setSettingsTab] = useState<'seo' | 'board'>('seo');
   
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loadingPosts, setLoadingPosts] = useState(false);
+
   const editorRef = useRef<any>(null);
 
   useEffect(() => {
     fetchPageAndSEO();
   }, [id]);
 
+  useEffect(() => {
+    if (showSettings && settingsTab === 'board' && page) {
+      fetchPosts();
+    }
+  }, [showSettings, settingsTab, page]);
+
   const fetchPageAndSEO = async () => {
     if (!id) return;
     setLoading(true);
     
-    // 1. Fetch Page
     const { data: pageData, error: pageError } = await supabase
       .from('pages')
       .select('*')
@@ -74,7 +93,6 @@ const PageEditor = () => {
     
     setPage(pageData);
 
-    // 2. Fetch SEO (if exists)
     const { data: seoData } = await supabase
       .from('seo_settings')
       .select('*')
@@ -90,7 +108,6 @@ const PageEditor = () => {
         og_image_url: seoData.og_image_url || ''
       });
     } else {
-      // Default SEO based on page info
       setSeo(prev => ({
         ...prev,
         title_ko: pageData.title_ko,
@@ -99,6 +116,27 @@ const PageEditor = () => {
     }
     
     setLoading(false);
+  };
+
+  const fetchPosts = async () => {
+    if (!page) return;
+    setLoadingPosts(true);
+    const { data, error } = await supabase
+      .from('posts')
+      .select('*')
+      .eq('page_id', page.id)
+      .order('created_at', { ascending: false });
+
+    if (!error && data) {
+      setPosts(data);
+    }
+    setLoadingPosts(false);
+  };
+
+  const deletePost = async (postId: string) => {
+    if (!window.confirm('게시글을 삭제하시겠습니까?')) return;
+    const { error } = await supabase.from('posts').delete().eq('id', postId);
+    if (!error) setPosts(posts.filter(p => p.id !== postId));
   };
 
   const saveAll = async () => {
@@ -117,8 +155,8 @@ const PageEditor = () => {
         style: editor.getStyle() 
       };
 
-      // 1. Save Page Content
       const pageUpdate: any = {
+        has_board: page.has_board,
         updated_at: new Date().toISOString()
       };
 
@@ -137,7 +175,6 @@ const PageEditor = () => {
 
       if (pError) throw pError;
 
-      // 2. Save SEO Settings
       const { error: sError } = await supabase
         .from('seo_settings')
         .upsert({
@@ -148,7 +185,6 @@ const PageEditor = () => {
 
       if (sError) throw sError;
 
-      // Sync local state
       setPage({
         ...page,
         ...(activeLang === 'ko' 
@@ -172,7 +208,7 @@ const PageEditor = () => {
         <Loader2 className="w-12 h-12 text-blue-600 animate-spin" />
         <div>
           <p className="text-gray-900 dark:text-white font-bold text-lg">NKHB Visual Studio</p>
-          <p className="text-gray-500 text-sm">콘텐츠와 SEO 설정을 동기화하는 중입니다...</p>
+          <p className="text-gray-500 text-sm">콘텐츠와 설정을 동기화하는 중입니다...</p>
         </div>
       </div>
     </div>
@@ -182,7 +218,7 @@ const PageEditor = () => {
 
   return (
     <div className="fixed inset-0 flex flex-col bg-white dark:bg-gray-900 z-[1500] font-pretendard">
-      {/* Enhanced Header */}
+      {/* Header */}
       <header className="h-16 border-b dark:border-gray-800 flex items-center justify-between px-6 bg-white dark:bg-gray-800 shrink-0 shadow-sm z-50">
         <div className="flex items-center gap-4">
           <button 
@@ -225,7 +261,6 @@ const PageEditor = () => {
           <button
             onClick={() => setShowSettings(!showSettings)}
             className={`p-2.5 rounded-xl transition-colors ${showSettings ? 'bg-blue-50 text-blue-600' : 'text-gray-500 hover:bg-gray-100'}`}
-            title="SEO 및 페이지 설정"
           >
             <Settings className="w-5 h-5" />
           </button>
@@ -244,7 +279,6 @@ const PageEditor = () => {
       </header>
 
       <div className="flex-1 flex overflow-hidden relative">
-        {/* Main Editor */}
         <main className="flex-1 relative overflow-hidden bg-white">
           <GrapesEditor 
             key={`${id}-${activeLang}`}
@@ -255,85 +289,131 @@ const PageEditor = () => {
           />
         </main>
 
-        {/* Integrated SEO Sidebar */}
         {showSettings && (
-          <aside className="w-80 border-l dark:border-gray-800 bg-white dark:bg-gray-800 overflow-y-auto animate-in slide-in-from-right duration-300 shadow-2xl z-40">
-            <div className="p-5 border-b dark:border-gray-700 flex justify-between items-center sticky top-0 bg-white dark:bg-gray-800 z-10">
-              <h3 className="font-bold text-sm flex items-center gap-2">
-                <Search className="w-4 h-4 text-blue-600" />
-                SEO 및 검색 최적화
-              </h3>
-              <button onClick={() => setShowSettings(false)} className="p-1 hover:bg-gray-100 rounded-lg">
+          <aside className="w-96 border-l dark:border-gray-800 bg-white dark:bg-gray-800 overflow-y-auto animate-in slide-in-from-right duration-300 shadow-2xl z-40">
+            <div className="p-2 border-b dark:border-gray-700 flex bg-gray-50 dark:bg-gray-900 sticky top-0 z-10">
+              <button 
+                onClick={() => setSettingsTab('seo')}
+                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${settingsTab === 'seo' ? 'bg-white dark:bg-gray-700 text-blue-600 shadow-sm' : 'text-gray-400'}`}
+              >
+                SEO 설정
+              </button>
+              <button 
+                onClick={() => setSettingsTab('board')}
+                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${settingsTab === 'board' ? 'bg-white dark:bg-gray-700 text-blue-600 shadow-sm' : 'text-gray-400'}`}
+              >
+                게시판 관리
+              </button>
+              <button onClick={() => setShowSettings(false)} className="p-2 ml-1 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-lg">
                 <X className="w-4 h-4 text-gray-400" />
               </button>
             </div>
             
-            <div className="p-6 space-y-6">
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 text-[10px] font-black text-blue-600 uppercase tracking-widest bg-blue-50 px-2 py-1 rounded w-fit">
-                  <Globe className="w-3 h-3" /> {activeLang === 'ko' ? '한국어 설정' : 'English Settings'}
-                </div>
+            <div className="p-6">
+              {settingsTab === 'seo' ? (
+                <div className="space-y-6">
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2 text-[10px] font-black text-blue-600 uppercase tracking-widest bg-blue-50 px-2 py-1 rounded w-fit">
+                      <Globe className="w-3 h-3" /> {activeLang === 'ko' ? '한국어 설정' : 'English Settings'}
+                    </div>
 
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-gray-500">페이지 제목 (Title)</label>
-                  <input 
-                    type="text"
-                    value={activeLang === 'ko' ? seo.title_ko : seo.title_en}
-                    onChange={(e) => setSeo(prev => activeLang === 'ko' 
-                      ? { ...prev, title_ko: e.target.value } 
-                      : { ...prev, title_en: e.target.value }
-                    )}
-                    className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-lg text-sm outline-none focus:ring-1 focus:ring-blue-500"
-                    placeholder="검색 결과 제목"
-                  />
-                </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-gray-500">페이지 제목 (Title)</label>
+                      <input 
+                        type="text"
+                        value={activeLang === 'ko' ? seo.title_ko : seo.title_en}
+                        onChange={(e) => setSeo(prev => activeLang === 'ko' 
+                          ? { ...prev, title_ko: e.target.value } 
+                          : { ...prev, title_en: e.target.value }
+                        )}
+                        className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-lg text-sm outline-none focus:ring-1 focus:ring-blue-500"
+                      />
+                    </div>
 
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-gray-500">메타 설명 (Description)</label>
-                  <textarea 
-                    value={activeLang === 'ko' ? seo.description_ko : seo.description_en}
-                    onChange={(e) => setSeo(prev => activeLang === 'ko' 
-                      ? { ...prev, description_ko: e.target.value } 
-                      : { ...prev, description_en: e.target.value }
-                    )}
-                    className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-lg text-sm outline-none focus:ring-1 focus:ring-blue-500 min-h-[120px] resize-none"
-                    placeholder="검색 결과 요약 문구"
-                  />
-                </div>
-              </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-gray-500">메타 설명 (Description)</label>
+                      <textarea 
+                        value={activeLang === 'ko' ? seo.description_ko : seo.description_en}
+                        onChange={(e) => setSeo(prev => activeLang === 'ko' 
+                          ? { ...prev, description_ko: e.target.value } 
+                          : { ...prev, description_en: e.target.value }
+                        )}
+                        className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-lg text-sm outline-none focus:ring-1 focus:ring-blue-500 min-h-[120px] resize-none"
+                      />
+                    </div>
+                  </div>
 
-              <div className="pt-6 border-t dark:border-gray-700 space-y-4">
-                <label className="text-xs font-bold text-gray-500">소셜 공유 이미지 (OG Image)</label>
-                <div className="aspect-[1.91/1] bg-gray-100 dark:bg-gray-900 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 flex items-center justify-center">
-                  {seo.og_image_url ? (
-                    <img src={seo.og_image_url} className="w-full h-full object-cover" alt="SEO Preview" />
-                  ) : (
-                    <p className="text-[10px] text-gray-400">이미지 없음</p>
+                  <div className="pt-6 border-t dark:border-gray-700 space-y-4">
+                    <label className="text-xs font-bold text-gray-500">소셜 공유 이미지 (OG Image)</label>
+                    <div className="aspect-[1.91/1] bg-gray-100 dark:bg-gray-900 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 flex items-center justify-center">
+                      {seo.og_image_url ? (
+                        <img src={seo.og_image_url} className="w-full h-full object-cover" alt="SEO Preview" />
+                      ) : (
+                        <p className="text-[10px] text-gray-400">이미지 없음</p>
+                      )}
+                    </div>
+                    <input 
+                      type="text"
+                      value={seo.og_image_url}
+                      onChange={(e) => setSeo(prev => ({ ...prev, og_image_url: e.target.value }))}
+                      className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-lg text-[11px] font-mono outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-900/20 rounded-2xl border border-blue-100 dark:border-blue-800">
+                    <div>
+                      <h4 className="font-bold text-sm text-blue-700 dark:text-blue-400">게시판 활성화</h4>
+                      <p className="text-[10px] text-blue-500 mt-0.5">페이지 하단에 소통 창구를 만듭니다.</p>
+                    </div>
+                    <button 
+                      onClick={() => setPage({...page, has_board: !page.has_board})}
+                      className={`w-12 h-6 rounded-full transition-colors relative ${page.has_board ? 'bg-blue-600' : 'bg-gray-300'}`}
+                    >
+                      <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${page.has_board ? 'left-7' : 'left-1'}`}></div>
+                    </button>
+                  </div>
+
+                  {page.has_board && (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-bold text-xs text-gray-500 uppercase tracking-widest">최근 게시글</h4>
+                        <button onClick={fetchPosts} className="text-[10px] font-bold text-blue-600 hover:underline">새로고침</button>
+                      </div>
+
+                      {loadingPosts ? (
+                        <div className="py-10 text-center"><Loader2 className="w-5 h-5 animate-spin mx-auto text-gray-300" /></div>
+                      ) : posts.length === 0 ? (
+                        <div className="py-10 text-center bg-gray-50 dark:bg-gray-900 rounded-2xl border border-dashed border-gray-200 dark:border-gray-800">
+                          <p className="text-[11px] text-gray-400">등록된 게시글이 없습니다.</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          {posts.map(post => (
+                            <div key={post.id} className="p-4 bg-gray-50 dark:bg-gray-900 rounded-2xl border dark:border-gray-700 group relative">
+                              <div className="flex justify-between items-start mb-2">
+                                <span className="font-bold text-xs">{post.author_name}</span>
+                                <button 
+                                  onClick={() => deletePost(post.id)}
+                                  className="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                              <p className="text-[11px] text-gray-500 line-clamp-3 leading-relaxed mb-2">{post.content}</p>
+                              <div className="flex items-center gap-1 text-[9px] text-gray-400">
+                                <Calendar className="w-2.5 h-2.5" />
+                                {new Date(post.created_at).toLocaleDateString()}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   )}
                 </div>
-                <input 
-                  type="text"
-                  value={seo.og_image_url}
-                  onChange={(e) => setSeo(prev => ({ ...prev, og_image_url: e.target.value }))}
-                  className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-lg text-[11px] font-mono outline-none focus:ring-1 focus:ring-blue-500"
-                  placeholder="https://image-url.com"
-                />
-                <p className="text-[10px] text-gray-400 leading-relaxed italic">
-                  * 팁: 이미지 편집기에서 업로드한 뒤 URL을 복사하여 여기에 붙여넣으세요.
-                </p>
-              </div>
-
-              <div className="pt-6 border-t dark:border-gray-700">
-                <p className="text-[11px] text-gray-400 mb-4">
-                  상단의 '페이지 저장' 버튼을 누르면 SEO 설정도 함께 저장됩니다.
-                </p>
-                <button 
-                  onClick={() => setShowSettings(false)}
-                  className="w-full py-2 bg-gray-100 dark:bg-gray-700 rounded-lg text-xs font-bold text-gray-600 dark:text-gray-300"
-                >
-                  설정 닫기
-                </button>
-              </div>
+              )}
             </div>
           </aside>
         )}
