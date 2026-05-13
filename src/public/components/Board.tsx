@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { ShieldCheck, X, Calendar } from 'lucide-react';
+import { ShieldCheck, X, Calendar, User } from 'lucide-react';
 import DOMPurify from 'dompurify';
 
 interface Post {
   id: string;
+  title: string | null;
   author_name: string;
   content: string;
   created_at: string;
@@ -30,7 +31,7 @@ const Board: React.FC<BoardProps> = ({ pageId, lang, titleKo, titleEn }) => {
     setLoading(true);
     const { data, error } = await supabase
       .from('nkhb_posts')
-      .select('id, author_name, content, created_at')
+      .select('id, title, author_name, content, created_at')
       .eq('page_id', pageId)
       .eq('is_approved', true)
       .order('created_at', { ascending: false });
@@ -56,7 +57,7 @@ const Board: React.FC<BoardProps> = ({ pageId, lang, titleKo, titleEn }) => {
                 : 'Official news and updates from New Korea Hope Broadcasting.'}
             </p>
           </div>
-          <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg text-xs font-bold border border-blue-100">
+          <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-gray-50 text-blue-600 rounded-lg text-xs font-bold border border-gray-100">
             <ShieldCheck size={14} />
             {lang === 'ko' ? '공식 채널' : 'Official Channel'}
           </div>
@@ -66,7 +67,7 @@ const Board: React.FC<BoardProps> = ({ pageId, lang, titleKo, titleEn }) => {
         <div className="board-table-container">
           <div className="board-table-header">
             <div>NO.</div>
-            <div>{lang === 'ko' ? '제목 / 내용' : 'TITLE / CONTENT'}</div>
+            <div>{lang === 'ko' ? '제목' : 'TITLE'}</div>
             <div>{lang === 'ko' ? '작성자' : 'AUTHOR'}</div>
             <div>{lang === 'ko' ? '날짜' : 'DATE'}</div>
           </div>
@@ -91,7 +92,7 @@ const Board: React.FC<BoardProps> = ({ pageId, lang, titleKo, titleEn }) => {
                   <div className="col-num">{posts.length - index}</div>
                   <div className="col-content-wrap">
                     <span className="col-title">
-                      {post.content.replace(/<[^>]*>/g, '').substring(0, 80)}...
+                        {post.title || (post.content.replace(/<[^>]*>/g, '').substring(0, 50) + '...')}
                     </span>
                   </div>
                   <div className="col-author">
@@ -117,28 +118,42 @@ const Board: React.FC<BoardProps> = ({ pageId, lang, titleKo, titleEn }) => {
         <div className="post-modal-overlay" onClick={() => setSelectedPost(null)}>
           <div className="post-modal-content" onClick={e => e.stopPropagation()}>
             <div className="post-modal-header">
-              <div className="post-modal-meta">
-                <div className="post-modal-author">
-                    <ShieldCheck className="text-blue-600" size={24} />
-                    {selectedPost.author_name}
-                    <span className="admin-badge">OFFICIAL</span>
+              <div className="post-modal-meta w-full">
+                <div className="flex justify-between items-start w-full">
+                    <div className="space-y-1">
+                        <div className="flex items-center gap-2 text-blue-600 mb-2">
+                             <ShieldCheck size={20} />
+                             <span className="text-[10px] font-black uppercase tracking-[0.2em]">Official Announcement</span>
+                        </div>
+                        <h3 className="text-2xl md:text-3xl font-black text-gray-900 leading-tight">
+                            {selectedPost.title || '소식 안내'}
+                        </h3>
+                    </div>
+                    <button className="post-modal-close" onClick={() => setSelectedPost(null)}>
+                        <X size={24} />
+                    </button>
                 </div>
-                <div className="post-modal-date flex items-center gap-1.5">
-                    <Calendar size={14} />
-                    {new Date(selectedPost.created_at).toLocaleDateString(lang === 'ko' ? 'ko-KR' : 'en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    })}
+                
+                <div className="flex items-center gap-4 mt-6 pt-6 border-t border-gray-100">
+                    <div className="flex items-center gap-2 text-sm text-gray-600 font-bold">
+                        <div className="w-8 h-8 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center">
+                            <User size={14} />
+                        </div>
+                        {selectedPost.author_name}
+                    </div>
+                    <div className="w-1 h-1 bg-gray-300 rounded-full"></div>
+                    <div className="flex items-center gap-2 text-sm text-gray-400 font-medium">
+                        <Calendar size={14} />
+                        {new Date(selectedPost.created_at).toLocaleDateString(lang === 'ko' ? 'ko-KR' : 'en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                        })}
+                    </div>
                 </div>
               </div>
-              <button className="post-modal-close" onClick={() => setSelectedPost(null)}>
-                <X size={24} />
-              </button>
             </div>
-            <div className="post-modal-body">
+            <div className="post-modal-body bg-gray-50/30">
               <div 
                 className="prose prose-lg dark:prose-invert max-w-none text-gray-800 leading-relaxed font-medium prose-img:rounded-3xl prose-a:text-blue-600"
                 dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(selectedPost.content) }}

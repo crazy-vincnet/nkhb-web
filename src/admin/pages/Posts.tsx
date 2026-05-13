@@ -9,11 +9,13 @@ import {
   Calendar, 
   ChevronRight,
   Edit3,
-  User
+  User,
+  Type
 } from 'lucide-react';
 
 interface Post {
   id: string;
+  title: string | null;
   author_name: string;
   content: string;
   created_at: string;
@@ -53,6 +55,7 @@ const Posts = () => {
   };
 
   const filteredPosts = posts.filter(p => 
+    (p.title?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
     (p.author_name?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
     (p.content?.toLowerCase() || '').includes(searchQuery.toLowerCase())
   );
@@ -79,7 +82,7 @@ const Posts = () => {
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
         <input 
           type="text"
-          placeholder="게시글 내용 또는 작성자 검색..."
+          placeholder="제목, 내용 또는 작성자 검색..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500"
@@ -104,20 +107,26 @@ const Posts = () => {
             >
               <div className="flex items-center gap-4 min-w-0 flex-1">
                 <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center text-blue-600 shrink-0">
-                  <User className="w-6 h-6" />
+                  <Type className="w-6 h-6" />
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="font-bold text-gray-900 dark:text-white">{post.author_name}</span>
-                    <span className="text-[10px] text-gray-400 flex items-center gap-1 font-mono">
+                    <span className="font-bold text-gray-900 dark:text-white truncate">
+                        {post.title || '제목 없음'}
+                    </span>
+                    <span className="text-[10px] text-gray-400 flex items-center gap-1 font-mono shrink-0">
                       <Calendar className="w-3 h-3" />
                       {new Date(post.created_at).toLocaleDateString()}
                     </span>
                   </div>
-                  <div 
-                    className="text-sm text-gray-500 line-clamp-1 prose prose-sm max-w-none"
-                    dangerouslySetInnerHTML={{ __html: post.content.substring(0, 150) }}
-                  />
+                  <div className="flex items-center gap-2 text-xs text-gray-500">
+                      <span className="flex items-center gap-1"><User size={10} /> {post.author_name}</span>
+                      <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+                      <div 
+                        className="line-clamp-1 opacity-70"
+                        dangerouslySetInnerHTML={{ __html: post.content.replace(/<[^>]*>/g, '').substring(0, 100) }}
+                      />
+                  </div>
                 </div>
               </div>
               
