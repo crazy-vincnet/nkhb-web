@@ -475,11 +475,13 @@ const PageEditor = () => {
                       </div>
 
                       {/* Post List */}
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between px-1">
-                          <h4 className="font-bold text-xs text-gray-500 uppercase tracking-widest">등록된 소식 ({posts.length})</h4>
-                          <button onClick={fetchPosts} className="text-[10px] font-bold text-blue-600 hover:underline">새로고침</button>
+                      <div className="flex items-center justify-between px-1">
+                        <h4 className="font-bold text-xs text-gray-500 uppercase tracking-widest">등록된 소식 ({posts.length})</h4>
+                        <div className="flex gap-3">
+                            <button onClick={() => navigate('/posts')} className="text-[10px] font-bold text-blue-600 hover:underline">모든 글 관리</button>
+                            <button onClick={fetchPosts} className="text-[10px] font-bold text-blue-600 hover:underline">새로고침</button>
                         </div>
+                      </div>
 
                         {loadingPosts ? (
                           <div className="py-10 text-center"><Loader2 className="w-5 h-5 animate-spin mx-auto text-gray-300" /></div>

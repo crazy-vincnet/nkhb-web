@@ -11,6 +11,8 @@ import SEO from './pages/SEO';
 import Menu from './pages/Menu';
 import Pages from './pages/Pages';
 import PageEditor from './pages/PageEditor';
+import Posts from './pages/Posts';
+import PostEditor from './pages/PostEditor';
 
 function App() {
   const [session, setSession] = useState<any>(null);
@@ -40,7 +42,7 @@ function App() {
       <Routes>
         <Route path="/login" element={!session ? <Login /> : <Navigate to="/" />} />
         
-        {/* Full-screen Editor Route (No Layout) */}
+        {/* Full-screen Editor Route */}
         <Route 
           path="/editor/:id" 
           element={session ? <PageEditor /> : <Navigate to="/login" />} 
@@ -54,10 +56,13 @@ function App() {
           <Route path="letters" element={<Letters />} />
           <Route path="audio" element={<Audio />} />
           <Route path="schedule" element={<Schedule />} />
-          <Route path="content" element={<Content />} />
-          <Route path="seo" element={<SEO />} />
           <Route path="menu" element={<Menu />} />
           <Route path="pages" element={<Pages />} />
+          <Route path="posts" element={<Posts />} />
+          <Route path="posts/new" element={<PostEditor />} />
+          <Route path="posts/edit/:id" element={<PostEditor />} />
+          <Route path="content" element={<Content />} />
+          <Route path="seo" element={<SEO />} />
         </Route>
       </Routes>
     </Router>

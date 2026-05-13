@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { MessageSquare, ShieldCheck, ArrowRight } from 'lucide-react';
+import DOMPurify from 'dompurify';
 
 interface Post {
   id: string;
@@ -61,7 +62,7 @@ const Board: React.FC<BoardProps> = ({ pageId, lang, titleKo, titleEn }) => {
           </p>
         </div>
 
-        {/* Post List - Modern Timeline Layout */}
+        {/* Post List */}
         <div className="relative space-y-12">
           {loading ? (
             <div className="py-20 text-center">
@@ -95,18 +96,17 @@ const Board: React.FC<BoardProps> = ({ pageId, lang, titleKo, titleEn }) => {
                     </div>
 
                     {/* Content Column */}
-                    <div className="flex-1 space-y-6">
+                    <div className="flex-1 space-y-6 overflow-hidden">
                       <div className="flex items-center gap-3">
                         <h4 className="font-bold text-blue-600 dark:text-blue-400 text-sm uppercase tracking-wider">{post.author_name}</h4>
                         <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
                         <span className="text-[11px] font-bold text-gray-400 uppercase">Announcement</span>
                       </div>
                       
-                      <div className="relative">
-                        <p className="text-gray-800 dark:text-gray-200 text-lg md:text-xl leading-relaxed whitespace-pre-wrap font-medium">
-                          {post.content}
-                        </p>
-                      </div>
+                      <div 
+                        className="prose prose-lg dark:prose-invert max-w-none text-gray-800 dark:text-gray-200 leading-relaxed font-medium prose-img:rounded-3xl prose-a:text-blue-600"
+                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }}
+                      />
 
                       <div className="pt-4 flex items-center gap-2 text-blue-600 font-bold text-xs opacity-0 group-hover:opacity-100 transition-opacity translate-x-[-10px] group-hover:translate-x-0 duration-500">
                          NKHB Official Message <ArrowRight className="w-3 h-3" />
