@@ -63,7 +63,7 @@ const DynamicPage = () => {
   const isVisualDesign = content?.includes('<style>') || content?.includes('gjs-');
 
   return (
-    <div className="dynamic-page pt-20 pb-0 font-pretendard">
+    <main className="dynamic-page font-pretendard">
       <SEO slug={page.slug} />
       
       {!isVisualDesign && (
@@ -94,7 +94,7 @@ const DynamicPage = () => {
           titleEn={page.board_title_en} 
         />
       )}
-    </div>
+    </main>
   );
 };
 
