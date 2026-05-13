@@ -11,7 +11,11 @@ import {
   X,
   Trash2,
   Calendar,
-  Type
+  Type,
+  Send,
+  User,
+  Plus,
+  MessageSquare
 } from 'lucide-react';
 import GrapesEditor from '../components/GrapesEditor';
 
@@ -66,6 +70,9 @@ const PageEditor = () => {
   
   const [posts, setPosts] = useState<Post[]>([]);
   const [loadingPosts, setLoadingPosts] = useState(false);
+  const [newPostName, setNewPostName] = useState('NKHB 관리자');
+  const [newPostContent, setNewPostContent] = useState('');
+  const [submittingPost, setSubmittingPost] = useState(false);
 
   const editorRef = useRef<any>(null);
 
@@ -134,6 +141,31 @@ const PageEditor = () => {
       setPosts(data);
     }
     setLoadingPosts(false);
+  };
+
+  const handleCreatePost = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!page || !newPostContent.trim()) return;
+
+    setSubmittingPost(true);
+    const { error } = await supabase
+      .from('posts')
+      .insert([
+        {
+          page_id: page.id,
+          author_name: newPostName,
+          content: newPostContent,
+          is_approved: true
+        }
+      ]);
+
+    if (!error) {
+      setNewPostContent('');
+      fetchPosts();
+    } else {
+      alert('게시글 등록 실패: ' + error.message);
+    }
+    setSubmittingPost(false);
   };
 
   const deletePost = async (postId: string) => {
@@ -295,7 +327,7 @@ const PageEditor = () => {
         </main>
 
         {showSettings && (
-          <aside className="w-96 border-l dark:border-gray-800 bg-white dark:bg-gray-800 overflow-y-auto animate-in slide-in-from-right duration-300 shadow-2xl z-40">
+          <aside className="w-[450px] border-l dark:border-gray-800 bg-white dark:bg-gray-800 overflow-y-auto animate-in slide-in-from-right duration-300 shadow-2xl z-40">
             <div className="p-2 border-b dark:border-gray-700 flex bg-gray-50 dark:bg-gray-900 sticky top-0 z-10">
               <button 
                 onClick={() => setSettingsTab('seo')}
@@ -366,79 +398,108 @@ const PageEditor = () => {
                   </div>
                 </div>
               ) : (
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-900/20 rounded-2xl border border-blue-100 dark:border-blue-800">
-                    <div>
-                      <h4 className="font-bold text-sm text-blue-700 dark:text-blue-400">게시판 활성화</h4>
-                      <p className="text-[10px] text-blue-500 mt-0.5">페이지 하단에 소통 창구를 만듭니다.</p>
+                <div className="space-y-8">
+                  {/* Board Config */}
+                  <div className="flex items-center justify-between p-5 bg-blue-600 rounded-[2rem] text-white shadow-xl shadow-blue-100 dark:shadow-none relative overflow-hidden">
+                    <div className="relative z-10">
+                      <h4 className="font-bold text-sm">게시판 활성화</h4>
+                      <p className="text-[10px] opacity-80 mt-0.5">페이지 하단 소식창 노출</p>
                     </div>
                     <button 
                       onClick={() => setPage({...page, has_board: !page.has_board})}
-                      className={`w-12 h-6 rounded-full transition-colors relative ${page.has_board ? 'bg-blue-600' : 'bg-gray-300'}`}
+                      className={`w-12 h-6 rounded-full transition-colors relative z-10 border-2 ${page.has_board ? 'bg-white border-white' : 'bg-transparent border-white/30'}`}
                     >
-                      <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${page.has_board ? 'left-7' : 'left-1'}`}></div>
+                      <div className={`absolute top-0.5 w-4 h-4 rounded-full transition-all ${page.has_board ? 'left-6 bg-blue-600' : 'left-0.5 bg-white/50'}`}></div>
                     </button>
+                    <MessageSquare className="absolute -right-4 -bottom-4 w-20 h-20 text-white/10" />
                   </div>
 
                   {page.has_board && (
-                    <div className="space-y-6">
-                      {/* Board Title Customization */}
-                      <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-2xl border dark:border-gray-700 space-y-4">
+                    <div className="space-y-8">
+                      {/* Create Post Form */}
+                      <div className="p-6 bg-gray-50 dark:bg-gray-900 rounded-[2rem] border border-gray-100 dark:border-gray-700 space-y-4">
+                        <div className="flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">
+                          <Plus className="w-3 h-3" /> 새 소식 작성 (Admin Only)
+                        </div>
+                        <form onSubmit={handleCreatePost} className="space-y-3">
+                            <div className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-xl">
+                                <User className="w-3.5 h-3.5 text-gray-400" />
+                                <input 
+                                    type="text"
+                                    value={newPostName}
+                                    onChange={(e) => setNewPostName(e.target.value)}
+                                    className="w-full bg-transparent border-none outline-none text-xs font-bold"
+                                    placeholder="작성자"
+                                    required
+                                />
+                            </div>
+                            <textarea 
+                                value={newPostContent}
+                                onChange={(e) => setNewPostContent(e.target.value)}
+                                className="w-full px-4 py-3 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-2xl text-xs outline-none focus:ring-1 focus:ring-blue-500 min-h-[100px] resize-none"
+                                placeholder="소식 내용을 입력하세요..."
+                                required
+                            />
+                            <button 
+                                type="submit"
+                                disabled={submittingPost}
+                                className="w-full flex items-center justify-center gap-2 py-3 bg-gray-900 text-white rounded-xl text-xs font-bold hover:bg-black transition-all disabled:opacity-50"
+                            >
+                                {submittingPost ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+                                소식 올리기
+                            </button>
+                        </form>
+                      </div>
+
+                      {/* Board Title Settings */}
+                      <div className="p-5 bg-white dark:bg-gray-800 rounded-2xl border dark:border-gray-700 space-y-4 shadow-sm">
                         <div className="flex items-center gap-2 text-[10px] font-black text-blue-600 uppercase tracking-widest px-1">
-                          <Type className="w-3 h-3" /> 게시판 이름 설정
+                          <Type className="w-3 h-3" /> 게시판 타이틀 설정
                         </div>
                         <div className="space-y-3">
-                            <div className="space-y-1">
-                                <label className="text-[9px] font-bold text-gray-400 ml-1">한국어 이름</label>
-                                <input 
-                                    type="text"
-                                    value={page.board_title_ko}
-                                    onChange={(e) => setPage({...page, board_title_ko: e.target.value})}
-                                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg text-xs outline-none focus:ring-1 focus:ring-blue-500"
-                                    placeholder="공지 및 소식"
-                                />
-                            </div>
-                            <div className="space-y-1">
-                                <label className="text-[9px] font-bold text-gray-400 ml-1">English Title</label>
-                                <input 
-                                    type="text"
-                                    value={page.board_title_en}
-                                    onChange={(e) => setPage({...page, board_title_en: e.target.value})}
-                                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg text-xs outline-none focus:ring-1 focus:ring-blue-500"
-                                    placeholder="Board & Updates"
-                                />
-                            </div>
+                            <input 
+                                type="text"
+                                value={page.board_title_ko}
+                                onChange={(e) => setPage({...page, board_title_ko: e.target.value})}
+                                className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-lg text-xs outline-none focus:ring-1 focus:ring-blue-500"
+                                placeholder="한국어 제목"
+                            />
+                            <input 
+                                type="text"
+                                value={page.board_title_en}
+                                onChange={(e) => setPage({...page, board_title_en: e.target.value})}
+                                className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-lg text-xs outline-none focus:ring-1 focus:ring-blue-500"
+                                placeholder="English Title"
+                            />
                         </div>
                       </div>
 
-                      <div className="h-px bg-gray-100 dark:bg-gray-800 mx-2"></div>
-
+                      {/* Post List */}
                       <div className="space-y-4">
                         <div className="flex items-center justify-between px-1">
-                          <h4 className="font-bold text-xs text-gray-500 uppercase tracking-widest">최근 게시글</h4>
+                          <h4 className="font-bold text-xs text-gray-500 uppercase tracking-widest">등록된 소식 ({posts.length})</h4>
                           <button onClick={fetchPosts} className="text-[10px] font-bold text-blue-600 hover:underline">새로고침</button>
                         </div>
 
                         {loadingPosts ? (
                           <div className="py-10 text-center"><Loader2 className="w-5 h-5 animate-spin mx-auto text-gray-300" /></div>
-                        ) : posts.length === 0 ? (
-                          <div className="py-10 text-center bg-gray-50 dark:bg-gray-900 rounded-2xl border border-dashed border-gray-200 dark:border-gray-800">
-                            <p className="text-[11px] text-gray-400">등록된 게시글이 없습니다.</p>
-                          </div>
                         ) : (
                           <div className="space-y-3">
                             {posts.map(post => (
-                              <div key={post.id} className="p-4 bg-gray-50 dark:bg-gray-900 rounded-2xl border dark:border-gray-700 group relative">
+                              <div key={post.id} className="p-4 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 group relative shadow-sm">
                                 <div className="flex justify-between items-start mb-2">
-                                  <span className="font-bold text-xs">{post.author_name}</span>
+                                  <div className="flex items-center gap-2">
+                                      <span className="font-bold text-xs">{post.author_name}</span>
+                                      <span className="text-[8px] bg-blue-50 text-blue-600 px-1 rounded font-black">ADMIN</span>
+                                  </div>
                                   <button 
                                     onClick={() => deletePost(post.id)}
-                                    className="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    className="text-gray-300 hover:text-red-500 transition-colors"
                                   >
                                     <Trash2 className="w-3.5 h-3.5" />
                                   </button>
                                 </div>
-                                <p className="text-[11px] text-gray-500 line-clamp-3 leading-relaxed mb-2">{post.content}</p>
+                                <p className="text-[11px] text-gray-600 dark:text-gray-400 line-clamp-2 leading-relaxed mb-2">{post.content}</p>
                                 <div className="flex items-center gap-1 text-[9px] text-gray-400">
                                   <Calendar className="w-2.5 h-2.5" />
                                   {new Date(post.created_at).toLocaleDateString()}
