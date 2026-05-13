@@ -34,7 +34,7 @@ const Posts = () => {
   const fetchPosts = async () => {
     setLoading(true);
     const { data, error } = await supabase
-      .from('posts')
+      .from('nkhb_posts')
       .select('*')
       .order('created_at', { ascending: false });
 
@@ -46,7 +46,7 @@ const Posts = () => {
 
   const deletePost = async (id: string) => {
     if (!window.confirm('게시글을 삭제하시겠습니까?')) return;
-    const { error } = await supabase.from('posts').delete().eq('id', id);
+    const { error } = await supabase.from('nkhb_posts').delete().eq('id', id);
     if (!error) {
       setPosts(posts.filter(p => p.id !== id));
     }

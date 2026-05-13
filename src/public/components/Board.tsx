@@ -28,7 +28,7 @@ const Board: React.FC<BoardProps> = ({ pageId, lang, titleKo, titleEn }) => {
   const fetchPosts = async () => {
     setLoading(true);
     const { data, error } = await supabase
-      .from('posts')
+      .from('nkhb_posts')
       .select('id, author_name, content, created_at')
       .eq('page_id', pageId)
       .eq('is_approved', true)
@@ -96,7 +96,7 @@ const Board: React.FC<BoardProps> = ({ pageId, lang, titleKo, titleEn }) => {
                     </div>
 
                     {/* Content Column */}
-                    <div className="flex-1 space-y-6 overflow-hidden">
+                    <div className="flex-1 space-y-6 overflow-hidden text-left">
                       <div className="flex items-center gap-3">
                         <h4 className="font-bold text-blue-600 dark:text-blue-400 text-sm uppercase tracking-wider">{post.author_name}</h4>
                         <span className="w-1 h-1 bg-gray-300 rounded-full"></span>

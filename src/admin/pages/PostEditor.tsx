@@ -46,7 +46,7 @@ const PostEditor = () => {
 
   const fetchPost = async () => {
     const { data, error } = await supabase
-      .from('posts')
+      .from('nkhb_posts')
       .select('*')
       .eq('id', id)
       .single();
@@ -82,10 +82,10 @@ const PostEditor = () => {
     try {
       let error;
       if (isNew) {
-        const { error: insertError } = await supabase.from('posts').insert([payload]);
+        const { error: insertError } = await supabase.from('nkhb_posts').insert([payload]);
         error = insertError;
       } else {
-        const { error: updateError } = await supabase.from('posts').update(payload).eq('id', id);
+        const { error: updateError } = await supabase.from('nkhb_posts').update(payload).eq('id', id);
         error = updateError;
       }
 
@@ -122,7 +122,7 @@ const PostEditor = () => {
             <ChevronLeft className="w-6 h-6" />
           </button>
           <div>
-            <h2 className="text-2xl font-bold flex items-center gap-2">
+            <h2 className="text-2xl font-bold flex items-center gap-2 text-gray-900 dark:text-white">
               <MessageSquare className="w-6 h-6 text-blue-600" />
               {isNew ? '새 소식 작성' : '소식 수정하기'}
             </h2>
