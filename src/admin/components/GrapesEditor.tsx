@@ -22,7 +22,7 @@ const GrapesEditor = ({ initialData, onReady }: GrapesEditorProps) => {
       container: editorRef.current,
       fromElement: true,
       height: '100%',
-      width: 'auto',
+      width: '100%',
       storageManager: false,
       plugins: [webpagePreset],
       i18n: {
@@ -30,7 +30,7 @@ const GrapesEditor = ({ initialData, onReady }: GrapesEditorProps) => {
         messages: { ko: grapesKo },
       },
       assetManager: {
-        upload: false, // We handle upload manually
+        upload: false,
         assets: [],
       },
       canvas: {
@@ -41,23 +41,7 @@ const GrapesEditor = ({ initialData, onReady }: GrapesEditorProps) => {
       }
     });
 
-    // Custom Asset Manager Upload Logic
-    editor.on('asset:open', async () => {
-      // Fetch existing assets from Supabase storage if needed
-      // For now, we'll just handle the upload part
-    });
-
-    editor.on('asset:upload:start', () => {
-      // Show loading indicator in editor if needed
-    });
-
-    // We'll add a custom button or handle the core upload
-    // But since GrapesJS UI is complex, the easiest way is to use its 'Add' button 
-    // and provide a better experience.
-    
     // Setup Custom Image Upload Bridge to Supabase
-    
-    // Add a custom 'Upload' button to the Asset Manager panel via DOM manipulation or GrapesJS API
     editor.on('run:open-assets', () => {
       const modal = editor.Modal;
       const modalContent = modal.getContentEl();
@@ -137,6 +121,11 @@ const GrapesEditor = ({ initialData, onReady }: GrapesEditorProps) => {
     grapesInstance.current = editor;
     onReady(editor);
 
+    // Force a resize check to prevent cut-off
+    setTimeout(() => {
+      editor.refresh();
+    }, 100);
+
     return () => {
       if (grapesInstance.current) {
         grapesInstance.current.destroy();
@@ -146,7 +135,7 @@ const GrapesEditor = ({ initialData, onReady }: GrapesEditorProps) => {
   }, []);
 
   return (
-    <div className="h-full w-full bg-white">
+    <div className="absolute inset-0 bg-white overflow-hidden">
       <style>{`
         .gjs-cv-canvas {
           width: 100% !important;
@@ -155,6 +144,7 @@ const GrapesEditor = ({ initialData, onReady }: GrapesEditorProps) => {
         }
         .gjs-editor {
           background-color: #fff;
+          height: 100% !important;
         }
         .gjs-pn-panels::-webkit-scrollbar {
           width: 4px;
@@ -181,8 +171,15 @@ const GrapesEditor = ({ initialData, onReady }: GrapesEditorProps) => {
           opacity: 0.5;
           cursor: not-allowed;
         }
+        /* Ensure the canvas and sidebar are fully visible */
+        .gjs-cv-canvas {
+            width: calc(100% - 230px) !important;
+        }
+        .gjs-pn-views-container {
+            width: 230px !important;
+        }
       `}</style>
-      <div ref={editorRef} className="h-full"></div>
+      <div ref={editorRef} className="h-full w-full"></div>
     </div>
   );
 };
