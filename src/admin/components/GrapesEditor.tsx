@@ -7,20 +7,15 @@ import { grapesKo } from '../lib/grapes-ko';
 
 interface GrapesEditorProps {
   initialData: any;
-  onChange: (data: { html: string; css: string; components: any; style: any }) => void;
-  minHeight?: string;
+  onReady: (editor: any) => void;
 }
 
-const GrapesEditor = ({ initialData, onChange }: Omit<GrapesEditorProps, 'minHeight'>) => {
+const GrapesEditor = ({ initialData, onReady }: GrapesEditorProps) => {
   const editorRef = useRef<HTMLDivElement>(null);
   const grapesInstance = useRef<any>(null);
 
   useEffect(() => {
-    if (!editorRef.current) return;
-
-    if (grapesInstance.current) {
-      grapesInstance.current.destroy();
-    }
+    if (!editorRef.current || grapesInstance.current) return;
 
     const editor = grapesjs.init({
       container: editorRef.current,
@@ -44,7 +39,7 @@ const GrapesEditor = ({ initialData, onChange }: Omit<GrapesEditorProps, 'minHei
     // Initialize Custom NKHB Blocks
     initNKHBBlocks(editor);
 
-    // Handle initialization data
+    // Load initial data
     if (initialData && initialData.components && initialData.components.length > 0) {
       editor.setComponents(initialData.components);
       editor.setStyle(initialData.style || '');
@@ -60,26 +55,16 @@ const GrapesEditor = ({ initialData, onChange }: Omit<GrapesEditorProps, 'minHei
 
     editor.Panels.getPanels().forEach((p: any) => p.set('visible', true));
 
-    const handleUpdate = () => {
-      onChange({
-        html: editor.getHtml() || '',
-        css: editor.getCss() || '',
-        components: editor.getComponents(),
-        style: editor.getStyle()
-      });
-    };
-
-    editor.on('component:update', handleUpdate);
-    editor.on('style:update', handleUpdate);
-
     grapesInstance.current = editor;
+    onReady(editor);
 
     return () => {
       if (grapesInstance.current) {
         grapesInstance.current.destroy();
+        grapesInstance.current = null;
       }
     };
-  }, [initialData]);
+  }, []); // Only run once on mount
 
   return (
     <div className="h-full w-full bg-white">
