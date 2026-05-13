@@ -1,6 +1,15 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { Save, Search, Globe, Image as ImageIcon, Layout, Type } from 'lucide-react';
+import { 
+  Save, 
+  Search, 
+  Globe, 
+  Image as ImageIcon, 
+  Layout, 
+  ShieldAlert,
+  Share2,
+  Eye
+} from 'lucide-react';
 
 interface SEOSettings {
   id: string;
@@ -12,33 +21,39 @@ interface SEOSettings {
   keywords_ko: string;
   keywords_en: string;
   og_image_url: string;
+  meta_robots: string;
+  canonical_url: string;
+  twitter_card: string;
+}
+
+interface SiteSettings {
+    key: string;
+    value_ko: string;
+    value_en: string;
 }
 
 const SEOAdmin = () => {
   const [settings, setSettings] = useState<SEOSettings[]>([]);
+  const [siteSettings, setSiteSettings] = useState<SiteSettings[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'main' | 'global'>('main');
 
   useEffect(() => {
-    fetchSettings();
+    fetchData();
   }, []);
 
-  const fetchSettings = async () => {
+  const fetchData = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from('seo_settings')
-      .select('*')
-      .order('page_slug', { ascending: true });
-
-    if (error) {
-      console.error('Error fetching SEO settings:', error);
-    } else {
-      setSettings(data || []);
-    }
+    const { data: seoData } = await supabase.from('seo_settings').select('*').order('page_slug');
+    const { data: siteData } = await supabase.from('site_settings').select('*');
+    
+    if (seoData) setSettings(seoData);
+    if (siteData) setSiteSettings(siteData);
     setLoading(false);
   };
 
-  const handleUpdate = async (item: SEOSettings) => {
+  const handleUpdateSEO = async (item: SEOSettings) => {
     setSaving(item.id);
     const { error } = await supabase
       .from('seo_settings')
@@ -50,186 +65,271 @@ const SEOAdmin = () => {
         keywords_ko: item.keywords_ko,
         keywords_en: item.keywords_en,
         og_image_url: item.og_image_url,
+        meta_robots: item.meta_robots,
+        canonical_url: item.canonical_url,
+        twitter_card: item.twitter_card,
         updated_at: new Date().toISOString()
       })
       .eq('id', item.id);
 
-    if (error) {
-      alert('저장 실패: ' + error.message);
-    } else {
-      setTimeout(() => setSaving(null), 500);
-    }
+    if (error) alert('저장 실패: ' + error.message);
+    setSaving(null);
+  };
+
+  const handleUpdateSite = async (key: string, value_ko: string, value_en: string) => {
+    setSaving(key);
+    const { error } = await supabase
+        .from('site_settings')
+        .upsert({ key, value_ko, value_en, updated_at: new Date().toISOString() });
+    
+    if (error) alert('저장 실패: ' + error.message);
+    setSaving(null);
   };
 
   const handleChange = (id: string, field: keyof SEOSettings, value: string) => {
-    setSettings(prev => prev.map(item => 
-      item.id === id ? { ...item, [field]: value } : item
-    ));
+    setSettings(prev => prev.map(item => item.id === id ? { ...item, [field]: value } : item));
   };
 
   if (loading) return (
-    <div className="flex items-center justify-center h-64">
+    <div className="flex items-center justify-center h-64 font-pretendard">
       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
     </div>
   );
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8">
-      <div className="flex justify-between items-center">
+    <div className="max-w-6xl mx-auto space-y-8 font-pretendard pb-20">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white dark:bg-gray-800 p-8 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-gray-700">
         <div>
-          <h2 className="text-2xl font-bold flex items-center gap-2">
-            <Search className="w-6 h-6 text-blue-600" />
-            SEO 및 검색 최적화
+          <h2 className="text-3xl font-black flex items-center gap-3 text-gray-900 dark:text-white tracking-tight">
+            <Search className="w-8 h-8 text-blue-600" />
+            SEO 마스터 센터
           </h2>
-          <p className="text-gray-500 text-sm mt-1">각 페이지별 검색 엔진 최적화 및 소셜 공유 설정을 관리합니다.</p>
+          <p className="text-gray-500 text-sm mt-1 font-medium">웹사이트의 검색 엔진 노출과 소셜 공유 최적화를 정밀하게 관리합니다.</p>
+        </div>
+        
+        <div className="flex bg-gray-100 dark:bg-gray-700 p-1.5 rounded-2xl">
+            <button 
+                onClick={() => setActiveTab('main')}
+                className={`px-6 py-2.5 rounded-xl text-xs font-black transition-all ${activeTab === 'main' ? 'bg-white dark:bg-gray-600 text-blue-600 shadow-sm' : 'text-gray-400'}`}
+            >
+                페이지별 설정
+            </button>
+            <button 
+                onClick={() => setActiveTab('global')}
+                className={`px-6 py-2.5 rounded-xl text-xs font-black transition-all ${activeTab === 'global' ? 'bg-white dark:bg-gray-600 text-blue-600 shadow-sm' : 'text-gray-400'}`}
+            >
+                전역 사이트 설정
+            </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-8">
-        {settings.map((item) => (
-          <div key={item.id} className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
-            <div className="px-6 py-4 bg-gray-50 dark:bg-gray-800/50 border-b dark:border-gray-700 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-lg text-blue-600 dark:text-blue-400">
-                  <Layout className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-lg uppercase tracking-tight">{item.page_slug} Page</h3>
-                </div>
-              </div>
-              <button
-                onClick={() => handleUpdate(item)}
-                disabled={saving === item.id}
-                className={`px-6 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${
-                  saving === item.id 
-                    ? 'bg-green-100 text-green-700' 
-                    : 'bg-blue-600 text-white hover:bg-blue-700'
-                }`}
-              >
-                <Save className="w-4 h-4" />
-                {saving === item.id ? '저장됨' : '설정 저장'}
-              </button>
-            </div>
-
-            <div className="p-6 space-y-8">
-              {/* Title & Description Grid */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Korean SEO */}
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2 text-sm font-bold text-red-600">
-                    <Globe className="w-4 h-4" /> 한국어 SEO
-                  </div>
-                  
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-gray-500">페이지 제목 (Title Tag)</label>
-                    <input 
-                      type="text"
-                      value={item.title_ko || ''}
-                      onChange={(e) => handleChange(item.id, 'title_ko', e.target.value)}
-                      className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                      placeholder="검색 결과에 표시될 제목"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-gray-500">메타 설명 (Description)</label>
-                    <textarea 
-                      value={item.description_ko || ''}
-                      onChange={(e) => handleChange(item.id, 'description_ko', e.target.value)}
-                      className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all min-h-[100px]"
-                      placeholder="검색 결과에 표시될 설명 (160자 내외 권장)"
-                    />
-                  </div>
-                </div>
-
-                {/* English SEO */}
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2 text-sm font-bold text-blue-600">
-                    <Globe className="w-4 h-4" /> English SEO
-                  </div>
-                  
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-gray-500">Page Title</label>
-                    <input 
-                      type="text"
-                      value={item.title_en || ''}
-                      onChange={(e) => handleChange(item.id, 'title_en', e.target.value)}
-                      className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                      placeholder="Title displayed in search results"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-gray-500">Meta Description</label>
-                    <textarea 
-                      value={item.description_en || ''}
-                      onChange={(e) => handleChange(item.id, 'description_en', e.target.value)}
-                      className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all min-h-[100px]"
-                      placeholder="Description displayed in search results"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Shared Settings */}
-              <div className="pt-6 border-t dark:border-gray-700 grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2 text-sm font-bold text-purple-600">
-                    <ImageIcon className="w-4 h-4" /> 소셜 공유 이미지 (Open Graph Image)
-                  </div>
-                  <div className="space-y-3">
-                    <div className="aspect-[1.91/1] w-full bg-gray-100 dark:bg-gray-900 rounded-2xl border-2 border-dashed dark:border-gray-700 flex items-center justify-center overflow-hidden">
-                      {item.og_image_url ? (
-                        <img src={item.og_image_url} className="w-full h-full object-cover" alt="OG Preview" />
-                      ) : (
-                        <div className="text-center p-4">
-                          <ImageIcon className="w-10 h-10 text-gray-300 mx-auto mb-2" />
-                          <p className="text-xs text-gray-400">권장 사이즈: 1200 x 630 px</p>
+      {activeTab === 'global' ? (
+        <div className="grid grid-cols-1 gap-6">
+            {['site_name', 'default_og_image'].map(key => {
+                const setting = siteSettings.find(s => s.key === key) || { key, value_ko: '', value_en: '' };
+                return (
+                    <div key={key} className="bg-white dark:bg-gray-800 p-8 rounded-[2rem] border border-gray-100 dark:border-gray-700 shadow-sm space-y-6">
+                        <div className="flex justify-between items-center border-b dark:border-gray-700 pb-4">
+                            <h3 className="font-bold text-lg uppercase tracking-wider text-blue-600">{key.replace(/_/g, ' ')}</h3>
+                            <button 
+                                onClick={() => handleUpdateSite(key, setting.value_ko, setting.value_en)}
+                                disabled={saving === key}
+                                className="px-6 py-2 bg-gray-900 text-white rounded-xl text-xs font-bold hover:bg-black disabled:opacity-50"
+                            >
+                                {saving === key ? '저장 중...' : '설정 저장'}
+                            </button>
                         </div>
-                      )}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-gray-400 uppercase">Korean Value</label>
+                                <input 
+                                    type="text"
+                                    value={setting.value_ko}
+                                    onChange={(e) => setSiteSettings(prev => {
+                                        const exists = prev.find(s => s.key === key);
+                                        if (exists) return prev.map(s => s.key === key ? { ...s, value_ko: e.target.value } : s);
+                                        return [...prev, { key, value_ko: e.target.value, value_en: '' }];
+                                    })}
+                                    className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-bold"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-gray-400 uppercase">English Value</label>
+                                <input 
+                                    type="text"
+                                    value={setting.value_en}
+                                    onChange={(e) => setSiteSettings(prev => {
+                                        const exists = prev.find(s => s.key === key);
+                                        if (exists) return prev.map(s => s.key === key ? { ...s, value_en: e.target.value } : s);
+                                        return [...prev, { key, value_ko: '', value_en: e.target.value }];
+                                    })}
+                                    className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-bold"
+                                />
+                            </div>
+                        </div>
                     </div>
-                    <input 
-                      type="text"
-                      value={item.og_image_url || ''}
-                      onChange={(e) => handleChange(item.id, 'og_image_url', e.target.value)}
-                      className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-xl text-xs font-mono"
-                      placeholder="이미지 URL (Content 메뉴에서 업로드 후 링크 복사 가능)"
-                    />
-                  </div>
-                </div>
+                );
+            })}
+        </div>
+      ) : (
+        <div className="space-y-8">
+            {settings.map((item) => (
+                <div key={item.id} className="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden group hover:shadow-xl hover:border-blue-100 transition-all duration-500">
+                    <div className="px-8 py-6 bg-gray-50 dark:bg-gray-800/50 border-b dark:border-gray-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 bg-blue-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-blue-100 dark:shadow-none">
+                                <Layout className="w-6 h-6" />
+                            </div>
+                            <div>
+                                <h3 className="font-black text-xl tracking-tight text-gray-900 dark:text-white uppercase">/{item.page_slug}</h3>
+                                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Individual Page SEO</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <button
+                                onClick={() => handleUpdateSEO(item)}
+                                disabled={saving === item.id}
+                                className={`px-8 py-3 rounded-2xl text-sm font-black transition-all flex items-center gap-2 shadow-lg disabled:opacity-50 ${
+                                    saving === item.id ? 'bg-green-100 text-green-700' : 'bg-blue-600 text-white hover:bg-blue-700 shadow-blue-100'
+                                }`}
+                            >
+                                <Save className="w-4 h-4" />
+                                {saving === item.id ? '저장 중...' : '페이지 SEO 저장'}
+                            </button>
+                        </div>
+                    </div>
 
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2 text-sm font-bold text-green-600">
-                    <Type className="w-4 h-4" /> 키워드 (Keywords - 선택사항)
-                  </div>
-                  <div className="space-y-4">
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-gray-500">한국어 키워드 (쉼표로 구분)</label>
-                      <input 
-                        type="text"
-                        value={item.keywords_ko || ''}
-                        onChange={(e) => handleChange(item.id, 'keywords_ko', e.target.value)}
-                        className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-xl outline-none"
-                        placeholder="북한, 라디오, 희망방송..."
-                      />
+                    <div className="p-8 space-y-10">
+                        {/* Title & Description */}
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                            <div className="space-y-6">
+                                <div className="flex items-center gap-2 text-xs font-black text-red-500 bg-red-50 px-3 py-1.5 rounded-lg w-fit">
+                                    <Globe className="w-3.5 h-3.5" /> KOREAN SEO
+                                </div>
+                                <div className="space-y-4">
+                                    <div className="space-y-1.5">
+                                        <label className="text-[10px] font-bold text-gray-400 ml-1">브라우저 제목 (Title)</label>
+                                        <input 
+                                            type="text"
+                                            value={item.title_ko || ''}
+                                            onChange={(e) => handleChange(item.id, 'title_ko', e.target.value)}
+                                            className="w-full px-5 py-3 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-900 dark:text-white"
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <label className="text-[10px] font-bold text-gray-400 ml-1">메타 설명 (Description)</label>
+                                        <textarea 
+                                            value={item.description_ko || ''}
+                                            onChange={(e) => handleChange(item.id, 'description_ko', e.target.value)}
+                                            className="w-full px-5 py-3 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none min-h-[120px] text-sm leading-relaxed"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="space-y-6">
+                                <div className="flex items-center gap-2 text-xs font-black text-blue-500 bg-blue-50 px-3 py-1.5 rounded-lg w-fit">
+                                    <Globe className="w-3.5 h-3.5" /> ENGLISH SEO
+                                </div>
+                                <div className="space-y-4">
+                                    <div className="space-y-1.5">
+                                        <label className="text-[10px] font-bold text-gray-400 ml-1">Browser Title</label>
+                                        <input 
+                                            type="text"
+                                            value={item.title_en || ''}
+                                            onChange={(e) => handleChange(item.id, 'title_en', e.target.value)}
+                                            className="w-full px-5 py-3 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-900 dark:text-white"
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <label className="text-[10px] font-bold text-gray-400 ml-1">Meta Description</label>
+                                        <textarea 
+                                            value={item.description_en || ''}
+                                            onChange={(e) => handleChange(item.id, 'description_en', e.target.value)}
+                                            className="w-full px-5 py-3 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none min-h-[120px] text-sm leading-relaxed"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Advanced Settings */}
+                        <div className="pt-10 border-t dark:border-gray-700">
+                            <div className="flex items-center gap-2 text-[10px] font-black text-purple-600 bg-purple-50 px-3 py-1.5 rounded-lg w-fit mb-8">
+                                <ShieldAlert className="w-3.5 h-3.5" /> ADVANCED CONFIGURATION
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div className="space-y-1.5">
+                                    <label className="text-[10px] font-bold text-gray-400 ml-1">검색 로봇 설정 (Robots)</label>
+                                    <select 
+                                        value={item.meta_robots || 'index, follow'}
+                                        onChange={(e) => handleChange(item.id, 'meta_robots', e.target.value)}
+                                        className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-xl outline-none font-bold text-sm"
+                                    >
+                                        <option value="index, follow">수집 허용 (Index, Follow)</option>
+                                        <option value="noindex, nofollow">수집 차단 (NoIndex, NoFollow)</option>
+                                        <option value="index, nofollow">링크 제외 (Index, NoFollow)</option>
+                                    </select>
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-[10px] font-bold text-gray-400 ml-1">대표 URL (Canonical)</label>
+                                    <input 
+                                        type="text"
+                                        value={item.canonical_url || ''}
+                                        onChange={(e) => handleChange(item.id, 'canonical_url', e.target.value)}
+                                        className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-xl outline-none font-mono text-xs"
+                                        placeholder="https://nkhb.org/..."
+                                    />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-[10px] font-bold text-gray-400 ml-1">트위터 카드 타입</label>
+                                    <select 
+                                        value={item.twitter_card || 'summary_large_image'}
+                                        onChange={(e) => handleChange(item.id, 'twitter_card', e.target.value)}
+                                        className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-xl outline-none font-bold text-sm"
+                                    >
+                                        <option value="summary">기본형 (Summary)</option>
+                                        <option value="summary_large_image">대형 이미지 (Large Image)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* OG Image */}
+                        <div className="pt-10 border-t dark:border-gray-700">
+                             <div className="flex items-center gap-2 text-[10px] font-black text-orange-600 bg-orange-50 px-3 py-1.5 rounded-lg w-fit mb-8">
+                                <Share2 className="w-3.5 h-3.5" /> SOCIAL SHARING PREVIEW
+                            </div>
+                            <div className="flex flex-col lg:flex-row gap-10">
+                                <div className="flex-1 space-y-4">
+                                    <label className="text-[10px] font-bold text-gray-400 ml-1">공유 이미지 URL</label>
+                                    <input 
+                                        type="text"
+                                        value={item.og_image_url || ''}
+                                        onChange={(e) => handleChange(item.id, 'og_image_url', e.target.value)}
+                                        className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-xl outline-none font-mono text-xs"
+                                    />
+                                    <p className="text-[10px] text-gray-400 italic">이미지 권장 사이즈: 1200 x 630 px</p>
+                                </div>
+                                <div className="w-full lg:w-80 h-44 bg-gray-100 dark:bg-gray-900 rounded-3xl overflow-hidden border dark:border-gray-700 flex items-center justify-center relative group">
+                                    {item.og_image_url ? (
+                                        <>
+                                            <img src={item.og_image_url} className="w-full h-full object-cover" alt="OG Preview" />
+                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                <Eye className="text-white w-8 h-8" />
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <ImageIcon className="text-gray-300 w-12 h-12" />
+                                    )}
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-gray-500">English Keywords (comma separated)</label>
-                      <input 
-                        type="text"
-                        value={item.keywords_en || ''}
-                        onChange={(e) => handleChange(item.id, 'keywords_en', e.target.value)}
-                        className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-xl outline-none"
-                        placeholder="North Korea, Radio, Hope..."
-                      />
-                    </div>
-                  </div>
                 </div>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+            ))}
+        </div>
+      )}
     </div>
   );
 };
