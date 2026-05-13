@@ -67,9 +67,9 @@ const SEO: React.FC<SEOProps> = ({ slug }) => {
       <link rel="canonical" href={currentUrl} />
       
       {/* Language Alternates (hreflang) */}
-      <link rel="alternate" href={currentUrl} hreflang="ko" />
-      <link rel="alternate" href={currentUrl} hreflang="en" />
-      <link rel="alternate" href={currentUrl} hreflang="x-default" />
+      <link rel="alternate" href={currentUrl} hrefLang="ko" />
+      <link rel="alternate" href={currentUrl} hrefLang="en" />
+      <link rel="alternate" href={currentUrl} hrefLang="x-default" />
 
       {/* Open Graph / Facebook */}
       <meta property="og:type" content="website" />
