@@ -118,11 +118,13 @@ const PageEditor = () => {
         og_image_url: seoData.og_image_url || ''
       });
     } else {
-      setSeo(prev => ({
-        ...prev,
+      setSeo({
         title_ko: pageData.title_ko,
-        title_en: pageData.title_en
-      }));
+        title_en: pageData.title_en,
+        description_ko: '',
+        description_en: '',
+        og_image_url: ''
+      });
     }
     
     setLoading(false);
@@ -316,7 +318,7 @@ const PageEditor = () => {
       </header>
 
       <div className="flex-1 flex overflow-hidden relative">
-        <main className="flex-1 relative overflow-hidden bg-white">
+        <main className="flex-1 relative overflow-hidden bg-white text-gray-900">
           <GrapesEditor 
             key={`${id}-${activeLang}`}
             initialData={activeLang === 'ko' ? page.layout_ko : page.layout_en}
@@ -346,7 +348,7 @@ const PageEditor = () => {
               </button>
             </div>
             
-            <div className="p-6 font-pretendard">
+            <div className="p-6">
               {settingsTab === 'seo' ? (
                 <div className="space-y-6">
                   <div className="space-y-4">
@@ -359,10 +361,10 @@ const PageEditor = () => {
                       <input 
                         type="text"
                         value={activeLang === 'ko' ? seo.title_ko : seo.title_en}
-                        onChange={(e) => setSeo(prev => activeLang === 'ko' 
-                          ? { ...prev, title_ko: e.target.value } 
-                          : { ...prev, title_en: e.target.value }
-                        )}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setSeo(prev => activeLang === 'ko' ? { ...prev, title_ko: val } : { ...prev, title_en: val });
+                        }}
                         className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-lg text-sm outline-none focus:ring-1 focus:ring-blue-500"
                       />
                     </div>
@@ -371,10 +373,10 @@ const PageEditor = () => {
                       <label className="text-xs font-bold text-gray-500">메타 설명 (Description)</label>
                       <textarea 
                         value={activeLang === 'ko' ? seo.description_ko : seo.description_en}
-                        onChange={(e) => setSeo(prev => activeLang === 'ko' 
-                          ? { ...prev, description_ko: e.target.value } 
-                          : { ...prev, description_en: e.target.value }
-                        )}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setSeo(prev => activeLang === 'ko' ? { ...prev, description_ko: val } : { ...prev, description_en: val });
+                        }}
                         className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-lg text-sm outline-none focus:ring-1 focus:ring-blue-500 min-h-[120px] resize-none"
                       />
                     </div>
@@ -382,7 +384,7 @@ const PageEditor = () => {
 
                   <div className="pt-6 border-t dark:border-gray-700 space-y-4">
                     <label className="text-xs font-bold text-gray-500">소셜 공유 이미지 (OG Image)</label>
-                    <div className="aspect-[1.91/1] bg-gray-100 dark:bg-gray-900 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 flex items-center justify-center">
+                    <div className="aspect-[1.91/1] bg-gray-100 dark:bg-gray-900 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-900">
                       {seo.og_image_url ? (
                         <img src={seo.og_image_url} className="w-full h-full object-cover" alt="SEO Preview" />
                       ) : (
@@ -392,7 +394,10 @@ const PageEditor = () => {
                     <input 
                       type="text"
                       value={seo.og_image_url}
-                      onChange={(e) => setSeo(prev => ({ ...prev, og_image_url: e.target.value }))}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setSeo(prev => ({ ...prev, og_image_url: val }));
+                      }}
                       className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-lg text-[11px] font-mono outline-none focus:ring-1 focus:ring-blue-500"
                     />
                   </div>
@@ -406,7 +411,7 @@ const PageEditor = () => {
                       <p className="text-[10px] opacity-80 mt-0.5">페이지 하단 소식창 노출</p>
                     </div>
                     <button 
-                      onClick={() => setPage({...page!, has_board: !page?.has_board})}
+                      onClick={() => setPage(prev => prev ? ({...prev, has_board: !prev.has_board}) : null)}
                       className={`w-12 h-6 rounded-full transition-colors relative z-10 border-2 ${page?.has_board ? 'bg-white border-white' : 'bg-transparent border-white/30'}`}
                     >
                       <div className={`absolute top-0.5 w-4 h-4 rounded-full transition-all ${page?.has_board ? 'left-6 bg-blue-600' : 'left-0.5 bg-white/50'}`}></div>
@@ -428,7 +433,7 @@ const PageEditor = () => {
                                     type="text"
                                     value={newPostName}
                                     onChange={(e) => setNewPostName(e.target.value)}
-                                    className="w-full bg-transparent border-none outline-none text-xs font-bold"
+                                    className="w-full bg-transparent border-none outline-none text-xs font-bold text-gray-900 dark:text-white"
                                     placeholder="작성자"
                                     required
                                 />
@@ -436,7 +441,7 @@ const PageEditor = () => {
                             <textarea 
                                 value={newPostContent}
                                 onChange={(e) => setNewPostContent(e.target.value)}
-                                className="w-full px-4 py-3 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-2xl text-xs outline-none focus:ring-1 focus:ring-blue-500 min-h-[100px] resize-none"
+                                className="w-full px-4 py-3 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-2xl text-xs outline-none focus:ring-1 focus:ring-blue-500 min-h-[100px] resize-none text-gray-900 dark:text-white"
                                 placeholder="소식 내용을 입력하세요..."
                                 required
                             />
@@ -460,15 +465,21 @@ const PageEditor = () => {
                             <input 
                                 type="text"
                                 value={page.board_title_ko}
-                                onChange={(e) => setPage({...page!, board_title_ko: e.target.value})}
-                                className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-lg text-xs outline-none focus:ring-1 focus:ring-blue-500"
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  setPage(prev => prev ? ({...prev, board_title_ko: val}) : null);
+                                }}
+                                className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-lg text-xs outline-none focus:ring-1 focus:ring-blue-500 text-gray-900 dark:text-white"
                                 placeholder="한국어 제목"
                             />
                             <input 
                                 type="text"
                                 value={page.board_title_en}
-                                onChange={(e) => setPage({...page!, board_title_en: e.target.value})}
-                                className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-lg text-xs outline-none focus:ring-1 focus:ring-blue-500"
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  setPage(prev => prev ? ({...prev, board_title_en: val}) : null);
+                                }}
+                                className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-lg text-xs outline-none focus:ring-1 focus:ring-blue-500 text-gray-900 dark:text-white"
                                 placeholder="English Title"
                             />
                         </div>
@@ -477,7 +488,7 @@ const PageEditor = () => {
                       {/* Post List */}
                       <div className="space-y-4">
                         <div className="flex items-center justify-between px-1">
-                          <h4 className="font-bold text-xs text-gray-500 uppercase tracking-widest">등록된 소식 ({posts.length})</h4>
+                          <h4 className="font-bold text-xs text-gray-500 uppercase tracking-widest text-gray-900 dark:text-white">등록된 소식 ({posts.length})</h4>
                           <div className="flex gap-3">
                               <button onClick={() => navigate('/posts')} className="text-[10px] font-bold text-blue-600 hover:underline">모든 글 관리</button>
                               <button onClick={fetchPosts} className="text-[10px] font-bold text-blue-600 hover:underline">새로고침</button>
@@ -492,8 +503,8 @@ const PageEditor = () => {
                               <div key={post.id} className="p-4 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 group relative shadow-sm">
                                 <div className="flex justify-between items-start mb-2">
                                   <div className="flex items-center gap-2">
-                                      <span className="font-bold text-xs">{post.author_name}</span>
-                                      <span className="text-[8px] bg-blue-50 text-blue-600 px-1 rounded font-black">ADMIN</span>
+                                      <span className="font-bold text-xs text-gray-900 dark:text-white">{post.author_name}</span>
+                                      <span className="text-[8px] bg-blue-50 text-blue-600 px-1 rounded font-black tracking-tighter">ADMIN</span>
                                   </div>
                                   <button 
                                     onClick={() => deletePost(post.id)}
@@ -502,7 +513,7 @@ const PageEditor = () => {
                                     <Trash2 className="w-3.5 h-3.5" />
                                   </button>
                                 </div>
-                                <p className="text-[11px] text-gray-600 dark:text-gray-400 line-clamp-2 leading-relaxed mb-2">{post.content}</p>
+                                <p className="text-[11px] text-gray-600 dark:text-gray-400 line-clamp-2 leading-relaxed mb-2 prose-sm prose max-w-none" dangerouslySetInnerHTML={{ __html: post.content }} />
                                 <div className="flex items-center gap-1 text-[9px] text-gray-400">
                                   <Calendar className="w-2.5 h-2.5" />
                                   {new Date(post.created_at).toLocaleDateString()}
