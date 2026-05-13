@@ -10,7 +10,8 @@ import {
   EyeOff,
   Search,
   ExternalLink,
-  Edit3
+  Edit3,
+  Save
 } from 'lucide-react';
 
 interface Page {
@@ -188,13 +189,68 @@ const Pages = () => {
               <div className="w-16 h-16 bg-blue-50 dark:bg-blue-900/20 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <FileText className="w-8 h-8" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{activePage.title_ko}</h3>
-              <p className="text-sm text-gray-500 font-mono flex items-center justify-center gap-1">
-                <LinkIcon className="w-3 h-3" /> nkhb.org/p/{activePage.slug}
-              </p>
+              <div className="space-y-4 mt-6">
+                <div className="space-y-1.5 text-left">
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">페이지 제목 (KO)</label>
+                  <input 
+                    type="text"
+                    value={activePage.title_ko}
+                    onChange={(e) => setActivePage({...activePage, title_ko: e.target.value})}
+                    className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none font-bold"
+                  />
+                </div>
+
+                <div className="space-y-1.5 text-left">
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Page Title (EN)</label>
+                  <input 
+                    type="text"
+                    value={activePage.title_en}
+                    onChange={(e) => setActivePage({...activePage, title_en: e.target.value})}
+                    className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none font-bold"
+                  />
+                </div>
+
+                <div className="space-y-1.5 text-left">
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block ml-1">URL 주소 (Slug)</label>
+                  <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-900 px-4 py-3 rounded-2xl border dark:border-gray-700 font-mono text-sm group focus-within:ring-2 focus-within:ring-blue-500 transition-all">
+                    <span className="text-gray-400">/p/</span>
+                    <input 
+                      type="text"
+                      value={activePage.slug}
+                      onChange={(e) => setActivePage({...activePage, slug: e.target.value.toLowerCase().replace(/\s+/g, '-')})}
+                      className="bg-transparent border-none outline-none text-blue-600 font-bold w-full p-0"
+                      placeholder="page-slug"
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 gap-3">
+              <button
+                onClick={async () => {
+                  const { error } = await supabase
+                    .from('pages')
+                    .update({ 
+                      slug: activePage.slug,
+                      title_ko: activePage.title_ko,
+                      title_en: activePage.title_en 
+                    })
+                    .eq('id', activePage.id);
+                  
+                  if (error) {
+                    alert('저장 실패: ' + error.message);
+                  } else {
+                    setPages(pages.map(p => p.id === activePage.id ? activePage : p));
+                    alert('페이지 정보가 저장되었습니다.');
+                  }
+                }}
+                className="w-full flex items-center justify-center gap-2 bg-gray-900 text-white py-3 rounded-2xl font-bold hover:bg-gray-800 transition-all mb-2"
+              >
+                <Save className="w-4 h-4" />
+                페이지 기본 정보 저장
+              </button>
+
               <button
                 onClick={() => navigate(`/editor/${activePage.id}`)}
                 className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-bold transition-all shadow-lg shadow-blue-200 dark:shadow-none"
