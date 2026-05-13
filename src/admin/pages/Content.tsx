@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { supabase } from '../lib/supabase';
-import { Save, Upload, Search, Filter } from 'lucide-react';
+import { Save, Upload, Search, ChevronRight, Layout, Type, Image as ImageIcon, Globe, Info, Settings, Radio, Heart } from 'lucide-react';
 
 interface ContentItem {
   id: string;
@@ -9,40 +9,32 @@ interface ContentItem {
   value_en: string;
 }
 
+const SECTIONS = [
+  { id: 'all', label: '전체 보기', icon: Layout },
+  { id: 'nav', label: '네비게이션/공통', icon: Globe, pattern: ['nav_', 'footer_', 'page_', 'alt_logo'] },
+  { id: 'hero', label: '히어로 섹션', icon: Layout, pattern: ['hero_', 'image_hero'] },
+  { id: 'background', label: '방송배경 (01)', icon: Info, pattern: ['background_', 'image_background'] },
+  { id: 'composition', label: '방송구성 (02)', icon: Radio, pattern: ['composition_', 'sample_', 'track'] },
+  { id: 'effects', label: '기대효과 (03)', icon: Heart, pattern: ['effects_'] },
+  { id: 'reach', label: '도달범위 (04)', icon: Globe, pattern: ['reach_', 'image_reach'] },
+  { id: 'guide', label: '참여안내 (05)', icon: Type, pattern: ['guide_', 'letter_modal'] },
+  { id: 'support', label: '후원하기 (06)', icon: Heart, pattern: ['support_'] },
+  { id: 'schedule', label: '방송시간 (07)', icon: Settings, pattern: ['schedule_'] },
+  { id: 'about', label: 'NKFI 소개페이지', icon: Info, pattern: ['about_', 'image_about'] },
+  { id: 'seo', label: 'SEO/메타데이터', icon: Search, pattern: ['meta_'] },
+];
+
 const Content = () => {
   const [content, setContent] = useState<ContentItem[]>([]);
-  const [filteredContent, setFilteredContent] = useState<ContentItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeSection, setActiveSection] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const [saving, setSaving] = useState<string | null>(null);
   const [uploading, setUploading] = useState<{id: string, field: string} | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filterType, setFilterType] = useState<'all' | 'text' | 'image'>('all');
 
   useEffect(() => {
     fetchContent();
   }, []);
-
-  useEffect(() => {
-    let result = content;
-
-    // Search filter
-    if (searchQuery) {
-      result = result.filter(item => 
-        item.key.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.value_ko?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.value_en?.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-
-    // Type filter
-    if (filterType === 'image') {
-      result = result.filter(item => isImageUrlKey(item.key));
-    } else if (filterType === 'text') {
-      result = result.filter(item => !isImageUrlKey(item.key));
-    }
-
-    setFilteredContent(result);
-  }, [searchQuery, filterType, content]);
 
   const fetchContent = async () => {
     setLoading(true);
@@ -59,6 +51,36 @@ const Content = () => {
     setLoading(false);
   };
 
+  const isImageUrlKey = (key: string) => {
+    const k = key.toLowerCase();
+    return k.includes('logo') || k.includes('image') || k.includes('url') || k.startsWith('image_');
+  };
+
+  const filteredContent = useMemo(() => {
+    let result = content;
+
+    // Search filter
+    if (searchQuery) {
+      result = result.filter(item => 
+        item.key.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.value_ko?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.value_en?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // Section filter
+    if (activeSection !== 'all') {
+      const section = SECTIONS.find(s => s.id === activeSection);
+      if (section?.pattern) {
+        result = result.filter(item => 
+          section.pattern?.some(p => item.key.toLowerCase().startsWith(p) || item.key.toLowerCase().includes(p))
+        );
+      }
+    }
+
+    return result;
+  }, [content, activeSection, searchQuery]);
+
   const handleUpdate = async (item: ContentItem) => {
     setSaving(item.id);
     const { error } = await supabase
@@ -71,11 +93,11 @@ const Content = () => {
 
     if (error) {
       console.error('Error updating content:', error);
-      alert('Failed to save changes');
+      alert('저장 실패: ' + error.message);
     } else {
-      alert('Changes saved successfully');
+      // Show a temporary success state
+      setTimeout(() => setSaving(null), 500);
     }
-    setSaving(null);
   };
 
   const handleChange = (id: string, field: 'value_ko' | 'value_en', value: string) => {
@@ -87,11 +109,9 @@ const Content = () => {
   const handleFileUpload = async (id: string, field: 'value_ko' | 'value_en', file: File) => {
     try {
       setUploading({ id, field });
-      
       const fileExt = file.name.split('.').pop();
       const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
-      const folder = isImageUrlKey(id) ? 'site-assets' : 'uploads';
-      const filePath = `${folder}/${fileName}`;
+      const filePath = `site-assets/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from('assets')
@@ -105,222 +125,195 @@ const Content = () => {
 
       handleChange(id, field, publicUrl);
     } catch (error: any) {
-      console.error('Error uploading image:', error.message);
-      alert('Error uploading image: ' + error.message + '\nMake sure "assets" bucket exists and is public.');
+      alert('업로드 에러: ' + error.message);
     } finally {
       setUploading(null);
     }
   };
 
-  const isImageUrlKey = (key: string) => {
-    const k = key.toLowerCase();
-    return k.includes('logo') || k.includes('image') || k.includes('url') || k.startsWith('image_');
-  };
-
   return (
-    <div className="max-w-6xl mx-auto">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-        <h2 className="text-2xl font-bold">Website Content Management</h2>
-        
-        <div className="flex flex-wrap gap-2 w-full md:w-auto">
-          <div className="relative flex-1 md:flex-none">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <input 
-              type="text" 
-              placeholder="Search keys or content..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 pr-4 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 w-full"
-            />
-          </div>
-          
-          <select 
-            value={filterType}
-            onChange={(e) => setFilterType(e.target.value as any)}
-            className="px-4 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
-          >
-            <option value="all">All Types</option>
-            <option value="text">Text Only</option>
-            <option value="image">Images Only</option>
-          </select>
-
-          <button 
-            onClick={fetchContent}
-            className="px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-          >
-            Refresh
-          </button>
+    <div className="flex h-[calc(100vh-120px)] overflow-hidden bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 shadow-lg">
+      {/* Sidebar - Sections */}
+      <div className="w-64 border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 flex flex-col shrink-0">
+        <div className="p-4 border-b dark:border-gray-700">
+          <h2 className="font-bold text-lg flex items-center gap-2">
+            <Layout className="w-5 h-5 text-blue-600" />
+            콘텐츠 관리
+          </h2>
+        </div>
+        <div className="flex-1 overflow-y-auto p-2 space-y-1">
+          {SECTIONS.map((section) => {
+            const Icon = section.icon;
+            return (
+              <button
+                key={section.id}
+                onClick={() => setActiveSection(section.id)}
+                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                  activeSection === section.id
+                    ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/50'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <Icon className="w-4 h-4" />
+                  {section.label}
+                </div>
+                {activeSection === section.id && <ChevronRight className="w-4 h-4" />}
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      {loading ? (
-        <div className="flex flex-col items-center justify-center py-20">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-          <p className="text-gray-500">Loading website content...</p>
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col min-w-0 bg-white dark:bg-gray-800">
+        {/* Toolbar */}
+        <div className="p-4 border-b dark:border-gray-700 flex flex-col sm:flex-row gap-4 items-center justify-between bg-white dark:bg-gray-800 z-10">
+          <div className="relative w-full sm:max-w-md">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <input 
+              type="text" 
+              placeholder="항목 키 또는 내용 검색..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-900 border-none rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div className="flex items-center gap-2 text-xs text-gray-500 font-medium">
+            항목 수: <span className="text-blue-600 font-bold">{filteredContent.length}</span>
+          </div>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 gap-6">
-          {filteredContent.length === 0 ? (
-            <div className="text-center py-20 bg-gray-50 dark:bg-gray-900 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-800">
-              <p className="text-gray-500">No content items found matching your filters.</p>
+
+        {/* Scrollable List */}
+        <div className="flex-1 overflow-y-auto p-6 bg-gray-50 dark:bg-gray-900/50">
+          {loading ? (
+            <div className="h-full flex items-center justify-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
             </div>
           ) : (
-            filteredContent.map((item) => (
-              <div key={item.id} className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 border-b dark:border-gray-700 pb-4">
-                  <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg ${isImageUrlKey(item.key) ? 'bg-purple-100 text-purple-600' : 'bg-blue-100 text-blue-600'}`}>
-                      {isImageUrlKey(item.key) ? <Upload className="w-5 h-5" /> : <Save className="w-5 h-5" />}
+            <div className="max-w-5xl mx-auto space-y-6">
+              {filteredContent.map((item) => (
+                <div key={item.id} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden group">
+                  <div className="px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border-b dark:border-gray-700 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <code className="text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded">
+                        {item.key}
+                      </code>
+                      {isImageUrlKey(item.key) && (
+                        <span className="text-[10px] bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded font-bold">IMAGE</span>
+                      )}
                     </div>
-                    <div>
-                      <h3 className="text-lg font-bold text-gray-900 dark:text-white leading-none mb-1">{item.key}</h3>
-                      <p className="text-xs text-gray-500 font-mono">{isImageUrlKey(item.key) ? 'IMAGE ASSET' : 'TEXT CONTENT'}</p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => handleUpdate(item)}
-                    disabled={saving === item.id}
-                    className="w-full sm:w-auto bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center disabled:opacity-50 font-medium"
-                  >
-                    <Save className="w-4 h-4 mr-2" />
-                    {saving === item.id ? 'Saving...' : 'Save Changes'}
-                  </button>
-                </div>
-                
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                  {/* KO Section */}
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                        <span className="w-6 h-4 bg-red-100 text-red-700 text-[10px] flex items-center justify-center rounded font-bold">KO</span>
-                        Korean Version
-                      </label>
-                    </div>
-                    
-                    {isImageUrlKey(item.key) ? (
-                      <div className="space-y-4">
-                        <div className="aspect-video w-full border-2 border-dashed rounded-xl overflow-hidden bg-gray-50 dark:bg-gray-900 flex items-center justify-center relative group">
-                          {item.value_ko ? (
-                            <>
-                              <img src={item.value_ko} alt="Preview KO" className="max-h-full max-w-full object-contain" />
-                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                <p className="text-white text-xs font-medium">Image Preview</p>
-                              </div>
-                            </>
-                          ) : (
-                            <p className="text-gray-400 text-sm">No image uploaded</p>
-                          )}
-                        </div>
-                        <div className="flex gap-2">
-                          <input
-                            type="text"
-                            value={item.value_ko || ''}
-                            onChange={(e) => handleChange(item.id, 'value_ko', e.target.value)}
-                            className="flex-1 px-4 py-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                            placeholder="https://image-url.com"
-                          />
-                          <label className="cursor-pointer bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex items-center shrink-0 border dark:border-gray-600">
-                            <Upload className="w-4 h-4" />
-                            <input
-                              type="file"
-                              accept="image/*"
-                              className="hidden"
-                              disabled={uploading?.id === item.id && uploading?.field === 'value_ko'}
-                              onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (file) handleFileUpload(item.id, 'value_ko', file);
-                              }}
-                            />
-                          </label>
-                        </div>
-                        {uploading?.id === item.id && uploading?.field === 'value_ko' && (
-                          <div className="flex items-center gap-2 text-xs text-blue-500 animate-pulse">
-                            <div className="w-3 h-3 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                            Uploading to cloud...
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <textarea
-                        value={item.value_ko || ''}
-                        onChange={(e) => handleChange(item.id, 'value_ko', e.target.value)}
-                        rows={5}
-                        className="w-full px-4 py-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 outline-none transition-all resize-y min-h-[120px]"
-                        placeholder="Enter Korean content here..."
-                      />
-                    )}
+                    <button
+                      onClick={() => handleUpdate(item)}
+                      disabled={saving === item.id}
+                      className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${
+                        saving === item.id 
+                          ? 'bg-green-100 text-green-700' 
+                          : 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm hover:shadow'
+                      }`}
+                    >
+                      <Save className="w-3.5 h-3.5" />
+                      {saving === item.id ? '저장됨' : '변경사항 저장'}
+                    </button>
                   </div>
 
-                  {/* EN Section */}
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                        <span className="w-6 h-4 bg-blue-100 text-blue-700 text-[10px] flex items-center justify-center rounded font-bold">EN</span>
-                        English Version
-                      </label>
+                  <div className="p-5 grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* KO Field */}
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                        <span className="w-2 h-2 rounded-full bg-red-500"></span> 한국어
+                      </div>
+                      {isImageUrlKey(item.key) ? (
+                        <ImageEditor 
+                          value={item.value_ko} 
+                          onChange={(val) => handleChange(item.id, 'value_ko', val)}
+                          onUpload={(file) => handleFileUpload(item.id, 'value_ko', file)}
+                          isUploading={uploading?.id === item.id && uploading?.field === 'value_ko'}
+                        />
+                      ) : (
+                        <textarea
+                          value={item.value_ko || ''}
+                          onChange={(e) => handleChange(item.id, 'value_ko', e.target.value)}
+                          className="w-full p-3 text-sm border dark:border-gray-600 dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none min-h-[100px]"
+                        />
+                      )}
                     </div>
 
-                    {isImageUrlKey(item.key) ? (
-                      <div className="space-y-4">
-                        <div className="aspect-video w-full border-2 border-dashed rounded-xl overflow-hidden bg-gray-50 dark:bg-gray-900 flex items-center justify-center relative group">
-                          {item.value_en ? (
-                            <>
-                              <img src={item.value_en} alt="Preview EN" className="max-h-full max-w-full object-contain" />
-                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                <p className="text-white text-xs font-medium">Image Preview</p>
-                              </div>
-                            </>
-                          ) : (
-                            <p className="text-gray-400 text-sm">No image uploaded</p>
-                          )}
-                        </div>
-                        <div className="flex gap-2">
-                          <input
-                            type="text"
-                            value={item.value_en || ''}
-                            onChange={(e) => handleChange(item.id, 'value_en', e.target.value)}
-                            className="flex-1 px-4 py-2.5 border rounded-lg dark:bg-gray-700 dark:border-gray-600 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                            placeholder="https://image-url.com"
-                          />
-                          <label className="cursor-pointer bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex items-center shrink-0 border dark:border-gray-600">
-                            <Upload className="w-4 h-4" />
-                            <input
-                              type="file"
-                              accept="image/*"
-                              className="hidden"
-                              disabled={uploading?.id === item.id && uploading?.field === 'value_en'}
-                              onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (file) handleFileUpload(item.id, 'value_en', file);
-                              }}
-                            />
-                          </label>
-                        </div>
-                        {uploading?.id === item.id && uploading?.field === 'value_en' && (
-                          <div className="flex items-center gap-2 text-xs text-blue-500 animate-pulse">
-                            <div className="w-3 h-3 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                            Uploading to cloud...
-                          </div>
-                        )}
+                    {/* EN Field */}
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                        <span className="w-2 h-2 rounded-full bg-blue-500"></span> ENGLISH
                       </div>
-                    ) : (
-                      <textarea
-                        value={item.value_en || ''}
-                        onChange={(e) => handleChange(item.id, 'value_en', e.target.value)}
-                        rows={5}
-                        className="w-full px-4 py-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 outline-none transition-all resize-y min-h-[120px]"
-                        placeholder="Enter English content here..."
-                      />
-                    )}
+                      {isImageUrlKey(item.key) ? (
+                        <ImageEditor 
+                          value={item.value_en} 
+                          onChange={(val) => handleChange(item.id, 'value_en', val)}
+                          onUpload={(file) => handleFileUpload(item.id, 'value_en', file)}
+                          isUploading={uploading?.id === item.id && uploading?.field === 'value_en'}
+                        />
+                      ) : (
+                        <textarea
+                          value={item.value_en || ''}
+                          onChange={(e) => handleChange(item.id, 'value_en', e.target.value)}
+                          className="w-full p-3 text-sm border dark:border-gray-600 dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none min-h-[100px]"
+                        />
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))
+              ))}
+            </div>
           )}
         </div>
-      )}
+      </div>
     </div>
   );
 };
+
+interface ImageEditorProps {
+  value: string;
+  onChange: (val: string) => void;
+  onUpload: (file: File) => void;
+  isUploading: boolean;
+}
+
+const ImageEditor = ({ value, onChange, onUpload, isUploading }: ImageEditorProps) => (
+  <div className="space-y-3">
+    <div className="aspect-video bg-gray-100 dark:bg-gray-900 rounded-lg overflow-hidden flex items-center justify-center border-2 border-dashed border-gray-200 dark:border-gray-700 group/img relative">
+      {value ? (
+        <img src={value} className="max-h-full max-w-full object-contain" alt="Preview" />
+      ) : (
+        <ImageIcon className="w-8 h-8 text-gray-300" />
+      )}
+      {isUploading && (
+        <div className="absolute inset-0 bg-white/80 dark:bg-black/80 flex flex-col items-center justify-center">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mb-2"></div>
+          <span className="text-[10px] font-bold text-blue-600">업로드 중...</span>
+        </div>
+      )}
+    </div>
+    <div className="flex gap-2">
+      <input
+        type="text"
+        value={value || ''}
+        onChange={(e) => onChange(e.target.value)}
+        className="flex-1 px-3 py-1.5 text-xs border dark:border-gray-600 dark:bg-gray-700 rounded-lg outline-none"
+        placeholder="이미지 URL 직접 입력"
+      />
+      <label className="cursor-pointer bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 px-3 py-1.5 rounded-lg border dark:border-gray-600 transition-colors flex items-center shrink-0">
+        <Upload className="w-3.5 h-3.5 text-gray-600 dark:text-gray-300" />
+        <input
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) onUpload(file);
+          }}
+        />
+      </label>
+    </div>
+  </div>
+);
 
 export default Content;
