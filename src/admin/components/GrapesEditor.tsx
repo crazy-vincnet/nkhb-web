@@ -4,6 +4,7 @@ import 'grapesjs/dist/css/grapes.min.css';
 import webpagePreset from 'grapesjs-preset-webpage';
 import { initNKHBBlocks } from '../lib/grapes-blocks';
 import { grapesKo } from '../lib/grapes-ko';
+import { supabase } from '../lib/supabase';
 
 interface GrapesEditorProps {
   initialData: any;
@@ -28,11 +29,89 @@ const GrapesEditor = ({ initialData, onReady }: GrapesEditorProps) => {
         locale: 'ko',
         messages: { ko: grapesKo },
       },
+      assetManager: {
+        upload: false, // We handle upload manually
+        assets: [],
+      },
       canvas: {
         styles: [
           'https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css',
           'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap'
         ]
+      }
+    });
+
+    // Custom Asset Manager Upload Logic
+    editor.on('asset:open', async () => {
+      // Fetch existing assets from Supabase storage if needed
+      // For now, we'll just handle the upload part
+    });
+
+    editor.on('asset:upload:start', () => {
+      // Show loading indicator in editor if needed
+    });
+
+    // We'll add a custom button or handle the core upload
+    // But since GrapesJS UI is complex, the easiest way is to use its 'Add' button 
+    // and provide a better experience.
+    
+    // Setup Custom Image Upload Bridge to Supabase
+    
+    // Add a custom 'Upload' button to the Asset Manager panel via DOM manipulation or GrapesJS API
+    editor.on('run:open-assets', () => {
+      const modal = editor.Modal;
+      const modalContent = modal.getContentEl();
+      
+      if (modalContent && !modalContent.querySelector('.nkhb-upload-btn')) {
+        const uploadBtn = document.createElement('button');
+        uploadBtn.className = 'nkhb-upload-btn gjs-btn-prim';
+        uploadBtn.innerHTML = '새 이미지 업로드 (Supabase)';
+        uploadBtn.style.margin = '10px';
+        uploadBtn.style.width = 'calc(100% - 20px)';
+        
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*';
+        fileInput.style.display = 'none';
+        
+        uploadBtn.onclick = () => fileInput.click();
+        
+        fileInput.onchange = async (e: any) => {
+          const file = e.target.files?.[0];
+          if (!file) return;
+          
+          try {
+            uploadBtn.innerHTML = '업로드 중...';
+            uploadBtn.disabled = true;
+            
+            const fileExt = file.name.split('.').pop();
+            const fileName = `cms/${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
+            
+            const { error: uploadError } = await supabase.storage
+              .from('assets')
+              .upload(fileName, file);
+              
+            if (uploadError) throw uploadError;
+            
+            const { data: { publicUrl } } = supabase.storage
+              .from('assets')
+              .getPublicUrl(fileName);
+              
+            editor.AssetManager.add(publicUrl);
+            uploadBtn.innerHTML = '업로드 완료!';
+            setTimeout(() => {
+              uploadBtn.innerHTML = '새 이미지 업로드 (Supabase)';
+              uploadBtn.disabled = false;
+            }, 2000);
+          } catch (err: any) {
+            alert('업로드 실패: ' + err.message);
+            uploadBtn.innerHTML = '다시 시도';
+            uploadBtn.disabled = false;
+          }
+        };
+        
+        modalContent.prepend(fileInput);
+        modalContent.prepend(uploadBtn);
       }
     });
 
@@ -64,7 +143,7 @@ const GrapesEditor = ({ initialData, onReady }: GrapesEditorProps) => {
         grapesInstance.current = null;
       }
     };
-  }, []); // Only run once on mount
+  }, []);
 
   return (
     <div className="h-full w-full bg-white">
@@ -83,6 +162,24 @@ const GrapesEditor = ({ initialData, onReady }: GrapesEditorProps) => {
         .gjs-pn-panels::-webkit-scrollbar-thumb {
           background: rgba(0,0,0,0.1);
           border-radius: 10px;
+        }
+        .nkhb-upload-btn {
+          cursor: pointer;
+          background-color: #2563eb !important;
+          color: white !important;
+          border: none;
+          padding: 12px !important;
+          border-radius: 8px !important;
+          font-weight: bold !important;
+          transition: all 0.2s;
+        }
+        .nkhb-upload-btn:hover {
+          background-color: #1d4ed8 !important;
+          transform: translateY(-1px);
+        }
+        .nkhb-upload-btn:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
         }
       `}</style>
       <div ref={editorRef} className="h-full"></div>
