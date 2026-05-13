@@ -4,14 +4,16 @@ import {
   Save, 
   Plus, 
   Trash2, 
-  Globe, 
   Link as LinkIcon, 
   FileText, 
   Eye, 
   EyeOff,
   Search,
-  ExternalLink
+  ExternalLink,
+  Monitor,
+  Code
 } from 'lucide-react';
+import GrapesEditor from '../components/GrapesEditor';
 
 interface Page {
   id: string;
@@ -20,6 +22,8 @@ interface Page {
   title_en: string;
   content_ko: string;
   content_en: string;
+  layout_ko: any;
+  layout_en: any;
   is_published: boolean;
 }
 
@@ -29,6 +33,8 @@ const Pages = () => {
   const [activePage, setActivePage] = useState<Page | null>(null);
   const [saving, setSaving] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [editorMode, setEditorMode] = useState<'visual' | 'code'>('visual');
+  const [activeLang, setActiveLang] = useState<'ko' | 'en'>('ko');
 
   useEffect(() => {
     fetchPages();
@@ -60,6 +66,8 @@ const Pages = () => {
       title_en: 'Untitled Page',
       content_ko: '',
       content_en: '',
+      layout_ko: null,
+      layout_en: null,
       is_published: false
     };
 
@@ -106,6 +114,8 @@ const Pages = () => {
         title_en: activePage.title_en,
         content_ko: activePage.content_ko,
         content_en: activePage.content_en,
+        layout_ko: activePage.layout_ko,
+        layout_en: activePage.layout_en,
         is_published: activePage.is_published,
         updated_at: new Date().toISOString()
       })
@@ -118,6 +128,27 @@ const Pages = () => {
       alert('성공적으로 저장되었습니다.');
     }
     setSaving(false);
+  };
+
+  const handleEditorChange = (data: { html: string; css: string; components: any; style: any }) => {
+    if (!activePage) return;
+    
+    const combinedHtml = `<style>${data.css}</style>${data.html}`;
+    const layoutState = { components: data.components, style: data.style };
+
+    if (activeLang === 'ko') {
+      setActivePage({
+        ...activePage,
+        content_ko: combinedHtml,
+        layout_ko: layoutState
+      });
+    } else {
+      setActivePage({
+        ...activePage,
+        content_en: combinedHtml,
+        layout_en: layoutState
+      });
+    }
   };
 
   const filteredPages = pages.filter(p => 
@@ -185,9 +216,6 @@ const Pages = () => {
               </div>
             </button>
           ))}
-          {filteredPages.length === 0 && (
-            <p className="text-center py-10 text-sm text-gray-400">페이지가 없습니다.</p>
-          )}
         </div>
       </div>
 
@@ -195,9 +223,47 @@ const Pages = () => {
       {activePage ? (
         <div className="flex-1 flex flex-col min-w-0">
           <div className="p-4 border-b dark:border-gray-700 flex items-center justify-between bg-white dark:bg-gray-800 z-10">
-            <div className="flex items-center gap-4">
-              <h3 className="font-bold text-gray-500 uppercase tracking-widest text-xs">Page Editor</h3>
+            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
+                <button
+                  onClick={() => setActiveLang('ko')}
+                  className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${
+                    activeLang === 'ko' ? 'bg-white dark:bg-gray-600 text-blue-600 shadow-sm' : 'text-gray-500'
+                  }`}
+                >
+                  한국어
+                </button>
+                <button
+                  onClick={() => setActiveLang('en')}
+                  className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${
+                    activeLang === 'en' ? 'bg-white dark:bg-gray-600 text-blue-600 shadow-sm' : 'text-gray-500'
+                  }`}
+                >
+                  ENGLISH
+                </button>
+              </div>
+
+              <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
+                <button
+                  onClick={() => setEditorMode('visual')}
+                  className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-bold transition-all ${
+                    editorMode === 'visual' ? 'bg-white dark:bg-gray-600 text-blue-600 shadow-sm' : 'text-gray-500'
+                  }`}
+                >
+                  <Monitor className="w-3.5 h-3.5" /> Visual
+                </button>
+                <button
+                  onClick={() => setEditorMode('code')}
+                  className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-bold transition-all ${
+                    editorMode === 'code' ? 'bg-white dark:bg-gray-600 text-blue-600 shadow-sm' : 'text-gray-500'
+                  }`}
+                >
+                  <Code className="w-3.5 h-3.5" /> HTML
+                </button>
+              </div>
+
               <div className="h-4 w-px bg-gray-200 dark:bg-gray-700"></div>
+              
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setActivePage({...activePage, is_published: !activePage.is_published})}
@@ -221,11 +287,11 @@ const Pages = () => {
                 </a>
               </div>
             </div>
+            
             <div className="flex items-center gap-2">
               <button
                 onClick={() => deletePage(activePage.id)}
                 className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors"
-                title="페이지 삭제"
               >
                 <Trash2 className="w-5 h-5" />
               </button>
@@ -240,98 +306,65 @@ const Pages = () => {
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-8 space-y-8 bg-gray-50/30 dark:bg-gray-900/10">
-            {/* Slug Configuration */}
-            <div className="max-w-4xl mx-auto p-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm space-y-4">
-              <div className="flex items-center gap-2 text-sm font-bold text-gray-700 dark:text-gray-300">
-                <LinkIcon className="w-4 h-4 text-blue-600" /> 주소 설정 (URL Slug)
-              </div>
-              <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-900 px-4 py-3 rounded-xl border dark:border-gray-700 font-mono text-sm">
-                <span className="text-gray-400">nkhb.org/p/</span>
+          <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-gray-50/30 dark:bg-gray-900/10">
+            {/* Header Settings */}
+            <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="p-4 bg-white dark:bg-gray-800 rounded-2xl border dark:border-gray-700 shadow-sm space-y-3">
+                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Page Title ({activeLang.toUpperCase()})</label>
                 <input 
                   type="text"
-                  value={activePage.slug}
-                  onChange={(e) => setActivePage({...activePage, slug: e.target.value.toLowerCase().replace(/\s+/g, '-')})}
-                  className="bg-transparent border-none outline-none text-blue-600 w-full p-0"
-                  placeholder="page-slug"
+                  value={activeLang === 'ko' ? activePage.title_ko : activePage.title_en}
+                  onChange={(e) => setActivePage(activeLang === 'ko' 
+                    ? {...activePage, title_ko: e.target.value} 
+                    : {...activePage, title_en: e.target.value}
+                  )}
+                  className="w-full bg-transparent border-none outline-none text-lg font-bold text-gray-900 dark:text-white p-0"
+                  placeholder="제목을 입력하세요"
                 />
+              </div>
+              <div className="p-4 bg-white dark:bg-gray-800 rounded-2xl border dark:border-gray-700 shadow-sm space-y-3">
+                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center block">URL Slug</label>
+                <div className="flex items-center justify-center gap-2 font-mono text-sm">
+                  <span className="text-gray-400">/p/</span>
+                  <input 
+                    type="text"
+                    value={activePage.slug}
+                    onChange={(e) => setActivePage({...activePage, slug: e.target.value.toLowerCase().replace(/\s+/g, '-')})}
+                    className="bg-transparent border-none outline-none text-blue-600 font-bold"
+                    placeholder="page-slug"
+                  />
+                </div>
               </div>
             </div>
 
-            <div className="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Korean Content */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 text-sm font-bold text-red-600">
-                  <Globe className="w-4 h-4" /> 한국어 페이지 내용
-                </div>
-                <div className="space-y-4">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-gray-500 uppercase">페이지 제목</label>
-                    <input 
-                      type="text"
-                      value={activePage.title_ko}
-                      onChange={(e) => setActivePage({...activePage, title_ko: e.target.value})}
-                      className="w-full px-4 py-3 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-lg font-bold"
-                      placeholder="제목을 입력하세요"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-gray-500 uppercase">본문 내용 (HTML 지원)</label>
-                    <textarea 
-                      value={activePage.content_ko || ''}
-                      onChange={(e) => setActivePage({...activePage, content_ko: e.target.value})}
-                      className="w-full px-4 py-4 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none min-h-[400px] font-mono text-sm leading-relaxed"
-                      placeholder="내용을 입력하세요..."
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* English Content */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 text-sm font-bold text-blue-600">
-                  <Globe className="w-4 h-4" /> English Page Content
-                </div>
-                <div className="space-y-4">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-gray-500 uppercase">Page Title</label>
-                    <input 
-                      type="text"
-                      value={activePage.title_en}
-                      onChange={(e) => setActivePage({...activePage, title_en: e.target.value})}
-                      className="w-full px-4 py-3 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-lg font-bold"
-                      placeholder="Enter title"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-gray-500 uppercase">Body Content (HTML support)</label>
-                    <textarea 
-                      value={activePage.content_en || ''}
-                      onChange={(e) => setActivePage({...activePage, content_en: e.target.value})}
-                      className="w-full px-4 py-4 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none min-h-[400px] font-mono text-sm leading-relaxed"
-                      placeholder="Enter content here..."
-                    />
-                  </div>
-                </div>
-              </div>
+            {/* Main Content Editor */}
+            <div className="max-w-6xl mx-auto h-[700px]">
+              {editorMode === 'visual' ? (
+                <GrapesEditor 
+                  key={`${activePage.id}-${activeLang}`} // Force re-init on page/lang switch
+                  initialData={activeLang === 'ko' ? activePage.layout_ko : activePage.layout_en}
+                  onChange={handleEditorChange}
+                  minHeight="100%"
+                />
+              ) : (
+                <textarea 
+                  value={activeLang === 'ko' ? activePage.content_ko : activePage.content_en}
+                  onChange={(e) => setActivePage(activeLang === 'ko' 
+                    ? {...activePage, content_ko: e.target.value} 
+                    : {...activePage, content_en: e.target.value}
+                  )}
+                  className="w-full h-full p-6 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none font-mono text-sm leading-relaxed shadow-sm"
+                  placeholder="HTML 코드를 직접 입력하세요..."
+                />
+              )}
             </div>
           </div>
         </div>
       ) : (
-        <div className="flex-1 flex flex-col items-center justify-center p-20 text-center space-y-4 bg-gray-50/50 dark:bg-gray-900/20">
-          <div className="p-4 bg-white dark:bg-gray-800 rounded-full shadow-sm">
-            <FileText className="w-12 h-12 text-gray-200" />
-          </div>
-          <div>
-            <h3 className="text-lg font-bold text-gray-700 dark:text-gray-300">관리할 페이지를 선택하세요</h3>
-            <p className="text-sm text-gray-400">새로운 서브페이지를 생성하여 메뉴에 연결할 수 있습니다.</p>
-          </div>
-          <button 
-            onClick={createPage}
-            className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-colors"
-          >
-            <Plus className="w-4 h-4" /> 첫 페이지 만들기
-          </button>
+        <div className="flex-1 flex flex-col items-center justify-center p-20 text-center space-y-4">
+          <FileText className="w-12 h-12 text-gray-200" />
+          <h3 className="text-lg font-bold text-gray-700">관리할 페이지를 선택하세요</h3>
+          <button onClick={createPage} className="btn-hero bg-blue-600 text-white px-6 py-2 rounded-xl">새 페이지 추가</button>
         </div>
       )}
     </div>

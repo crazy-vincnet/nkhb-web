@@ -56,9 +56,13 @@ const DynamicPage = () => {
   const content = lang === 'ko' ? page.content_ko : page.content_en;
 
   return (
-    <div className="dynamic-page pt-32 pb-20">
+    <div className="dynamic-page pt-32 pb-20 overflow-hidden">
       <SEO slug={page.slug} />
-      <div className="container mx-auto px-4 max-w-4xl">
+      
+      {/* If content starts with <style>, it's GrapesJS content. 
+          We render it without the standard container constraints if it's a full-page design.
+          But for now, let's keep it in a semantic article wrapper. */}
+      <div className="container mx-auto px-4 max-w-5xl">
         <header className="mb-12 text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
             {title}
@@ -66,9 +70,14 @@ const DynamicPage = () => {
           <div className="w-20 h-1 bg-blue-600 mx-auto rounded-full"></div>
         </header>
 
-        <article 
-          className="prose prose-lg dark:prose-invert max-w-none prose-img:rounded-2xl prose-a:text-blue-600"
-          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(content || '') }}
+        <div 
+          className="grapesjs-content-wrapper"
+          dangerouslySetInnerHTML={{ 
+            __html: DOMPurify.sanitize(content || '', {
+              ADD_TAGS: ['style'], // Allow style tags for GrapesJS CSS
+              FORCE_BODY: true
+            }) 
+          }}
         />
       </div>
     </div>
