@@ -7,6 +7,7 @@ import Letters from './pages/Letters';
 import Audio from './pages/Audio';
 import Schedule from './pages/Schedule';
 import Content from './pages/Content';
+import SEO from './pages/SEO';
 
 function App() {
   const [session, setSession] = useState<any>(null);
@@ -44,6 +45,7 @@ function App() {
           <Route path="audio" element={<Audio />} />
           <Route path="schedule" element={<Schedule />} />
           <Route path="content" element={<Content />} />
+          <Route path="seo" element={<SEO />} />
         </Route>
       </Routes>
     </Router>

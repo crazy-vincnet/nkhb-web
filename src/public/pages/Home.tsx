@@ -13,6 +13,7 @@ import Schedule from '../components/Schedule';
 import ArticleModal from '../components/ArticleModal';
 import LetterModal from '../components/LetterModal';
 import SampleModal from '../components/SampleModal';
+import SEO from '../components/SEO';
 import { useI18n } from '../lib/i18n';
 
 const Home: React.FC = () => {
@@ -42,6 +43,7 @@ const Home: React.FC = () => {
 
     return (
         <>
+            <SEO slug="home" />
             <main>
                 <Hero />
                 <Background onOpenArticle={() => setIsArticleModalOpen(true)} />

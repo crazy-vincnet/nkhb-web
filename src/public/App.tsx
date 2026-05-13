@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -11,17 +12,19 @@ const App: React.FC = () => {
     const { lang } = useI18n();
 
     return (
-        <Router>
-            <ScrollToTop />
-            <div className={`app-container ${lang}`}>
-                <Header />
-                <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/about" element={<About />} />
-                </Routes>
-                <Footer />
-            </div>
-        </Router>
+        <HelmetProvider>
+            <Router>
+                <ScrollToTop />
+                <div className={`app-container ${lang}`}>
+                    <Header />
+                    <Routes>
+                        <Route path="/" element={<Home />} />
+                        <Route path="/about" element={<About />} />
+                    </Routes>
+                    <Footer />
+                </div>
+            </Router>
+        </HelmetProvider>
     );
 };
 

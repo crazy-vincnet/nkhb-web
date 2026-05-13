@@ -5,7 +5,8 @@ import {
   Music, 
   Calendar, 
   FileText, 
-  LogOut 
+  LogOut,
+  Search
 } from 'lucide-react';
 
 const Layout = () => {
@@ -22,12 +23,13 @@ const Layout = () => {
     { path: '/audio', icon: Music, label: 'Audio Tracks' },
     { path: '/schedule', icon: Calendar, label: 'Schedule' },
     { path: '/content', icon: FileText, label: 'Content' },
+    { path: '/seo', icon: Search, label: 'SEO' },
   ];
 
   return (
     <div className="flex h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
       {/* Sidebar */}
-      <aside className="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
+      <aside className="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 shrink-0">
         <div className="p-6">
           <h1 className="text-2xl font-bold text-blue-600 dark:text-blue-400">NKHB Admin</h1>
         </div>
