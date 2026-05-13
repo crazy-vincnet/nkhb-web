@@ -11,7 +11,7 @@ const About: React.FC = () => {
             <SEO slug="about" />
             <section className="about-hero">
                 <div className="container">
-                    <div className="about-hero-content text-center">
+                    <div className="about-hero-content">
                         <h1>{t('about_hero_title')}</h1>
                         <p className="subtitle">{t('about_hero_subtitle')}</p>
                     </div>
@@ -50,7 +50,7 @@ const About: React.FC = () => {
                         </div>
                         
                         <div className="mission-box">
-                            <h3 className="text-center mb-10" style={{ fontSize: '2rem', fontWeight: 800 }}>{t('about_mission_title')}</h3>
+                            <h3 className="section-title text-center">{t('about_mission_title')}</h3>
                             <p className="mission-desc text-center">{t('about_mission_desc')}</p>
                             <div className="mission-grid">
                                 <div className="mission-item">{t('about_mission_li1')}</div>
@@ -66,27 +66,27 @@ const About: React.FC = () => {
 
                 <section className="section about-ministry">
                     <div className="container">
-                        <h2 className="section-title text-center" style={{ marginBottom: '60px' }}>{t('about_ministry_title')}</h2>
+                        <h2 className="section-title text-center">{t('about_ministry_title')}</h2>
                         <div className="ministry-grid">
                             <div className="ministry-card">
-                                <div className="card-icon-svg" style={{ fontSize: '40px', marginBottom: '20px' }}>📢</div>
-                                <h4 style={{ fontWeight: 800, fontSize: '1.25rem', marginBottom: '10px' }}>{t('about_ministry_card1_title')}</h4>
-                                <p style={{ color: '#666', fontSize: '0.95rem' }}>{t('about_ministry_card1_desc')}</p>
+                                <div className="card-icon-svg">📢</div>
+                                <h4>{t('about_ministry_card1_title')}</h4>
+                                <p>{t('about_ministry_card1_desc')}</p>
                             </div>
                             <div className="ministry-card">
-                                <div className="card-icon-svg" style={{ fontSize: '40px', marginBottom: '20px' }}>📖</div>
-                                <h4 style={{ fontWeight: 800, fontSize: '1.25rem', marginBottom: '10px' }}>{t('about_ministry_card2_title')}</h4>
-                                <p style={{ color: '#666', fontSize: '0.95rem' }}>{t('about_ministry_card2_desc')}</p>
+                                <div className="card-icon-svg">📖</div>
+                                <h4>{t('about_ministry_card2_title')}</h4>
+                                <p>{t('about_ministry_card2_desc')}</p>
                             </div>
                             <div className="ministry-card">
-                                <div className="card-icon-svg" style={{ fontSize: '40px', marginBottom: '20px' }}>🤝</div>
-                                <h4 style={{ fontWeight: 800, fontSize: '1.25rem', marginBottom: '10px' }}>{t('about_ministry_card3_title')}</h4>
-                                <p style={{ color: '#666', fontSize: '0.95rem' }}>{t('about_ministry_card3_desc')}</p>
+                                <div className="card-icon-svg">🤝</div>
+                                <h4>{t('about_ministry_card3_title')}</h4>
+                                <p>{t('about_ministry_card3_desc')}</p>
                             </div>
                             <div className="ministry-card">
-                                <div className="card-icon-svg" style={{ fontSize: '40px', marginBottom: '20px' }}>🆘</div>
-                                <h4 style={{ fontWeight: 800, fontSize: '1.25rem', marginBottom: '10px' }}>{t('about_ministry_card4_title')}</h4>
-                                <p style={{ color: '#666', fontSize: '0.95rem' }}>{t('about_ministry_card4_desc')}</p>
+                                <div className="card-icon-svg">🆘</div>
+                                <h4>{t('about_ministry_card4_title')}</h4>
+                                <p>{t('about_ministry_card4_desc')}</p>
                             </div>
                         </div>
                     </div>
@@ -100,8 +100,8 @@ const About: React.FC = () => {
                                 <p className="caption">Kenneth Bae | NKFI 대표</p>
                             </div>
                             <div className="founder-info">
-                                <h2 style={{ fontSize: '2.5rem', fontWeight: 900 }}>{t('about_founder_title')}</h2>
-                                <h3 className="highlight-title" style={{ fontSize: '1.5rem', fontWeight: 700 }}>{t('about_founder_desc_title')}</h3>
+                                <h2>{t('about_founder_title')}</h2>
+                                <h3 className="highlight-title">{t('about_founder_desc_title')}</h3>
                                 <ul className="profile-list">
                                     <li>{t('about_founder_profile1')}</li>
                                     <li>{t('about_founder_profile2')}</li>
@@ -110,7 +110,7 @@ const About: React.FC = () => {
                                     <li>{t('about_founder_profile5')}</li>
                                     <li>{t('about_founder_profile6')}</li>
                                 </ul>
-                                <p className="book-info" style={{ fontWeight: 700, marginTop: '20px' }}>{t('about_founder_book')}</p>
+                                <p className="book-info">{t('about_founder_book')}</p>
                             </div>
                         </div>
                     </div>
@@ -118,10 +118,10 @@ const About: React.FC = () => {
 
                 <section className="section about-cta">
                     <div className="container">
-                        <div className="cta-box">
-                            <h2 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '30px' }}>{t('about_cta_title')}</h2>
+                        <div className="cta-box text-center">
+                            <h2>{t('about_cta_title')}</h2>
                             <div className="cta-buttons">
-                                <a href="https://nkfi.org" target="_blank" rel="noopener noreferrer" className="btn-fill-accent">
+                                <a href="https://nkfi.org" target="_blank" rel="noopener noreferrer" className="btn-hero btn-fill-accent">
                                     {t('about_cta_website')}
                                 </a>
                                 <Link to="/" className="btn-outline-dark">

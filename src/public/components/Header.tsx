@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useI18n } from '../lib/i18n';
 import { supabase } from '../lib/supabase';
 import { ChevronDown } from 'lucide-react';
@@ -19,6 +19,7 @@ const Header: React.FC = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
     const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+    const location = useLocation();
 
     useEffect(() => {
         const fetchMenu = async () => {
@@ -29,7 +30,6 @@ const Header: React.FC = () => {
                 .order('order', { ascending: true });
 
             if (data && !error) {
-                // Organize into hierarchy
                 const roots = data.filter(i => !i.parent_id);
                 const children = data.filter(i => i.parent_id);
                 
@@ -44,9 +44,14 @@ const Header: React.FC = () => {
         fetchMenu();
     }, []);
 
+    // Close mobile menu on route change
+    useEffect(() => {
+        setIsMenuOpen(false);
+        setActiveDropdown(null);
+    }, [location]);
+
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
-    // Fallback static menu if DB is empty
     const displayMenu = menuItems.length > 0 ? menuItems : [
         { id: '1', label_ko: 'NKFI 소개', label_en: 'About Us', path: '/about', order: 1, parent_id: null },
         { id: '2', label_ko: '방송안내', label_en: 'Broadcast', path: '#', order: 2, parent_id: null, children: [
@@ -74,15 +79,28 @@ const Header: React.FC = () => {
                             <li 
                                 key={item.id} 
                                 className={item.children && item.children.length > 0 ? 'has-dropdown' : ''}
-                                onMouseEnter={() => item.children && setActiveDropdown(item.id)}
-                                onMouseLeave={() => setActiveDropdown(null)}
+                                onMouseEnter={() => !isMenuOpen && item.children && setActiveDropdown(item.id)}
+                                onMouseLeave={() => !isMenuOpen && setActiveDropdown(null)}
                             >
-                                <div className="menu-item-wrapper">
-                                    <Link to={item.path} onClick={() => !item.children && setIsMenuOpen(false)}>
-                                        {lang === 'ko' ? item.label_ko : item.label_en}
-                                    </Link>
+                                <div 
+                                    className="menu-item-wrapper"
+                                    onClick={() => {
+                                        if (isMenuOpen && item.children) {
+                                            setActiveDropdown(activeDropdown === item.id ? null : item.id);
+                                        }
+                                    }}
+                                >
+                                    {item.children ? (
+                                        <span className="nav-link-text">
+                                            {lang === 'ko' ? item.label_ko : item.label_en}
+                                        </span>
+                                    ) : (
+                                        <Link to={item.path}>
+                                            {lang === 'ko' ? item.label_ko : item.label_en}
+                                        </Link>
+                                    )}
                                     {item.children && item.children.length > 0 && (
-                                        <ChevronDown className="w-4 h-4 ml-1 opacity-50" />
+                                        <ChevronDown className={`w-4 h-4 ml-1 opacity-50 transition-transform ${activeDropdown === item.id ? 'rotate-180' : ''}`} />
                                     )}
                                 </div>
                                 
@@ -90,7 +108,7 @@ const Header: React.FC = () => {
                                     <ul className={`dropdown-menu ${activeDropdown === item.id ? 'active' : ''}`}>
                                         {item.children.map(child => (
                                             <li key={child.id}>
-                                                <Link to={child.path} onClick={() => setIsMenuOpen(false)}>
+                                                <Link to={child.path}>
                                                     {lang === 'ko' ? child.label_ko : child.label_en}
                                                 </Link>
                                             </li>

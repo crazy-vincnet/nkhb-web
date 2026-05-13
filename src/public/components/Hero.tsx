@@ -10,7 +10,7 @@ const Hero: React.FC = () => {
             className="hero" 
             id="hero"
             style={{ 
-                background: `linear-gradient(rgba(10, 25, 47, 0.7), rgba(10, 25, 47, 0.7)), url('${t('image_hero_bg')}') center/cover no-repeat` 
+                background: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.5)), url('${t('image_hero_bg')}') center/cover no-repeat` 
             }}
         >
             <div className="container">

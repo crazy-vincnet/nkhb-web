@@ -406,15 +406,15 @@ const PageEditor = () => {
                       <p className="text-[10px] opacity-80 mt-0.5">페이지 하단 소식창 노출</p>
                     </div>
                     <button 
-                      onClick={() => setPage({...page, has_board: !page.has_board})}
-                      className={`w-12 h-6 rounded-full transition-colors relative z-10 border-2 ${page.has_board ? 'bg-white border-white' : 'bg-transparent border-white/30'}`}
+                      onClick={() => setPage({...page!, has_board: !page?.has_board})}
+                      className={`w-12 h-6 rounded-full transition-colors relative z-10 border-2 ${page?.has_board ? 'bg-white border-white' : 'bg-transparent border-white/30'}`}
                     >
-                      <div className={`absolute top-0.5 w-4 h-4 rounded-full transition-all ${page.has_board ? 'left-6 bg-blue-600' : 'left-0.5 bg-white/50'}`}></div>
+                      <div className={`absolute top-0.5 w-4 h-4 rounded-full transition-all ${page?.has_board ? 'left-6 bg-blue-600' : 'left-0.5 bg-white/50'}`}></div>
                     </button>
                     <MessageSquare className="absolute -right-4 -bottom-4 w-20 h-20 text-white/10" />
                   </div>
 
-                  {page.has_board && (
+                  {page?.has_board && (
                     <div className="space-y-8">
                       {/* Create Post Form */}
                       <div className="p-6 bg-gray-50 dark:bg-gray-900 rounded-[2rem] border border-gray-100 dark:border-gray-700 space-y-4">
@@ -460,14 +460,14 @@ const PageEditor = () => {
                             <input 
                                 type="text"
                                 value={page.board_title_ko}
-                                onChange={(e) => setPage({...page, board_title_ko: e.target.value})}
+                                onChange={(e) => setPage({...page!, board_title_ko: e.target.value})}
                                 className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-lg text-xs outline-none focus:ring-1 focus:ring-blue-500"
                                 placeholder="한국어 제목"
                             />
                             <input 
                                 type="text"
                                 value={page.board_title_en}
-                                onChange={(e) => setPage({...page, board_title_en: e.target.value})}
+                                onChange={(e) => setPage({...page!, board_title_en: e.target.value})}
                                 className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-lg text-xs outline-none focus:ring-1 focus:ring-blue-500"
                                 placeholder="English Title"
                             />
@@ -475,13 +475,14 @@ const PageEditor = () => {
                       </div>
 
                       {/* Post List */}
-                      <div className="flex items-center justify-between px-1">
-                        <h4 className="font-bold text-xs text-gray-500 uppercase tracking-widest">등록된 소식 ({posts.length})</h4>
-                        <div className="flex gap-3">
-                            <button onClick={() => navigate('/posts')} className="text-[10px] font-bold text-blue-600 hover:underline">모든 글 관리</button>
-                            <button onClick={fetchPosts} className="text-[10px] font-bold text-blue-600 hover:underline">새로고침</button>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between px-1">
+                          <h4 className="font-bold text-xs text-gray-500 uppercase tracking-widest">등록된 소식 ({posts.length})</h4>
+                          <div className="flex gap-3">
+                              <button onClick={() => navigate('/posts')} className="text-[10px] font-bold text-blue-600 hover:underline">모든 글 관리</button>
+                              <button onClick={fetchPosts} className="text-[10px] font-bold text-blue-600 hover:underline">새로고침</button>
+                          </div>
                         </div>
-                      </div>
 
                         {loadingPosts ? (
                           <div className="py-10 text-center"><Loader2 className="w-5 h-5 animate-spin mx-auto text-gray-300" /></div>
