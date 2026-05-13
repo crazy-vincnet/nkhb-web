@@ -44,7 +44,6 @@ const Header: React.FC = () => {
         fetchMenu();
     }, []);
 
-    // Close mobile menu on route change
     useEffect(() => {
         setIsMenuOpen(false);
         setActiveDropdown(null);
@@ -82,38 +81,31 @@ const Header: React.FC = () => {
                                 onMouseEnter={() => !isMenuOpen && item.children && setActiveDropdown(item.id)}
                                 onMouseLeave={() => !isMenuOpen && setActiveDropdown(null)}
                             >
-                                <div 
-                                    className="menu-item-wrapper"
-                                    onClick={() => {
-                                        if (isMenuOpen && item.children) {
-                                            setActiveDropdown(activeDropdown === item.id ? null : item.id);
-                                        }
-                                    }}
-                                >
-                                    {item.children ? (
-                                        <span className="nav-link-text">
-                                            {lang === 'ko' ? item.label_ko : item.label_en}
-                                        </span>
-                                    ) : (
-                                        <Link to={item.path}>
-                                            {lang === 'ko' ? item.label_ko : item.label_en}
-                                        </Link>
-                                    )}
-                                    {item.children && item.children.length > 0 && (
-                                        <ChevronDown className={`w-4 h-4 ml-1 opacity-50 transition-transform ${activeDropdown === item.id ? 'rotate-180' : ''}`} />
-                                    )}
-                                </div>
-                                
-                                {item.children && item.children.length > 0 && (
-                                    <ul className={`dropdown-menu ${activeDropdown === item.id ? 'active' : ''}`}>
-                                        {item.children.map(child => (
-                                            <li key={child.id}>
-                                                <Link to={child.path}>
-                                                    {lang === 'ko' ? child.label_ko : child.label_en}
-                                                </Link>
-                                            </li>
-                                        ))}
-                                    </ul>
+                                {item.children && item.children.length > 0 ? (
+                                    <>
+                                        <div 
+                                            className="menu-item-wrapper"
+                                            onClick={() => isMenuOpen && setActiveDropdown(activeDropdown === item.id ? null : item.id)}
+                                        >
+                                            <span className="nav-link-text">
+                                                {lang === 'ko' ? item.label_ko : item.label_en}
+                                            </span>
+                                            <ChevronDown className={`w-4 h-4 ml-1 opacity-50 transition-transform ${activeDropdown === item.id ? 'rotate-180' : ''}`} />
+                                        </div>
+                                        <ul className={`dropdown-menu ${activeDropdown === item.id ? 'active' : ''}`}>
+                                            {item.children.map(child => (
+                                                <li key={child.id}>
+                                                    <Link to={child.path}>
+                                                        {lang === 'ko' ? child.label_ko : child.label_en}
+                                                    </Link>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </>
+                                ) : (
+                                    <Link to={item.path}>
+                                        {lang === 'ko' ? item.label_ko : item.label_en}
+                                    </Link>
                                 )}
                             </li>
                         ))}
