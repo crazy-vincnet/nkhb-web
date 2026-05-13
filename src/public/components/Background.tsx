@@ -56,4 +56,5 @@ const Background: React.FC<BackgroundProps> = ({ onOpenArticle }) => {
     );
 };
 
-export default Background;
+// Performance: Export memoized component to skip re-renders when props haven't changed
+export default React.memo(Background);
