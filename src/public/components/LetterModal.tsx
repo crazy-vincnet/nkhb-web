@@ -35,13 +35,18 @@ const LetterModal: React.FC<LetterModalProps> = ({ isOpen, onClose }) => {
             if (dbError) throw dbError;
 
             // 2. Send via Server API (Real-time Notification)
-            await fetch('/api/send-email', {
+            const response = await fetch('/api/send-email', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(data),
             });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Server responded with error');
+            }
 
             const msg = lang === 'en' ? 'Letter sent successfully.' : '편지가 성공적으로 전송되었습니다.';
             alert(msg);
