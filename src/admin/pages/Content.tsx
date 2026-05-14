@@ -9,8 +9,6 @@ import {
   ImageIcon,
   Layout,
   Info,
-  Radio,
-  Heart,
   RotateCcw,
   CheckCircle2,
   Layers,
@@ -26,40 +24,64 @@ interface ContentItem {
 }
 
 const SECTIONS = [
-  { id: 'hero', label: '히어로', icon: Layout, description: '메인 배너 제목, 설명, 버튼, 통계', pattern: ['hero_', 'image_hero'] },
-  { id: 'about', label: '소개', icon: Info, description: '기관 소개 및 미션 섹션', pattern: ['background_', 'image_background'] },
-  { id: 'ministry', label: '사역', icon: Radio, description: '진행 중인 사역 리스트', pattern: ['composition_', 'sample_', 'track', 'effects_'] },
-  { id: 'support', label: '후원', icon: Heart, description: '후원 안내 및 계좌 정보', pattern: ['support_'] },
-  { id: 'nav', label: '공통/메뉴', icon: Globe, description: '내비게이션, 푸터, 로고', pattern: ['nav_', 'footer_', 'page_', 'alt_logo', 'image_logo'] },
-  { id: 'seo', label: 'SEO', icon: Search, description: '검색 엔진 최적화 메타 정보', pattern: ['meta_'] },
+  { 
+    id: 'home', 
+    label: '메인 페이지', 
+    icon: Layout, 
+    description: '홈페이지 메인 배너, 방송 소개, 후원 안내 등 모든 섹션',
+    patterns: ['hero_', 'background_', 'composition_', 'sample_', 'track', 'effects_', 'reach_', 'guide_', 'support_', 'schedule_']
+  },
+  { 
+    id: 'about', 
+    label: 'NKFI 소개', 
+    icon: Info, 
+    description: '기관 미션, 비전, 사역 소개, 창립자 정보',
+    patterns: ['about_']
+  },
+  { 
+    id: 'common', 
+    label: '공통/메뉴', 
+    icon: Globe, 
+    description: '네비게이션, 푸터, 로고, SNS 링크',
+    patterns: ['nav_', 'footer_', 'logo', 'title', 'image_', 'alt_']
+  },
+  { 
+    id: 'seo', 
+    label: 'SEO', 
+    icon: Search, 
+    description: '검색 엔진 최적화 메타 정보',
+    patterns: ['meta_']
+  },
 ];
 
-const GROUP_CONFIG: { [sectionId: string]: { label: string; pattern: string }[] } = {
-  hero: [
-    { label: '메인 문구', pattern: 'hero_title' },
-    { label: '설명 및 슬로건', pattern: 'hero_desc' },
-    { label: '메인 버튼', pattern: 'hero_button' },
-    { label: '히어로 이미지', pattern: 'image_hero' },
-  ],
-  support: [
-    { label: '후원 안내', pattern: 'support_title' },
-    { label: '계좌 정보', pattern: 'support_bank' },
+const GROUP_CONFIG: { [sectionId: string]: { label: string; patterns: string[] }[] } = {
+  home: [
+    { label: '히어로 (Main Banner)', patterns: ['hero_'] },
+    { label: '방송 배경', patterns: ['background_'] },
+    { label: '방송 구성', patterns: ['composition_'] },
+    { label: '샘플 트랙', patterns: ['sample_', 'track'] },
+    { label: '기대 효과', patterns: ['effects_'] },
+    { label: '도달 범위', patterns: ['reach_'] },
+    { label: '참여 안내', patterns: ['guide_'] },
+    { label: '후원 안내', patterns: ['support_'] },
+    { label: '방송 시간', patterns: ['schedule_'] },
   ],
   about: [
-    { label: '소개 타이틀', pattern: 'about_title' },
-    { label: '소개 설명', pattern: 'about_desc' },
+    { label: '소개 히어로', patterns: ['about_hero'] },
+    { label: 'NKFI 소개 본문', patterns: ['about_intro'] },
+    { label: '비전 및 사명', patterns: ['about_vision', 'about_mission'] },
+    { label: '사역 안내', patterns: ['about_ministry'] },
+    { label: '창립자 소개', patterns: ['about_founder'] },
+    { label: '하단 CTA', patterns: ['about_cta'] },
   ],
-  ministry: [
-    { label: '사역 타이틀', pattern: 'ministry_title' },
-    { label: '사역 설명', pattern: 'ministry_desc' },
-  ],
-  nav: [
-    { label: '메뉴 항목', pattern: 'nav_' },
-    { label: '푸터 정보', pattern: 'footer_' },
-    { label: '로고 설정', pattern: 'logo' },
+  common: [
+    { label: '네비게이션 메뉴', patterns: ['nav_'] },
+    { label: '푸터 정보', patterns: ['footer_'] },
+    { label: '로고 및 사이트 명칭', patterns: ['logo', 'title'] },
+    { label: '이미지 에셋', patterns: ['image_', 'alt_'] },
   ],
   seo: [
-    { label: '메타 태그', pattern: 'meta_' },
+    { label: '검색 엔진 최적화', patterns: ['meta_'] },
   ]
 };
 
@@ -156,7 +178,7 @@ const Content = () => {
 
   const getLabel = (key: string) => KEY_LABELS[key] || key.split('_').join(' ').toUpperCase();
 
-  const filteredItems = useMemo(() => {
+  const filteredItemsByStatus = useMemo(() => {
     let items = content;
     if (statusFilter === 'missing') items = items.filter(i => !i.value_en || !i.value_ko);
     else if (statusFilter === 'modified') items = items.filter(i => modifiedIds.has(i.id));
@@ -164,28 +186,44 @@ const Content = () => {
   }, [content, statusFilter, modifiedIds]);
 
   const groupedItems = useMemo(() => {
-    const groups = GROUP_CONFIG[activeTab] || [{ label: '일반', pattern: '' }];
+    const section = SECTIONS.find(s => s.id === activeTab);
+    const sectionPatterns = section?.patterns || [];
     
-    return groups.map(group => {
-      const items = filteredItems.filter(item => {
-        // 1. 해당 섹션에 속하는지 확인
-        const matchesSection = item.key.toLowerCase().startsWith(activeTab.toLowerCase()) || 
-                               item.key.toLowerCase().includes(activeTab.toLowerCase());
-        
-        // 2. 해당 그룹 패턴과 일치하는지 확인
-        const matchesGroup = group.pattern === '' || item.key.toLowerCase().includes(group.pattern.toLowerCase());
-        
-        // 3. 검색어 필터링
-        const matchesSearch = searchQuery === '' || 
-          item.key.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          (item.value_ko || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-          (item.value_en || '').toLowerCase().includes(searchQuery.toLowerCase());
-        
-        return matchesSection && matchesGroup && matchesSearch;
-      });
+    // Filter items belonging to this section
+    const sectionItems = filteredItemsByStatus.filter(item => 
+      sectionPatterns.some(p => item.key.toLowerCase().includes(p.toLowerCase()))
+    );
+
+    const config = GROUP_CONFIG[activeTab] || [];
+    const usedIds = new Set<string>();
+
+    const groups = config.map(group => {
+      const items = sectionItems.filter(item => 
+        group.patterns.some(p => item.key.toLowerCase().includes(p.toLowerCase())) &&
+        (searchQuery === '' || 
+         item.key.toLowerCase().includes(searchQuery.toLowerCase()) ||
+         (item.value_ko || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+         (item.value_en || '').toLowerCase().includes(searchQuery.toLowerCase()))
+      );
+      items.forEach(i => usedIds.add(i.id));
       return { ...group, items };
-    }).filter(g => g.items.length > 0);
-  }, [filteredItems, activeTab, searchQuery]);
+    });
+
+    // Add "Miscellaneous" group for items in section but not in any specific group
+    const miscItems = sectionItems.filter(item => 
+      !usedIds.has(item.id) &&
+      (searchQuery === '' || 
+       item.key.toLowerCase().includes(searchQuery.toLowerCase()) ||
+       (item.value_ko || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+       (item.value_en || '').toLowerCase().includes(searchQuery.toLowerCase()))
+    );
+
+    if (miscItems.length > 0) {
+      groups.push({ label: '기타 항목', patterns: [], items: miscItems });
+    }
+
+    return groups.filter(g => g.items.length > 0);
+  }, [filteredItemsByStatus, activeTab, searchQuery]);
 
   const handleUpdate = async (item: ContentItem) => {
     setSavingId(item.id);
