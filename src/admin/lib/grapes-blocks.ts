@@ -423,4 +423,74 @@ export const initNKHBBlocks = (editor: Editor) => {
       </div>
     `,
   });
+
+  // --- Category: NKHB Special (특화 기능) ---
+  bm.add('nkhb-audio-player', {
+    label: '오디오 플레이어',
+    category: 'NKHB Special',
+    media: createIcon('🎵'),
+    content: `
+      <div style="padding: 30px; background: #f8fafc; border-radius: 24px; border: 1px solid #e2e8f0; display: flex; align-items: center; gap: 20px;">
+        <div style="width: 60px; height: 60px; background: #2563eb; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white;">
+          <svg viewBox="0 0 24 24" width="30" height="30" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        </div>
+        <div style="flex: 1;">
+          <div style="font-weight: 800; font-size: 1.1rem; color: #1e293b; margin-bottom: 5px;">방송 제목을 입력하세요</div>
+          <div style="width: 100%; height: 4px; background: #e2e8f0; border-radius: 2px; position: relative;">
+            <div style="position: absolute; left: 0; top: 0; bottom: 0; width: 30%; background: #2563eb; border-radius: 2px;"></div>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 10px; color: #94a3b8; mt: 5px;">
+            <span>03:15</span><span>15:00</span>
+          </div>
+        </div>
+      </div>
+    `,
+  });
+
+  bm.add('nkhb-live-badge', {
+    label: '라이브 편성 위젯',
+    category: 'NKHB Special',
+    media: createIcon('📡'),
+    content: `
+      <div style="display: inline-flex; align-items: center; gap: 10px; padding: 8px 16px; background: white; border-radius: 50px; border: 1px solid #fee2e2; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+        <span style="display: block; width: 8px; height: 8px; background: #ef4444; border-radius: 50%; animation: pulse 2s infinite;"></span>
+        <span style="font-size: 12px; font-weight: 800; color: #1e293b; text-transform: uppercase;">ON AIR</span>
+        <span style="width: 1px; height: 12px; background: #e2e8f0;"></span>
+        <span style="font-size: 12px; font-weight: 600; color: #64748b;">02:30 - 03:00 (5920 kHz)</span>
+      </div>
+      <style>
+        @keyframes pulse {
+          0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+          70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+          100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+      </style>
+    `,
+  });
+
+  bm.add('nkhb-donation-progress', {
+    label: '후원 현황바',
+    category: 'NKHB Special',
+    media: createIcon('📈'),
+    content: `
+      <div style="padding: 40px; background: white; border-radius: 30px; border: 1px solid #f1f5f9; box-shadow: 0 10px 30px rgba(0,0,0,0.03);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 15px;">
+          <div>
+            <div style="font-size: 12px; font-weight: 700; color: #2563eb; text-transform: uppercase; margin-bottom: 5px;">Current Campaign</div>
+            <div style="font-size: 1.5rem; font-weight: 900; color: #0f172a;">북한 라디오 보내기</div>
+          </div>
+          <div style="text-align: right;">
+            <span style="font-size: 1.8rem; font-weight: 900; color: #2563eb;">75%</span>
+          </div>
+        </div>
+        <div style="width: 100%; height: 12px; background: #f1f5f9; border-radius: 10px; overflow: hidden;">
+          <div style="width: 75%; height: 100%; background: linear-gradient(90deg, #2563eb, #3b82f6); border-radius: 10px;"></div>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-top: 15px; font-size: 13px; font-weight: 600; color: #64748b;">
+          <span>$7,500 모금</span>
+          <span>목표 $10,000</span>
+        </div>
+      </div>
+    `,
+  });
 };

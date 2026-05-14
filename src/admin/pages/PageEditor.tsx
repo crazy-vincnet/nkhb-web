@@ -284,6 +284,24 @@ const PageEditor = () => {
               EN
             </button>
           </div>
+
+          {activeLang === 'en' && (
+            <button
+              onClick={() => {
+                if (window.confirm('한국어 레이아웃을 영어 레이아웃으로 덮어쓰시겠습니까? 현재 영어 데이터는 삭제됩니다.')) {
+                  setPage(prev => prev ? ({ ...prev, layout_en: prev.layout_ko }) : null);
+                  // Refresh editor if it's already mounted
+                  if (editorRef.current) {
+                    editorRef.current.loadProjectData(page?.layout_ko);
+                  }
+                }
+              }}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-lg text-[10px] font-black transition-all border border-indigo-100"
+              title="한국어 디자인 그대로 가져오기"
+            >
+              <Plus className="w-3 h-3 rotate-45" /> Sync Design from KO
+            </button>
+          )}
         </div>
 
         <div className="flex items-center gap-3">
@@ -378,6 +396,22 @@ const PageEditor = () => {
                         }}
                         className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-lg text-sm outline-none focus:ring-1 focus:ring-blue-500 min-h-[120px] resize-none"
                       />
+                    </div>
+                  </div>
+
+                  {/* SEO Simulation */}
+                  <div className="pt-6 border-t dark:border-gray-700 space-y-4">
+                    <div className="flex items-center gap-2 text-[10px] font-black text-emerald-600 uppercase tracking-widest bg-emerald-50 px-2 py-1 rounded w-fit">
+                      <Globe className="w-3 h-3" /> Search Preview (Simulation)
+                    </div>
+                    <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm space-y-1.5">
+                      <div className="text-[12px] text-gray-500 truncate">nkhb.org › p › {page.slug}</div>
+                      <div className="text-[18px] text-blue-700 font-medium truncate hover:underline cursor-pointer">
+                        {activeLang === 'ko' ? (seo.title_ko || page.title_ko) : (seo.title_en || page.title_en)} | 뉴코리아 희망방송
+                      </div>
+                      <div className="text-[13px] text-gray-600 line-clamp-2 leading-relaxed">
+                        {(activeLang === 'ko' ? seo.description_ko : seo.description_en) || '페이지 설명을 입력하면 여기에 검색 결과가 미리 표시됩니다...'}
+                      </div>
                     </div>
                   </div>
 

@@ -104,6 +104,26 @@ const GrapesEditor = ({ initialData, onReady }: GrapesEditorProps) => {
 
         initNKHBBlocks(editor);
 
+        // Fetch and load existing assets from Supabase
+        const loadAssets = async () => {
+          try {
+            const { data: files, error } = await supabase.storage.from('assets').list('cms');
+            if (error) throw error;
+            if (files) {
+              const assets = files
+                .filter(file => file.name !== '.emptyFolderPlaceholder')
+                .map(file => {
+                  const { data: { publicUrl } } = supabase.storage.from('assets').getPublicUrl(`cms/${file.name}`);
+                  return publicUrl;
+                });
+              editor.AssetManager.add(assets);
+            }
+          } catch (err) {
+            console.error('Failed to load assets:', err);
+          }
+        };
+        loadAssets();
+
         // Load initial data safely
         if (initialData) {
             if (initialData.pages || initialData.assets) {
