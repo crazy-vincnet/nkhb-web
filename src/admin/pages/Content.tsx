@@ -1,7 +1,23 @@
-import { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { 
+  Save, 
+  Search, 
+  Globe, 
+  Languages,
+  RotateCcw,
+  CheckCircle2,
+  Copy,
+  Layout as LayoutIcon,
   ChevronRight,
+  Info,
+  Radio,
+  Heart,
+  Settings,
+  Mail,
+  Users,
+  MessageSquare,
+  HelpCircle,
   FileText
 } from 'lucide-react';
 
