@@ -41,7 +41,63 @@ const GrapesEditor = ({ initialData, onReady }: GrapesEditorProps) => {
       }
     });
 
-    // ... (Asset Manager logic remains the same)
+    // Setup Custom Image Upload Bridge to Supabase
+    editor.on('run:open-assets', () => {
+      const modal = editor.Modal;
+      const modalContent = modal.getContentEl();
+      
+      if (modalContent && !modalContent.querySelector('.nkhb-upload-btn')) {
+        const uploadBtn = document.createElement('button');
+        uploadBtn.className = 'nkhb-upload-btn gjs-btn-prim';
+        uploadBtn.innerHTML = '새 이미지 업로드 (Supabase)';
+        uploadBtn.style.margin = '10px';
+        uploadBtn.style.width = 'calc(100% - 20px)';
+        
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*';
+        fileInput.style.display = 'none';
+        
+        uploadBtn.onclick = () => fileInput.click();
+        
+        fileInput.onchange = async (e: any) => {
+          const file = e.target.files?.[0];
+          if (!file) return;
+          
+          try {
+            uploadBtn.innerHTML = '업로드 중...';
+            uploadBtn.disabled = true;
+            
+            const fileExt = file.name.split('.').pop();
+            const fileName = `cms/${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
+            
+            const { error: uploadError } = await supabase.storage
+              .from('assets')
+              .upload(fileName, file);
+              
+            if (uploadError) throw uploadError;
+            
+            const { data: { publicUrl } } = supabase.storage
+              .from('assets')
+              .getPublicUrl(fileName);
+              
+            editor.AssetManager.add(publicUrl);
+            uploadBtn.innerHTML = '업로드 완료!';
+            setTimeout(() => {
+              uploadBtn.innerHTML = '새 이미지 업로드 (Supabase)';
+              uploadBtn.disabled = false;
+            }, 2000);
+          } catch (err: any) {
+            alert('업로드 실패: ' + err.message);
+            uploadBtn.innerHTML = '다시 시도';
+            uploadBtn.disabled = false;
+          }
+        };
+        
+        modalContent.prepend(fileInput);
+        modalContent.prepend(uploadBtn);
+      }
+    });
 
     // Initialize Custom NKHB Blocks
     initNKHBBlocks(editor);
