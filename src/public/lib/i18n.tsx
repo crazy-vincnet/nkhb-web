@@ -471,13 +471,23 @@ export const I18nProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const savedLang = localStorage.getItem('lang') as Language;
-        if (savedLang && (savedLang === 'ko' || savedLang === 'en')) {
-            setLangState(savedLang);
+        // 1. Check URL query parameter first
+        const params = new URLSearchParams(window.location.search);
+        const urlLang = params.get('lang') as Language;
+        
+        if (urlLang && (urlLang === 'ko' || urlLang === 'en')) {
+            setLang(urlLang);
         } else {
-            const browserLang = navigator.language.split('-')[0];
-            if (browserLang === 'en') {
-                setLangState('en');
+            // 2. Check localStorage
+            const savedLang = localStorage.getItem('lang') as Language;
+            if (savedLang && (savedLang === 'ko' || savedLang === 'en')) {
+                setLangState(savedLang);
+            } else {
+                // 3. Check browser language
+                const browserLang = navigator.language.split('-')[0];
+                if (browserLang === 'en') {
+                    setLangState('en');
+                }
             }
         }
 

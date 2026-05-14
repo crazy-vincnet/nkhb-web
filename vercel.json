@@ -1,4 +1,11 @@
 {
+  "redirects": [
+    {
+      "source": "/en/:path*",
+      "destination": "/:path*?lang=en",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/admin/:path*",
