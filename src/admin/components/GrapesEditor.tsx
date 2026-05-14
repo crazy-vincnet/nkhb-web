@@ -22,7 +22,7 @@ const GrapesEditor = ({ initialData, onReady }: GrapesEditorProps) => {
         const editor = grapesjs.init({
           container: editorRef.current,
           fromElement: false,
-          height: '100vh',
+          height: '100%',
           width: '100%',
           storageManager: false,
           plugins: [webpagePreset],
@@ -140,86 +140,55 @@ const GrapesEditor = ({ initialData, onReady }: GrapesEditorProps) => {
   }, []);
 
   return (
-    <div className="absolute inset-0 bg-white overflow-hidden gjs-custom-wrapper">
+    <div className="grapesjs-editor-wrapper">
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
-      <div ref={editorRef} className="h-full w-full"></div>
+      <div ref={editorRef} id="gjs"></div>
       <style>{`
-        .gjs-custom-wrapper {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-            height: 100%;
+        .grapesjs-editor-wrapper {
+          position: absolute;
+          inset: 0;
+          overflow: hidden;
+          background: #f1f5f9;
         }
-        #gjs {
-          border: 3px solid #eee;
-        }
+
+        /* GrapesJS Overrides */
         .gjs-editor-cont {
-            height: 100% !important;
-            width: 100% !important;
-            display: flex !important;
-            flex-direction: row-reverse !important;
+          height: 100% !important;
+          width: 100% !important;
         }
-        
-        /* Sidebar/Views container */
-        .gjs-pn-views-container {
-            width: 300px !important;
-            height: 100% !important;
-            background: #fff !important;
-            border-left: 1px solid #e2e8f0 !important;
-            position: relative !important;
-            top: 0 !important;
-            right: 0 !important;
-            box-shadow: none !important;
-        }
-        
-        /* Canvas area */
-        .gjs-cv-canvas {
-            width: calc(100% - 300px) !important;
-            height: 100% !important;
-            top: 0 !important;
-            position: relative !important;
-            background-color: #f1f5f9 !important;
-        }
-        
-        /* Panels */
+
+        /* Toolbar/Panels Fix */
         .gjs-pn-panels {
-            position: relative !important;
-            z-index: 10;
-            background: #fff;
-            border-bottom: 1px solid #e2e8f0;
+          z-index: 100 !important;
         }
 
-        /* Buttons Styling */
-        .gjs-pn-btn {
-            color: #64748b !important;
-            font-size: 1.2rem !important;
-            padding: 8px 12px !important;
-            border-radius: 8px !important;
-            transition: all 0.2s;
-        }
-        .gjs-pn-btn:hover {
-            color: #2563eb !important;
-            background: #eff6ff !important;
-        }
-        .gjs-pn-active {
-            color: #2563eb !important;
-            background: #eff6ff !important;
-            box-shadow: inset 0 0 0 1px rgba(37,99,235,0.1) !important;
-        }
-
+        /* Asset Manager Modal */
         .nkhb-upload-btn {
-            cursor: pointer;
-            background: #2563eb !important;
-            color: #fff !important;
-            border: none;
-            padding: 12px !important;
-            border-radius: 8px !important;
-            font-weight: bold !important;
-            font-size: 14px !important;
+          cursor: pointer;
+          background: #2563eb !important;
+          color: #fff !important;
+          border: none;
+          padding: 12px !important;
+          border-radius: 8px !important;
+          font-weight: bold !important;
+          font-size: 14px !important;
+          transition: all 0.2s;
         }
-        
-        /* Hide unwanted default panels if any */
-        .gjs-pn-commands { display: none !important; }
+        .nkhb-upload-btn:hover {
+          background: #1e40af !important;
+        }
+        .nkhb-upload-btn:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
+        /* Korean Translations Style Adjustments */
+        .gjs-pn-views-container {
+          width: 250px !important;
+        }
+        .gjs-cv-canvas {
+          width: calc(100% - 250px) !important;
+        }
       `}</style>
     </div>
   );

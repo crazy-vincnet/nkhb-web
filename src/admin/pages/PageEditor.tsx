@@ -317,7 +317,7 @@ const PageEditor = () => {
       </header>
 
       <div className="flex-1 flex overflow-hidden relative">
-        <main className="flex-1 relative overflow-hidden bg-white text-gray-900">
+        <main className="flex-1 relative bg-white overflow-hidden">
           <GrapesEditor 
             key={`${id}-${activeLang}`}
             initialData={activeLang === 'ko' ? page.layout_ko : page.layout_en}
