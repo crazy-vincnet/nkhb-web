@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useRef } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { supabase } from '../lib/supabase';
 import { 
   Save, 
@@ -14,9 +14,8 @@ import {
   Copy,
   Languages,
   ExternalLink,
-  Zap,
-  FileText,
-  AlertCircle
+  X,
+  CheckCircle2
 } from 'lucide-react';
 
 interface ContentItem {
@@ -27,28 +26,47 @@ interface ContentItem {
 }
 
 const SECTIONS = [
-  { id: 'hero', label: '히어로 섹션', icon: Layout, pattern: ['hero_', 'image_hero'], desc: '메인 상단 비주얼 및 환영 메시지', link: '/#hero' },
-  { id: 'background', label: '방송배경 (01)', icon: Info, pattern: ['background_', 'image_background'], desc: '방송 취지 및 설립 배경', link: '/#about' },
-  { id: 'composition', label: '방송구성 (02)', icon: Radio, pattern: ['composition_', 'sample_', 'track'], desc: '라디오 프로그램 구성 및 샘플', link: '/#composition' },
-  { id: 'effects', label: '기대효과 (03)', icon: Heart, pattern: ['effects_'], desc: '대북 방송의 긍정적 영향력', link: '/#effects' },
-  { id: 'reach', label: '도달범위 (04)', icon: Globe, pattern: ['reach_', 'image_reach'], desc: '방송 송출 범위 및 청취자 현황', link: '/#reach' },
-  { id: 'guide', label: '참여안내 (05)', icon: Info, pattern: ['guide_', 'letter_modal'], desc: '사연 보내기 및 참여 방법', link: '/#guide' },
-  { id: 'support', label: '후원하기 (06)', icon: Heart, pattern: ['support_'], desc: '후원 안내 및 계좌 정보', link: '/#support' },
-  { id: 'schedule', label: '방송시간 (07)', icon: Settings, pattern: ['schedule_'], desc: '방송 시간표 및 주파수 안내', link: '/#schedule' },
-  { id: 'nav', label: '내비게이션/공통', icon: Globe, pattern: ['nav_', 'footer_', 'page_', 'alt_logo'], desc: '메뉴, 푸터 및 공통 문구', link: '/' },
-  { id: 'about', label: 'NKFI 소개페이지', icon: Info, pattern: ['about_', 'image_about'], desc: '단체 소개 및 연혁 페이지', link: '/about' },
-  { id: 'seo', label: 'SEO/메타데이터', icon: Search, pattern: ['meta_'], desc: '검색 엔진 및 공유 정보' },
+  { id: 'all', label: '전체 보기', icon: Layers },
+  { id: 'hero', label: '히어로', icon: Layout, pattern: ['hero_', 'image_hero'] },
+  { id: 'background', label: '방송배경', icon: Info, pattern: ['background_', 'image_background'] },
+  { id: 'composition', label: '방송구성', icon: Radio, pattern: ['composition_', 'sample_', 'track'] },
+  { id: 'effects', label: '기대효과', icon: Heart, pattern: ['effects_'] },
+  { id: 'reach', label: '도달범위', icon: Globe, pattern: ['reach_', 'image_reach'] },
+  { id: 'guide', label: '참여안내', icon: Info, pattern: ['guide_', 'letter_modal'] },
+  { id: 'support', label: '후원하기', icon: Heart, pattern: ['support_'] },
+  { id: 'nav', label: '공통/메뉴', icon: Globe, pattern: ['nav_', 'footer_', 'page_', 'alt_logo'] },
+  { id: 'seo', label: 'SEO', icon: Search, pattern: ['meta_'] },
 ];
+
+function Layers(props: any) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z" />
+      <path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65" />
+      <path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65" />
+    </svg>
+  );
+}
 
 const Content = () => {
   const [content, setContent] = useState<ContentItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeSectionId, setActiveSectionId] = useState('hero');
+  const [activeTab, setActiveTab] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedItem, setSelectedItem] = useState<ContentItem | null>(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState<{id: string, field: string} | null>(null);
-  const [modifiedIds, setModifiedIds] = useState<Set<string>>(new Set());
-  const [originalContent, setOriginalContent] = useState<ContentItem[]>([]);
 
   useEffect(() => {
     fetchContent();
@@ -65,7 +83,6 @@ const Content = () => {
       console.error('Error fetching content:', error);
     } else {
       setContent(data || []);
-      setOriginalContent(JSON.parse(JSON.stringify(data || [])));
     }
     setLoading(false);
   };
@@ -75,82 +92,57 @@ const Content = () => {
     return k.includes('logo') || k.includes('image') || k.includes('url') || k.startsWith('image_');
   };
 
-  const currentSection = useMemo(() => SECTIONS.find(s => s.id === activeSectionId), [activeSectionId]);
-
   const filteredItems = useMemo(() => {
     let items = content;
     
     if (searchQuery) {
-        return items.filter(item => 
+        items = items.filter(item => 
             item.key.toLowerCase().includes(searchQuery.toLowerCase()) ||
             item.value_ko.toLowerCase().includes(searchQuery.toLowerCase()) ||
             item.value_en?.toLowerCase().includes(searchQuery.toLowerCase())
         );
-    }
-
-    if (currentSection) {
-        return items.filter(item => 
-            currentSection.pattern.some(p => item.key.toLowerCase().startsWith(p) || item.key.toLowerCase().includes(p))
-        );
+    } else if (activeTab !== 'all') {
+        const section = SECTIONS.find(s => s.id === activeTab);
+        if (section?.pattern) {
+            items = items.filter(item => 
+                section.pattern.some(p => item.key.toLowerCase().startsWith(p) || item.key.toLowerCase().includes(p))
+            );
+        }
     }
 
     return items;
-  }, [content, activeSectionId, searchQuery, currentSection]);
+  }, [content, activeTab, searchQuery]);
 
-  const handleBatchUpdate = async () => {
-    if (modifiedIds.size === 0) return;
+  const handleUpdate = async (item: ContentItem) => {
     setSaving(true);
-    try {
-      const updates = content
-        .filter(item => modifiedIds.has(item.id))
-        .map(item => ({
-            id: item.id,
-            key: item.key,
-            value_ko: item.value_ko,
-            value_en: item.value_en
-        }));
+    const { error } = await supabase
+      .from('content')
+      .update({ 
+        value_ko: item.value_ko, 
+        value_en: item.value_en 
+      })
+      .eq('id', item.id);
 
-      const { error } = await supabase.from('content').upsert(updates);
-      if (error) throw error;
-      
-      setOriginalContent(prev => {
-        const next = [...prev];
-        updates.forEach(upd => {
-            const idx = next.findIndex(o => o.id === upd.id);
-            if (idx > -1) next[idx] = { ...upd };
-        });
-        return next;
-      });
-      setModifiedIds(new Set());
-      alert('모든 변경사항이 성공적으로 저장되었습니다.');
-    } catch (error: any) {
+    if (error) {
       alert('저장 실패: ' + error.message);
-    } finally {
-      setSaving(false);
+    } else {
+      setContent(prev => prev.map(o => o.id === item.id ? { ...item } : o));
+      setTimeout(() => {
+          setSaving(false);
+          setSelectedItem(null);
+      }, 500);
     }
   };
 
-  const handleChange = (id: string, field: 'value_ko' | 'value_en', value: string) => {
-    setContent(prev => prev.map(item => 
-      item.id === id ? { ...item, [field]: value } : item
-    ));
-
-    const original = originalContent.find(o => o.id === id);
-    if (!original) return;
-
-    const current = content.find(c => c.id === id);
-    const nextVal = { ...(current || original), [field]: value };
-    const isModified = nextVal.value_ko !== original.value_ko || nextVal.value_en !== original.value_en;
-
-    const nextModified = new Set(modifiedIds);
-    if (isModified) nextModified.add(id);
-    else nextModified.delete(id);
-    setModifiedIds(nextModified);
+  const handleFieldChange = (field: 'value_ko' | 'value_en', value: string) => {
+    if (!selectedItem) return;
+    setSelectedItem({ ...selectedItem, [field]: value });
   };
 
-  const handleFileUpload = async (id: string, field: 'value_ko' | 'value_en', file: File) => {
+  const handleFileUpload = async (field: 'value_ko' | 'value_en', file: File) => {
+    if (!selectedItem) return;
     try {
-      setUploading({ id, field });
+      setUploading({ id: selectedItem.id, field });
       const fileExt = file.name.split('.').pop();
       const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
       const filePath = `site-assets/${fileName}`;
@@ -165,7 +157,7 @@ const Content = () => {
         .from('assets')
         .getPublicUrl(filePath);
 
-      handleChange(id, field, publicUrl);
+      handleFieldChange(field, publicUrl);
     } catch (error: any) {
       alert('업로드 에러: ' + error.message);
     } finally {
@@ -173,318 +165,242 @@ const Content = () => {
     }
   };
 
-  const copyToClipboard = (text: string) => {
-    if (!text) return;
-    navigator.clipboard.writeText(text);
-  };
-
-  // Keyboard shortcut: Cmd+S
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 's') {
-        e.preventDefault();
-        handleBatchUpdate();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [modifiedIds, content]);
-
   if (loading) return (
-    <div className="flex items-center justify-center h-64">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+    <div className="flex items-center justify-center h-96">
+      <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
     </div>
   );
 
   return (
-    <div className="fixed inset-0 top-[72px] flex bg-gray-50 dark:bg-gray-950 font-pretendard overflow-hidden">
+    <div className="max-w-[1600px] mx-auto p-6 lg:p-10 font-pretendard min-h-screen">
       
-      {/* 1. SIDEBAR (Navigation) */}
-      <aside className="w-80 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex flex-col shrink-0">
-        <div className="p-6 border-b border-gray-100 dark:border-gray-800">
-            <h2 className="text-xl font-black text-gray-900 dark:text-white flex items-center gap-2">
-                <FileText className="w-5 h-5 text-blue-600" />
-                콘텐츠 스튜디오
-            </h2>
-            <div className="mt-4 relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input 
-                    type="text" 
-                    placeholder="항목 검색..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-800 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500"
-                />
-            </div>
+      {/* 1. TOP HEADER & SEARCH */}
+      <div className="flex flex-col md:flex-row justify-between items-center gap-8 mb-12">
+        <div>
+            <h1 className="text-3xl font-black text-gray-900 dark:text-white tracking-tighter">Content Studio</h1>
+            <p className="text-gray-500 font-medium mt-1">사이트의 모든 시각적, 텍스트 요소를 한눈에 관리하세요.</p>
         </div>
+        <div className="relative w-full md:max-w-md group">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+            <input 
+                type="text" 
+                placeholder="어떤 콘텐츠를 찾으시나요?"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-12 pr-6 py-4 bg-white dark:bg-gray-900 border-none rounded-[1.5rem] shadow-xl shadow-blue-500/5 focus:ring-2 focus:ring-blue-500 transition-all text-sm font-medium"
+            />
+        </div>
+      </div>
 
-        <nav className="flex-1 overflow-y-auto p-4 space-y-1 custom-scrollbar">
-            {SECTIONS.map((section) => {
-                const Icon = section.icon;
-                const isActive = activeSectionId === section.id && !searchQuery;
-                const sectionItems = content.filter(item => section.pattern.some(p => item.key.toLowerCase().startsWith(p) || item.key.toLowerCase().includes(p)));
-                const missingCount = sectionItems.filter(i => !i.value_en || !i.value_ko).length;
-                const modifiedCount = sectionItems.filter(i => modifiedIds.has(i.id)).length;
-
-                return (
-                    <button
-                        key={section.id}
-                        onClick={() => {
-                            setActiveSectionId(section.id);
-                            setSearchQuery('');
-                        }}
-                        className={`w-full flex items-center justify-between p-3.5 rounded-xl transition-all ${
-                            isActive 
-                            ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 shadow-sm ring-1 ring-blue-100 dark:ring-blue-900/50' 
-                            : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
-                        }`}
-                    >
-                        <div className="flex items-center gap-3">
-                            <Icon size={18} className={isActive ? 'text-blue-600' : 'text-gray-400'} />
-                            <span className={`text-sm font-bold ${isActive ? 'text-blue-700 dark:text-blue-300' : ''}`}>{section.label}</span>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                            {modifiedCount > 0 && <span className="w-2 h-2 rounded-full bg-rose-500 shadow-sm" />}
-                            {missingCount > 0 && (
-                                <span className="px-1.5 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-[10px] font-black rounded-md">{missingCount}</span>
-                            )}
-                        </div>
-                    </button>
-                );
-            })}
-        </nav>
-
-        {modifiedIds.size > 0 && (
-            <div className="p-6 bg-rose-50 dark:bg-rose-900/10 border-t border-rose-100 dark:border-rose-900/20">
+      {/* 2. NAVIGATION PILLS */}
+      <div className="flex flex-wrap items-center gap-2 mb-10 overflow-x-auto pb-4 custom-scrollbar">
+        {SECTIONS.map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+            return (
                 <button
-                    onClick={handleBatchUpdate}
-                    className="w-full py-3.5 bg-rose-600 text-white rounded-xl text-sm font-black shadow-lg shadow-rose-200 dark:shadow-none hover:bg-rose-700 transition-all flex items-center justify-center gap-2"
-                >
-                    <Zap className="w-4 h-4 fill-current" />
-                    {modifiedIds.size}개 변경사항 저장
-                </button>
-            </div>
-        )}
-      </aside>
-
-      {/* 2. MAIN PANEL (Editor) */}
-      <main className="flex-1 flex flex-col overflow-hidden relative">
-        {/* Main Header */}
-        <header className="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 px-10 py-6 flex items-center justify-between shrink-0">
-            <div>
-                <div className="flex items-center gap-3">
-                    <h1 className="text-2xl font-black text-gray-900 dark:text-white">
-                        {searchQuery ? '검색 결과' : currentSection?.label}
-                    </h1>
-                    {currentSection?.link && !searchQuery && (
-                        <a 
-                            href={currentSection.link} 
-                            target="_blank" 
-                            rel="noreferrer"
-                            className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
-                        >
-                            <ExternalLink size={16} />
-                        </a>
-                    )}
-                </div>
-                <p className="text-sm text-gray-500 font-medium mt-1">
-                    {searchQuery ? `"${searchQuery}"에 대한 ${filteredItems.length}개의 항목` : currentSection?.desc}
-                </p>
-            </div>
-
-            <div className="flex items-center gap-4">
-                <div className="hidden lg:flex items-center gap-2 text-xs font-bold text-gray-400">
-                    <span className="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded text-gray-500">Cmd + S</span>
-                    <span>빠른 저장</span>
-                </div>
-                <button
-                    onClick={handleBatchUpdate}
-                    disabled={modifiedIds.size === 0 || saving}
-                    className={`px-8 py-3.5 rounded-2xl text-sm font-black transition-all flex items-center gap-2 ${
-                        modifiedIds.size > 0 
-                        ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-xl shadow-blue-200' 
-                        : 'bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-600 cursor-not-allowed'
+                    key={tab.id}
+                    onClick={() => {setActiveTab(tab.id); setSearchQuery('');}}
+                    className={`flex items-center gap-2.5 px-6 py-3 rounded-full text-sm font-bold transition-all whitespace-nowrap ${
+                        isActive 
+                        ? 'bg-gray-900 text-white shadow-xl dark:bg-blue-600' 
+                        : 'bg-white dark:bg-gray-800 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700 shadow-sm'
                     }`}
                 >
-                    {saving ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save size={18} />}
-                    저장하기
+                    <Icon size={16} />
+                    {tab.label}
                 </button>
-            </div>
-        </header>
+            );
+        })}
+      </div>
 
-        {/* Form Area */}
-        <div className="flex-1 overflow-y-auto p-10 custom-scrollbar bg-gray-50/50 dark:bg-gray-950/50">
-            <div className="max-w-5xl mx-auto space-y-12">
-                {filteredItems.map((item) => (
-                    <div 
-                        key={item.id} 
-                        className={`bg-white dark:bg-gray-900 rounded-[2rem] border transition-all ${
-                            modifiedIds.has(item.id) 
-                            ? 'border-blue-400 ring-4 ring-blue-500/5 shadow-xl' 
-                            : 'border-gray-200 dark:border-gray-800 shadow-sm'
-                        }`}
-                    >
-                        {/* Field Header */}
-                        <div className="px-8 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <code className="text-[11px] font-black text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-3 py-1.5 rounded-lg">
-                                    {item.key}
-                                </code>
-                                {isImageUrlKey(item.key) && (
-                                    <span className="text-[9px] bg-purple-100 text-purple-700 px-2 py-0.5 rounded font-black uppercase tracking-wider">Image</span>
-                                )}
-                                {(!item.value_ko || !item.value_en) && (
-                                    <span className="flex items-center gap-1 text-[9px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-black uppercase tracking-wider">
-                                        <AlertCircle size={10} /> 미완성
-                                    </span>
-                                )}
+      {/* 3. VISUAL CARD GRID */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-8">
+        {filteredItems.map((item) => {
+            const isImg = isImageUrlKey(item.key);
+            return (
+                <div 
+                    key={item.id}
+                    onClick={() => setSelectedItem(item)}
+                    className="group bg-white dark:bg-gray-900 rounded-[2.5rem] overflow-hidden border border-gray-100 dark:border-gray-800 hover:border-blue-500/30 hover:shadow-2xl transition-all cursor-pointer flex flex-col h-full active:scale-95"
+                >
+                    {/* Visual Preview */}
+                    <div className="aspect-[4/3] bg-gray-50 dark:bg-gray-800 relative overflow-hidden flex items-center justify-center border-b border-gray-50 dark:border-gray-800">
+                        {isImg ? (
+                            item.value_ko ? (
+                                <img src={item.value_ko} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Preview" />
+                            ) : (
+                                <ImageIcon size={48} className="text-gray-200" />
+                            )
+                        ) : (
+                            <div className="p-8 w-full">
+                                <p className="text-gray-900 dark:text-gray-100 text-lg font-bold leading-relaxed line-clamp-4">
+                                    {item.value_ko || <span className="text-gray-300 italic font-normal">비어있는 문구</span>}
+                                </p>
                             </div>
-                            <div className="flex items-center gap-2">
+                        )}
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />
+                        <div className="absolute top-4 right-4 w-10 h-10 bg-white/90 dark:bg-gray-900/90 backdrop-blur rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0 shadow-lg">
+                            <Settings size={18} className="text-blue-600" />
+                        </div>
+                    </div>
+
+                    {/* Meta Info */}
+                    <div className="p-8 flex flex-col flex-1">
+                        <div className="flex items-center justify-between mb-4">
+                            <code className="text-[10px] font-black text-blue-600 bg-blue-50 dark:bg-blue-900/30 px-3 py-1 rounded-lg uppercase tracking-wider">
+                                {item.key}
+                            </code>
+                            {(!item.value_en || !item.value_ko) && (
+                                <div className="w-2 h-2 rounded-full bg-amber-500 shadow-lg shadow-amber-200" />
+                            )}
+                        </div>
+                        <p className="text-gray-400 text-xs font-medium line-clamp-2 leading-relaxed">
+                            {item.value_en || 'English translation needed'}
+                        </p>
+                    </div>
+                </div>
+            );
+        })}
+      </div>
+
+      {filteredItems.length === 0 && (
+        <div className="py-40 text-center">
+            <Search className="w-16 h-16 text-gray-100 mx-auto mb-6" />
+            <p className="text-gray-400 text-lg font-bold">일치하는 항목이 없습니다.</p>
+        </div>
+      )}
+
+      {/* 4. SLIDE-OVER EDITOR PANEL */}
+      <div className={`fixed inset-0 z-[100] transition-opacity duration-300 ${selectedItem ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+        {/* Backdrop */}
+        <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" onClick={() => setSelectedItem(null)} />
+        
+        {/* Panel */}
+        <div className={`absolute inset-y-0 right-0 w-full max-w-2xl bg-white dark:bg-gray-900 shadow-2xl transition-transform duration-500 ease-out transform ${selectedItem ? 'translate-x-0' : 'translate-x-full'}`}>
+            {selectedItem && (
+                <div className="flex flex-col h-full">
+                    {/* Header */}
+                    <div className="px-10 py-8 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
+                        <div>
+                            <h2 className="text-2xl font-black text-gray-900 dark:text-white flex items-center gap-3">
+                                {selectedItem.key}
+                                <button onClick={() => {navigator.clipboard.writeText(selectedItem.key);}} className="text-gray-300 hover:text-blue-600 transition-colors"><Copy size={18} /></button>
+                            </h2>
+                            <p className="text-sm text-gray-400 font-medium mt-1">콘텐츠 상세 편집</p>
+                        </div>
+                        <button onClick={() => setSelectedItem(null)} className="p-3 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-2xl transition-all">
+                            <X size={24} />
+                        </button>
+                    </div>
+
+                    {/* Scrollable Form */}
+                    <div className="flex-1 overflow-y-auto p-10 space-y-12 custom-scrollbar">
+                        {/* KO FIELD */}
+                        <div className="space-y-4">
+                            <label className="text-[11px] font-black text-gray-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                                <span className="w-2.5 h-2.5 rounded-full bg-red-500" /> 한국어 원문
+                            </label>
+                            {isImageUrlKey(selectedItem.key) ? (
+                                <ImageUploader 
+                                    value={selectedItem.value_ko} 
+                                    onChange={(v) => handleFieldChange('value_ko', v)}
+                                    onUpload={(f) => handleFileUpload('value_ko', f)}
+                                    isUploading={uploading?.id === selectedItem.id && uploading?.field === 'value_ko'}
+                                />
+                            ) : (
+                                <textarea
+                                    value={selectedItem.value_ko || ''}
+                                    onChange={(e) => handleFieldChange('value_ko', e.target.value)}
+                                    className="w-full p-8 text-xl border-4 border-gray-50 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50 rounded-[2rem] focus:bg-white dark:focus:bg-gray-900 focus:border-blue-500/20 focus:ring-0 outline-none min-h-[250px] transition-all font-medium leading-relaxed resize-none"
+                                    placeholder="한국어 내용을 입력하세요..."
+                                />
+                            )}
+                        </div>
+
+                        {/* EN FIELD */}
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                                <label className="text-[11px] font-black text-gray-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                                    <span className="w-2.5 h-2.5 rounded-full bg-blue-500" /> English Translation
+                                </label>
                                 <button 
-                                    onClick={() => copyToClipboard(item.key)}
-                                    className="p-2 text-gray-300 hover:text-blue-600 transition-colors"
-                                    title="Key 복사"
+                                    onClick={() => handleFieldChange('value_en', selectedItem.value_ko)}
+                                    className="flex items-center gap-1.5 text-[10px] font-black text-indigo-600 hover:underline uppercase"
                                 >
-                                    <Copy size={14} />
+                                    <Languages size={14} /> Sync from KO
                                 </button>
                             </div>
-                        </div>
-
-                        {/* Edit Area */}
-                        <div className="p-8 grid grid-cols-1 lg:grid-cols-2 gap-10">
-                            {/* KO */}
-                            <div className="space-y-4">
-                                <div className="flex items-center justify-between px-1">
-                                    <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
-                                        <span className="w-2 h-2 rounded-full bg-red-500" /> 한국어 원문
-                                    </h4>
-                                    <span className="text-[10px] font-bold text-gray-300">{item.value_ko?.length || 0} 자</span>
-                                </div>
-                                {isImageUrlKey(item.key) ? (
-                                    <ImageEditor 
-                                        value={item.value_ko} 
-                                        onChange={(val) => handleChange(item.id, 'value_ko', val)}
-                                        onUpload={(file) => handleFileUpload(item.id, 'value_ko', file)}
-                                        isUploading={uploading?.id === item.id && uploading?.field === 'value_ko'}
-                                    />
-                                ) : (
-                                    <AutoResizeTextarea
-                                        value={item.value_ko || ''}
-                                        onChange={(val) => handleChange(item.id, 'value_ko', val)}
-                                        placeholder="내용을 입력하세요..."
-                                        isError={!item.value_ko}
-                                    />
-                                )}
-                            </div>
-
-                            {/* EN */}
-                            <div className="space-y-4">
-                                <div className="flex items-center justify-between px-1">
-                                    <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
-                                        <span className="w-2 h-2 rounded-full bg-blue-500" /> English
-                                    </h4>
-                                    <div className="flex items-center gap-3">
-                                        <button 
-                                            onClick={() => handleChange(item.id, 'value_en', item.value_ko)}
-                                            className="text-[9px] font-black text-indigo-600 hover:underline flex items-center gap-1 uppercase"
-                                        >
-                                            <Languages size={10} /> KO-To-EN
-                                        </button>
-                                        <span className="text-[10px] font-bold text-gray-300">{item.value_en?.length || 0} 자</span>
-                                    </div>
-                                </div>
-                                {isImageUrlKey(item.key) ? (
-                                    <ImageEditor 
-                                        value={item.value_en} 
-                                        onChange={(val) => handleChange(item.id, 'value_en', val)}
-                                        onUpload={(file) => handleFileUpload(item.id, 'value_en', file)}
-                                        isUploading={uploading?.id === item.id && uploading?.field === 'value_en'}
-                                    />
-                                ) : (
-                                    <AutoResizeTextarea
-                                        value={item.value_en || ''}
-                                        onChange={(val) => handleChange(item.id, 'value_en', val)}
-                                        placeholder="Enter translation..."
-                                        isError={!item.value_en}
-                                    />
-                                )}
-                            </div>
+                            {isImageUrlKey(selectedItem.key) ? (
+                                <ImageUploader 
+                                    value={selectedItem.value_en} 
+                                    onChange={(v) => handleFieldChange('value_en', v)}
+                                    onUpload={(f) => handleFileUpload('value_en', f)}
+                                    isUploading={uploading?.id === selectedItem.id && uploading?.field === 'value_en'}
+                                />
+                            ) : (
+                                <textarea
+                                    value={selectedItem.value_en || ''}
+                                    onChange={(e) => handleFieldChange('value_en', e.target.value)}
+                                    className="w-full p-8 text-xl border-4 border-gray-50 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50 rounded-[2rem] focus:bg-white dark:focus:bg-gray-900 focus:border-blue-500/20 focus:ring-0 outline-none min-h-[250px] transition-all font-medium leading-relaxed resize-none"
+                                    placeholder="Enter English translation..."
+                                />
+                            )}
                         </div>
                     </div>
-                ))}
 
-                {filteredItems.length === 0 && (
-                    <div className="py-40 text-center">
-                        <Search className="w-16 h-16 text-gray-200 mx-auto mb-6" />
-                        <p className="text-gray-400 text-lg font-bold">표시할 항목이 없습니다.</p>
+                    {/* Footer Actions */}
+                    <div className="p-10 border-t border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/20">
+                        <button
+                            onClick={() => handleUpdate(selectedItem)}
+                            disabled={saving}
+                            className={`w-full py-5 rounded-[1.5rem] font-black transition-all flex items-center justify-center gap-3 shadow-2xl ${
+                                saving 
+                                ? 'bg-green-100 text-green-700' 
+                                : 'bg-blue-600 text-white hover:bg-blue-700 shadow-blue-500/20'
+                            }`}
+                        >
+                            {saving ? <CheckCircle2 size={24} /> : <Save size={24} />}
+                            {saving ? '수정 사항 반영 중...' : '변경사항 저장하기'}
+                        </button>
+                        <p className="text-center text-[10px] font-bold text-gray-400 mt-6 uppercase tracking-widest">NKHB Content Studio v3.0</p>
                     </div>
-                )}
-                
-                {/* Spacer for bottom */}
-                <div className="h-20" />
-            </div>
+                </div>
+            )}
         </div>
-      </main>
+      </div>
     </div>
   );
 };
 
-interface AutoResizeTextareaProps {
-  value: string;
-  onChange: (val: string) => void;
-  placeholder: string;
-  isError: boolean;
-}
-
-const AutoResizeTextarea = ({ value, onChange, placeholder, isError }: AutoResizeTextareaProps) => {
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
-    }
-  }, [value]);
-
-  return (
-    <textarea
-      ref={textareaRef}
-      value={value || ''}
-      onChange={(e) => onChange(e.target.value)}
-      className={`w-full p-6 text-base border-2 ${isError ? 'border-amber-100 bg-amber-50/10' : 'border-gray-50 dark:border-gray-800'} dark:bg-gray-800 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/50 outline-none min-h-[120px] transition-all font-medium leading-relaxed resize-none`}
-      placeholder={placeholder}
-    />
-  );
-};
-
-interface ImageEditorProps {
+interface ImageUploaderProps {
   value: string;
   onChange: (val: string) => void;
   onUpload: (file: File) => void;
   isUploading: boolean;
 }
 
-const ImageEditor = ({ value, onChange, onUpload, isUploading }: ImageEditorProps) => (
+const ImageUploader = ({ value, onChange, onUpload, isUploading }: ImageUploaderProps) => (
   <div className="space-y-4">
-    <div className="aspect-video bg-gray-50 dark:bg-gray-800 rounded-2xl overflow-hidden flex items-center justify-center border-2 border-dashed border-gray-200 dark:border-gray-700 group/img relative transition-all hover:border-blue-300">
+    <div className="aspect-video bg-gray-50 dark:bg-gray-800 rounded-[2rem] overflow-hidden flex items-center justify-center border-4 border-dashed border-gray-200 dark:border-gray-700 group/img relative transition-all hover:border-blue-300">
       {value ? (
-        <img src={value} className="max-h-full max-w-full object-contain p-4" alt="Preview" />
+        <img src={value} className="w-full h-full object-cover transition-transform group-hover/img:scale-105" alt="Preview" />
       ) : (
-        <div className="flex flex-col items-center gap-2 text-gray-300">
-            <ImageIcon size={32} />
-            <span className="text-[10px] font-black uppercase tracking-widest">No Image</span>
+        <div className="flex flex-col items-center gap-3 text-gray-200">
+            <ImageIcon size={48} />
+            <span className="text-[10px] font-black uppercase tracking-widest">No Image Asset</span>
         </div>
       )}
       
       {isUploading && (
         <div className="absolute inset-0 bg-white/95 dark:bg-black/95 flex flex-col items-center justify-center backdrop-blur-sm z-10">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
         </div>
       )}
 
-      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/img:opacity-100 transition-all flex items-center justify-center gap-3">
-        <label className="cursor-pointer bg-white text-gray-900 px-4 py-2 rounded-xl text-xs font-black hover:bg-gray-100 transition-all flex items-center gap-2">
-          <Upload size={14} />
+      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/img:opacity-100 transition-all flex items-center justify-center gap-4">
+        <label className="cursor-pointer bg-white text-gray-900 px-6 py-3 rounded-[1.25rem] text-xs font-black hover:bg-gray-100 transition-all flex items-center gap-2">
+          <Upload size={16} />
           교체
           <input
             type="file"
@@ -497,8 +413,8 @@ const ImageEditor = ({ value, onChange, onUpload, isUploading }: ImageEditorProp
           />
         </label>
         {value && (
-            <a href={value} target="_blank" rel="noreferrer" className="bg-white/20 hover:bg-white/30 text-white p-2.5 rounded-xl transition-all">
-                <ExternalLink size={16} />
+            <a href={value} target="_blank" rel="noreferrer" className="bg-white/20 hover:bg-white/30 text-white p-3 rounded-[1.25rem] transition-all">
+                <ExternalLink size={20} />
             </a>
         )}
       </div>
@@ -509,10 +425,10 @@ const ImageEditor = ({ value, onChange, onUpload, isUploading }: ImageEditorProp
         type="text"
         value={value || ''}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full pl-4 pr-10 py-3 text-[11px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:border-blue-500/20 transition-all font-mono"
-        placeholder="이미지 URL"
+        className="w-full pl-6 pr-12 py-5 text-xs bg-gray-50/50 dark:bg-gray-800/50 border-2 border-transparent rounded-[1.25rem] outline-none focus:bg-white dark:focus:bg-gray-900 focus:border-blue-500/10 transition-all font-mono"
+        placeholder="이미지 직접 URL (https://...)"
       />
-      <Globe className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-300" />
+      <Globe className="absolute right-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
     </div>
   </div>
 );
