@@ -76,29 +76,31 @@ const Audio = () => {
     const currentTrack = tracks[index];
     const targetTrack = tracks[newIndex];
 
-    // Optimistic UI update
-    const newTracks = [...tracks];
-    const tempOrder = currentTrack.order;
+    // 1. Create a copy of current state for optimistic UI
+    const updatedTracks = [...tracks];
     
-    // Swap order values
-    const currentWithNewOrder = { ...currentTrack, order: targetTrack.order };
-    const targetWithNewOrder = { ...targetTrack, order: tempOrder };
-    
-    newTracks[index] = targetWithNewOrder;
-    newTracks[newIndex] = currentWithNewOrder;
-    
-    // The list is already sorted by order, so this swap maintains that
-    setTracks(newTracks);
+    // 2. Swap order values in local state
+    const currentOrder = currentTrack.order;
+    const targetOrder = targetTrack.order;
 
-    // Persist to DB
-    const { error } = await supabase.from('audio_tracks').upsert([
-        { id: currentTrack.id, order: targetTrack.order },
-        { id: targetTrack.id, order: currentTrack.order }
-    ]);
+    updatedTracks[index] = { ...targetTrack, order: currentOrder };
+    updatedTracks[newIndex] = { ...currentTrack, order: targetOrder };
 
-    if (error) {
-        console.error('Error reordering:', error);
-        fetchTracks(); // Revert on error
+    // 3. Sort local state to reflect new order visually
+    updatedTracks.sort((a, b) => a.order - b.order);
+    setTracks(updatedTracks);
+
+    // 4. Persist to DB using UPSERT (Supabase handles multiple rows in one call)
+    try {
+        const { error } = await supabase.from('audio_tracks').upsert([
+            { id: currentTrack.id, order: targetOrder },
+            { id: targetTrack.id, order: currentOrder }
+        ]);
+
+        if (error) throw error;
+    } catch (err) {
+        console.error('Failed to update order in DB:', err);
+        fetchTracks(); // Revert to server state on failure
     }
   };
 
@@ -265,11 +267,11 @@ const Audio = () => {
             }`}
           >
             {/* Reorder Buttons */}
-            <div className="flex flex-col gap-1 shrink-0">
+            <div className="flex md:flex-col gap-2 shrink-0">
                 <button 
                   onClick={() => moveTrack(index, 'up')}
                   disabled={index === 0}
-                  className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg text-gray-400 disabled:opacity-20 transition-colors"
+                  className="w-10 h-10 flex items-center justify-center bg-gray-50 dark:bg-gray-800 hover:bg-blue-600 hover:text-white rounded-xl text-gray-400 disabled:opacity-20 transition-all shadow-sm active:scale-90"
                   title="위로 이동"
                 >
                     <ChevronUp size={20} />
@@ -277,7 +279,7 @@ const Audio = () => {
                 <button 
                   onClick={() => moveTrack(index, 'down')}
                   disabled={index === tracks.length - 1}
-                  className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg text-gray-400 disabled:opacity-20 transition-colors"
+                  className="w-10 h-10 flex items-center justify-center bg-gray-50 dark:bg-gray-800 hover:bg-blue-600 hover:text-white rounded-xl text-gray-400 disabled:opacity-20 transition-all shadow-sm active:scale-90"
                   title="아래로 이동"
                 >
                     <ChevronDown size={20} />
@@ -295,16 +297,13 @@ const Audio = () => {
               {playingId === track.id ? <Pause className="w-8 h-8 fill-current" /> : <Play className="w-8 h-8 fill-current ml-1" />}
             </button>
 
-            <div className="flex-1 min-w-0 w-full">
-              <div className="flex items-center gap-3 mb-1">
+            <div className="flex-1 min-w-0 w-full text-center md:text-left">
+              <div className="flex items-center justify-center md:justify-start gap-3 mb-1">
                 <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${track.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-500'}`}>
                   {track.is_active ? 'Active' : 'Inactive'}
                 </span>
                 <span className="flex items-center gap-1 text-[10px] text-gray-400 font-bold uppercase tracking-widest">
                   <Clock className="w-3 h-3" /> {new Date(track.created_at).toLocaleDateString()}
-                </span>
-                <span className="text-[10px] bg-gray-50 dark:bg-gray-800 text-gray-400 px-2 py-0.5 rounded-md font-mono">
-                    ORDER: {track.order}
                 </span>
               </div>
               <h3 className="text-xl font-black text-gray-900 dark:text-white truncate">{track.title_ko}</h3>
