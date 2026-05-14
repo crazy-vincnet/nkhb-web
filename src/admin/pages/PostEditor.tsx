@@ -10,7 +10,9 @@ import {
   User,
   Layout,
   Type,
-  Calendar
+  Calendar,
+  Upload,
+  X
 } from 'lucide-react';
 import TiptapEditor from '../components/TiptapEditor';
 
@@ -33,12 +35,14 @@ const PostEditor = () => {
   const [postType, setPostType] = useState<'news' | 'audio'>('news');
   const [category, setCategory] = useState('');
   const [audioUrl, setAudioUrl] = useState('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [createdAt, setCreatedAt] = useState(new Date().toISOString().split('T')[0]);
   const [pageId, setPageId] = useState<string>('');
   const [pages, setPages] = useState<Page[]>([]);
   
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [activeTab, setActiveTab] = useState<'ko' | 'en'>('ko');
 
@@ -90,24 +94,48 @@ const PostEditor = () => {
     setSaving(true);
     setSaveStatus('idle');
 
-    const payload = {
-      title: titleKo, // Backward compatibility
-      title_ko: titleKo,
-      title_en: titleEn,
-      author_name: authorName,
-      content: contentKo, // Backward compatibility
-      content_ko: contentKo,
-      content_en: contentEn,
-      post_type: postType,
-      category: category,
-      audio_url: audioUrl,
-      page_id: pageId || null,
-      is_approved: true,
-      created_at: new Date(createdAt).toISOString(),
-      updated_at: new Date().toISOString()
-    };
-
     try {
+      let finalAudioUrl = audioUrl;
+
+      // Upload audio file if selected
+      if (selectedFile) {
+        setUploading(true);
+        const fileExt = selectedFile.name.split('.').pop();
+        const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
+        const filePath = `posts/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('audio')
+          .upload(filePath, selectedFile);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('audio')
+          .getPublicUrl(filePath);
+        
+        finalAudioUrl = publicUrl;
+        setAudioUrl(finalAudioUrl);
+        setUploading(false);
+      }
+
+      const payload = {
+        title: titleKo, // Backward compatibility
+        title_ko: titleKo,
+        title_en: titleEn,
+        author_name: authorName,
+        content: contentKo, // Backward compatibility
+        content_ko: contentKo,
+        content_en: contentEn,
+        post_type: postType,
+        category: category,
+        audio_url: finalAudioUrl,
+        page_id: pageId || null,
+        is_approved: true,
+        created_at: new Date(createdAt).toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
       let error;
       if (isNew) {
         const { error: insertError } = await supabase.from('nkhb_posts').insert([payload]);
@@ -130,6 +158,7 @@ const PostEditor = () => {
       alert('저장 실패: ' + err.message);
     } finally {
       setSaving(false);
+      setUploading(false);
     }
   };
 
@@ -210,14 +239,50 @@ const PostEditor = () => {
               />
             </div>
             <div className="space-y-2">
-              <label className="text-xs font-bold text-gray-500 ml-1">오디오 URL (Google Drive, Dropbox 등)</label>
-              <input 
-                  type="text"
-                  value={audioUrl}
-                  onChange={(e) => setAudioUrl(e.target.value)}
-                  className="w-full px-4 py-3 bg-white dark:bg-gray-900 border dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-mono"
-                  placeholder="https://..."
-              />
+              <label className="text-xs font-bold text-gray-500 ml-1">오디오 파일 업로드</label>
+              <div className="flex items-center gap-3">
+                <label className="flex-1 flex items-center gap-3 px-4 py-3 bg-white dark:bg-gray-900 border-2 border-dashed border-indigo-100 dark:border-indigo-900/30 rounded-xl cursor-pointer hover:border-indigo-500 transition-all group">
+                  <input 
+                      type="file"
+                      accept="audio/*"
+                      onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                      className="hidden"
+                  />
+                  <div className={`p-2 rounded-lg ${selectedFile ? 'bg-emerald-100 text-emerald-600' : 'bg-indigo-50 text-indigo-600 group-hover:bg-indigo-100'}`}>
+                    {selectedFile ? <CheckCircle size={18} /> : <Upload size={18} />}
+                  </div>
+                  <div className="flex-1 truncate">
+                    <p className="text-sm font-bold text-gray-900 dark:text-white truncate">
+                      {selectedFile ? selectedFile.name : (audioUrl ? '기존 파일 유지됨' : '파일 선택 (MP3, WAV 등)')}
+                    </p>
+                    <p className="text-[10px] text-gray-400 font-medium">
+                      {selectedFile ? `${(selectedFile.size / (1024 * 1024)).toFixed(2)} MB` : (audioUrl ? audioUrl.split('/').pop() : '최대 50MB 권장')}
+                    </p>
+                  </div>
+                </label>
+                {(selectedFile || audioUrl) && (
+                  <button
+                    onClick={() => {
+                      setSelectedFile(null);
+                      setAudioUrl('');
+                    }}
+                    className="p-3 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
+                    title="파일 제거"
+                  >
+                    <X size={20} />
+                  </button>
+                )}
+              </div>
+              {uploading && (
+                <div className="px-1 space-y-1.5">
+                  <div className="flex items-center justify-between text-[10px] font-black text-indigo-600 uppercase tracking-widest">
+                    <span>Uploading...</span>
+                  </div>
+                  <div className="h-1.5 w-full bg-indigo-100 dark:bg-indigo-900/30 rounded-full overflow-hidden">
+                    <div className="h-full bg-indigo-600 animate-pulse w-full"></div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
