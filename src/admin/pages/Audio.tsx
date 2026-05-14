@@ -13,7 +13,9 @@ import {
   CheckCircle2,
   AlertCircle,
   Clock,
-  Globe
+  Globe,
+  ChevronUp,
+  ChevronDown
 } from 'lucide-react';
 
 interface AudioTrack {
@@ -22,6 +24,7 @@ interface AudioTrack {
   title_en: string;
   url: string;
   is_active: boolean;
+  order: number;
   created_at: string;
 }
 
@@ -56,7 +59,7 @@ const Audio = () => {
     const { data, error } = await supabase
       .from('audio_tracks')
       .select('*')
-      .order('created_at', { ascending: false });
+      .order('order', { ascending: true });
 
     if (error) {
       console.error('Error fetching tracks:', error);
@@ -64,6 +67,39 @@ const Audio = () => {
       setTracks(data || []);
     }
     setLoading(false);
+  };
+
+  const moveTrack = async (index: number, direction: 'up' | 'down') => {
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= tracks.length) return;
+
+    const currentTrack = tracks[index];
+    const targetTrack = tracks[newIndex];
+
+    // Optimistic UI update
+    const newTracks = [...tracks];
+    const tempOrder = currentTrack.order;
+    
+    // Swap order values
+    const currentWithNewOrder = { ...currentTrack, order: targetTrack.order };
+    const targetWithNewOrder = { ...targetTrack, order: tempOrder };
+    
+    newTracks[index] = targetWithNewOrder;
+    newTracks[newIndex] = currentWithNewOrder;
+    
+    // The list is already sorted by order, so this swap maintains that
+    setTracks(newTracks);
+
+    // Persist to DB
+    const { error } = await supabase.from('audio_tracks').upsert([
+        { id: currentTrack.id, order: targetTrack.order },
+        { id: targetTrack.id, order: currentTrack.order }
+    ]);
+
+    if (error) {
+        console.error('Error reordering:', error);
+        fetchTracks(); // Revert on error
+    }
   };
 
   const openAddModal = () => {
@@ -120,13 +156,15 @@ const Audio = () => {
           .eq('id', editingId);
         if (dbError) throw dbError;
       } else {
+        const maxOrder = tracks.length > 0 ? Math.max(...tracks.map(t => t.order || 0)) : 0;
         const { error: dbError } = await supabase
           .from('audio_tracks')
           .insert([{ 
             title_ko: titleKo, 
             title_en: titleEn, 
             url: finalUrl, 
-            is_active: true 
+            is_active: true,
+            order: maxOrder + 1
           }]);
         if (dbError) throw dbError;
       }
@@ -207,7 +245,7 @@ const Audio = () => {
             <Music className="w-8 h-8 text-blue-600" />
             Audio Tracks
           </h2>
-          <p className="text-gray-500 font-medium mt-1">방송 음원 및 오디오 라이브러리를 관리합니다.</p>
+          <p className="text-gray-500 font-medium mt-1">방송 음원의 노출 순서 및 정보를 관리합니다.</p>
         </div>
         <button 
           onClick={openAddModal}
@@ -219,13 +257,33 @@ const Audio = () => {
       </div>
 
       <div className="grid grid-cols-1 gap-4">
-        {tracks.map((track) => (
+        {tracks.map((track, index) => (
           <div 
             key={track.id} 
             className={`bg-white dark:bg-gray-900 p-6 rounded-[2rem] border transition-all flex flex-col md:flex-row items-center gap-6 ${
               track.is_active ? 'border-gray-100 dark:border-gray-800 shadow-sm' : 'border-gray-100 opacity-60 grayscale bg-gray-50'
             }`}
           >
+            {/* Reorder Buttons */}
+            <div className="flex flex-col gap-1 shrink-0">
+                <button 
+                  onClick={() => moveTrack(index, 'up')}
+                  disabled={index === 0}
+                  className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg text-gray-400 disabled:opacity-20 transition-colors"
+                  title="위로 이동"
+                >
+                    <ChevronUp size={20} />
+                </button>
+                <button 
+                  onClick={() => moveTrack(index, 'down')}
+                  disabled={index === tracks.length - 1}
+                  className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg text-gray-400 disabled:opacity-20 transition-colors"
+                  title="아래로 이동"
+                >
+                    <ChevronDown size={20} />
+                </button>
+            </div>
+
             <button 
               onClick={() => togglePlay(track)}
               className={`w-16 h-16 rounded-2xl flex items-center justify-center transition-all ${
@@ -244,6 +302,9 @@ const Audio = () => {
                 </span>
                 <span className="flex items-center gap-1 text-[10px] text-gray-400 font-bold uppercase tracking-widest">
                   <Clock className="w-3 h-3" /> {new Date(track.created_at).toLocaleDateString()}
+                </span>
+                <span className="text-[10px] bg-gray-50 dark:bg-gray-800 text-gray-400 px-2 py-0.5 rounded-md font-mono">
+                    ORDER: {track.order}
                 </span>
               </div>
               <h3 className="text-xl font-black text-gray-900 dark:text-white truncate">{track.title_ko}</h3>
