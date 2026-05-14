@@ -13,7 +13,8 @@ import {
   Calendar,
   Type,
   Plus,
-  MessageSquare
+  MessageSquare,
+  Music
 } from 'lucide-react';
 import GrapesEditor from '../components/GrapesEditor';
 
