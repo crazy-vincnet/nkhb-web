@@ -141,51 +141,88 @@ const Board: React.FC<BoardProps> = ({ pageId, lang, titleKo, titleEn }) => {
         </div>
       </div>
 
-      {/* Post Detail Modal */}
+      {/* Premium Post Detail Modal */}
       {selectedPost && (
-        <div className="post-modal-overlay" onClick={() => setSelectedPost(null)}>
-          <div className="post-modal-content" onClick={e => e.stopPropagation()}>
-            <div className="post-modal-header">
-              <div className="post-modal-meta w-full">
-                <div className="flex justify-between items-start w-full">
-                    <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-blue-600 mb-2">
-                             <ShieldCheck size={20} />
-                             <span className="text-[10px] font-black uppercase tracking-[0.2em]">Official Announcement</span>
-                        </div>
-                        <h3 className="text-2xl md:text-3xl font-black text-gray-900 leading-tight">
-                            {getPostTitle(selectedPost)}
-                        </h3>
-                    </div>
-                    <button className="post-modal-close" onClick={() => setSelectedPost(null)}>
-                        <X size={24} />
-                    </button>
+        <div className="premium-post-overlay" onClick={() => setSelectedPost(null)}>
+          <div className="premium-post-container" onClick={e => e.stopPropagation()}>
+            {/* Reading Progress Bar */}
+            <div className="reading-progress-bar"></div>
+
+            {/* Close Button (Floating) */}
+            <button className="premium-close-btn" onClick={() => setSelectedPost(null)}>
+              <X size={20} />
+            </button>
+
+            <div className="premium-post-scroll-area">
+              {/* Hero Section */}
+              <div className="premium-hero">
+                <div className="premium-hero-bg"></div>
+                <div className="premium-hero-content">
+                  <div className="premium-category-badge">
+                    <ShieldCheck size={12} className="mr-1.5" />
+                    Official News
+                  </div>
+                  <h3 className="premium-title">
+                    {getPostTitle(selectedPost)}
+                  </h3>
                 </div>
-                
-                <div className="flex items-center gap-4 mt-6 pt-6 border-t border-gray-100">
-                    <div className="flex items-center gap-2 text-sm text-gray-600 font-bold">
-                        <div className="w-8 h-8 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center">
-                            <User size={14} />
-                        </div>
-                        {selectedPost.author_name}
+              </div>
+
+              {/* Main Content Layout */}
+              <div className="premium-main-layout">
+                {/* Side Meta */}
+                <aside className="premium-meta-side">
+                  <div className="meta-card">
+                    <div className="meta-item">
+                      <div className="meta-icon"><User size={16} /></div>
+                      <div className="meta-text">
+                        <label>{lang === 'ko' ? '작성자' : 'Author'}</label>
+                        <span>{selectedPost.author_name}</span>
+                      </div>
                     </div>
-                    <div className="w-1 h-1 bg-gray-300 rounded-full"></div>
-                    <div className="flex items-center gap-2 text-sm text-gray-400 font-medium">
-                        <Calendar size={14} />
-                        {new Date(selectedPost.created_at).toLocaleDateString(lang === 'ko' ? 'ko-KR' : 'en-US', {
+                    <div className="meta-item">
+                      <div className="meta-icon"><Calendar size={16} /></div>
+                      <div className="meta-text">
+                        <label>{lang === 'ko' ? '발행일' : 'Date'}</label>
+                        <span>
+                          {new Date(selectedPost.created_at).toLocaleDateString(lang === 'ko' ? 'ko-KR' : 'en-US', {
                             year: 'numeric',
                             month: 'long',
                             day: 'numeric'
-                        })}
+                          })}
+                        </span>
+                      </div>
                     </div>
-                </div>
+                  </div>
+                  
+                  <div className="premium-action-list">
+                    <button className="premium-action-btn" onClick={() => {
+                        navigator.clipboard.writeText(window.location.href);
+                        alert(lang === 'ko' ? '링크가 복사되었습니다.' : 'Link copied to clipboard.');
+                    }}>
+                        {lang === 'ko' ? '공유하기' : 'Share Link'}
+                    </button>
+                  </div>
+                </aside>
+
+                {/* Content Body */}
+                <article className="premium-body">
+                  <div 
+                    className="prose prose-xl dark:prose-invert max-w-none"
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(getPostContent(selectedPost)) }}
+                  />
+                  
+                  {/* Bottom Guide */}
+                  <div className="premium-footer-guide">
+                    <div className="guide-divider"></div>
+                    <p>
+                        {lang === 'ko' 
+                          ? '뉴코리아 희망방송은 여러분의 후원과 기도로 함께 만들어갑니다.' 
+                          : 'New Korea Hope Broadcasting is built together with your support and prayers.'}
+                    </p>
+                  </div>
+                </article>
               </div>
-            </div>
-            <div className="post-modal-body bg-gray-50/30">
-              <div 
-                className="prose prose-lg dark:prose-invert max-w-none text-gray-800 leading-relaxed font-medium prose-img:rounded-3xl prose-a:text-blue-600"
-                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(getPostContent(selectedPost)) }}
-              />
             </div>
           </div>
         </div>
