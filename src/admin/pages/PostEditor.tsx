@@ -25,9 +25,11 @@ const PostEditor = () => {
   const navigate = useNavigate();
   const isNew = !id || id === 'new';
 
-  const [title, setTitle] = useState('');
+  const [titleKo, setTitleKo] = useState('');
+  const [titleEn, setTitleEn] = useState('');
   const [authorName, setAuthorName] = useState('NKHB 관리자');
-  const [content, setContent] = useState('');
+  const [contentKo, setContentKo] = useState('');
+  const [contentEn, setContentEn] = useState('');
   const [createdAt, setCreatedAt] = useState(new Date().toISOString().split('T')[0]);
   const [pageId, setPageId] = useState<string>('');
   const [pages, setPages] = useState<Page[]>([]);
@@ -35,6 +37,7 @@ const PostEditor = () => {
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [activeTab, setActiveTab] = useState<'ko' | 'en'>('ko');
 
   useEffect(() => {
     fetchPages();
@@ -60,9 +63,11 @@ const PostEditor = () => {
       return;
     }
     
-    setTitle(data.title || '');
+    setTitleKo(data.title_ko || data.title || '');
+    setTitleEn(data.title_en || '');
     setAuthorName(data.author_name);
-    setContent(data.content);
+    setContentKo(data.content_ko || data.content || '');
+    setContentEn(data.content_en || '');
     setPageId(data.page_id || '');
     if (data.created_at) {
         setCreatedAt(new Date(data.created_at).toISOString().split('T')[0]);
@@ -71,12 +76,8 @@ const PostEditor = () => {
   };
 
   const savePost = async () => {
-    if (!title.trim()) {
+    if (!titleKo.trim() && !titleEn.trim()) {
       alert('제목을 입력해 주세요.');
-      return;
-    }
-    if (!content.trim()) {
-      alert('내용을 입력해 주세요.');
       return;
     }
     
@@ -84,9 +85,13 @@ const PostEditor = () => {
     setSaveStatus('idle');
 
     const payload = {
-      title: title,
+      title: titleKo, // Backward compatibility
+      title_ko: titleKo,
+      title_en: titleEn,
       author_name: authorName,
-      content: content,
+      content: contentKo, // Backward compatibility
+      content_ko: contentKo,
+      content_en: contentEn,
       page_id: pageId || null,
       is_approved: true,
       created_at: new Date(createdAt).toISOString(),
@@ -140,7 +145,7 @@ const PostEditor = () => {
               <MessageSquare className="w-6 h-6 text-blue-600" />
               {isNew ? '새 소식 작성' : '소식 수정하기'}
             </h2>
-            <p className="text-sm text-gray-500">제목과 날짜를 지정하고 에디터로 본문을 작성하세요.</p>
+            <p className="text-sm text-gray-500">한국어와 영어로 소식을 작성하여 글로벌 청취자와 소통하세요.</p>
           </div>
         </div>
 
@@ -163,27 +168,75 @@ const PostEditor = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
-          {/* Title Input */}
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm space-y-4">
-            <div className="flex items-center gap-2 text-[10px] font-black text-blue-600 uppercase tracking-widest px-1">
-                <Type size={12} /> 게시글 제목
-            </div>
-            <input 
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="w-full px-5 py-4 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none font-bold text-xl text-gray-900 dark:text-white"
-                placeholder="여기에 소식의 제목을 입력하세요"
-            />
+          {/* Language Tabs */}
+          <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-2xl w-fit">
+            <button
+              onClick={() => setActiveTab('ko')}
+              className={`px-6 py-2 rounded-xl text-sm font-bold transition-all ${
+                activeTab === 'ko' ? 'bg-white dark:bg-gray-700 text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              한국어 (KO)
+            </button>
+            <button
+              onClick={() => setActiveTab('en')}
+              className={`px-6 py-2 rounded-xl text-sm font-bold transition-all ${
+                activeTab === 'en' ? 'bg-white dark:bg-gray-700 text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              English (EN)
+            </button>
           </div>
 
-          {/* Tiptap Editor */}
-          <div className="bg-white dark:bg-gray-800 p-1 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
-            <TiptapEditor 
-              content={content} 
-              onChange={setContent} 
-            />
-          </div>
+          {activeTab === 'ko' ? (
+            <>
+              {/* Title Input KO */}
+              <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm space-y-4">
+                <div className="flex items-center gap-2 text-[10px] font-black text-blue-600 uppercase tracking-widest px-1">
+                    <Type size={12} /> 게시글 제목 (한국어)
+                </div>
+                <input 
+                    type="text"
+                    value={titleKo}
+                    onChange={(e) => setTitleKo(e.target.value)}
+                    className="w-full px-5 py-4 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none font-bold text-xl text-gray-900 dark:text-white"
+                    placeholder="한국어 제목을 입력하세요"
+                />
+              </div>
+
+              {/* Tiptap Editor KO */}
+              <div className="bg-white dark:bg-gray-800 p-1 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
+                <TiptapEditor 
+                  content={contentKo} 
+                  onChange={setContentKo} 
+                />
+              </div>
+            </>
+          ) : (
+            <>
+              {/* Title Input EN */}
+              <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm space-y-4">
+                <div className="flex items-center gap-2 text-[10px] font-black text-indigo-600 uppercase tracking-widest px-1">
+                    <Type size={12} /> Post Title (English)
+                </div>
+                <input 
+                    type="text"
+                    value={titleEn}
+                    onChange={(e) => setTitleEn(e.target.value)}
+                    className="w-full px-5 py-4 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none font-bold text-xl text-gray-900 dark:text-white"
+                    placeholder="Enter English title here"
+                />
+              </div>
+
+              {/* Tiptap Editor EN */}
+              <div className="bg-white dark:bg-gray-800 p-1 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
+                <TiptapEditor 
+                  content={contentEn} 
+                  onChange={setContentEn} 
+                />
+              </div>
+            </>
+          )}
         </div>
 
         <div className="space-y-6">

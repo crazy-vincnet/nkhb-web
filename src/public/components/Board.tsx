@@ -6,8 +6,12 @@ import DOMPurify from 'dompurify';
 interface Post {
   id: string;
   title: string | null;
+  title_ko: string | null;
+  title_en: string | null;
   author_name: string;
   content: string;
+  content_ko: string | null;
+  content_en: string | null;
   created_at: string;
 }
 
@@ -31,7 +35,7 @@ const Board: React.FC<BoardProps> = ({ pageId, lang, titleKo, titleEn }) => {
     setLoading(true);
     let query = supabase
       .from('nkhb_posts')
-      .select('id, title, author_name, content, created_at')
+      .select('id, title, title_ko, title_en, author_name, content, content_ko, content_en, created_at')
       .eq('is_approved', true);
 
     if (pageId) {
@@ -48,6 +52,22 @@ const Board: React.FC<BoardProps> = ({ pageId, lang, titleKo, titleEn }) => {
       setPosts(data);
     }
     setLoading(false);
+  };
+
+  const getPostTitle = (post: Post) => {
+    if (lang === 'ko') {
+      return post.title_ko || post.title || post.title_en || (post.content_ko || post.content || post.content_en || '').replace(/<[^>]*>/g, '').substring(0, 50) + '...';
+    } else {
+      return post.title_en || post.title || post.title_ko || (post.content_en || post.content || post.content_ko || '').replace(/<[^>]*>/g, '').substring(0, 50) + '...';
+    }
+  };
+
+  const getPostContent = (post: Post) => {
+    if (lang === 'ko') {
+      return post.content_ko || post.content || post.content_en || '';
+    } else {
+      return post.content_en || post.content || post.content_ko || '';
+    }
   };
 
   const boardTitle = lang === 'ko' ? (titleKo || '공지 및 소식') : (titleEn || 'Board & Updates');
@@ -100,7 +120,7 @@ const Board: React.FC<BoardProps> = ({ pageId, lang, titleKo, titleEn }) => {
                   <div className="col-num">{posts.length - index}</div>
                   <div className="col-content-wrap">
                     <span className="col-title">
-                        {post.title || (post.content.replace(/<[^>]*>/g, '').substring(0, 50) + '...')}
+                        {getPostTitle(post)}
                     </span>
                   </div>
                   <div className="col-author">
@@ -134,7 +154,7 @@ const Board: React.FC<BoardProps> = ({ pageId, lang, titleKo, titleEn }) => {
                              <span className="text-[10px] font-black uppercase tracking-[0.2em]">Official Announcement</span>
                         </div>
                         <h3 className="text-2xl md:text-3xl font-black text-gray-900 leading-tight">
-                            {selectedPost.title || '소식 안내'}
+                            {getPostTitle(selectedPost)}
                         </h3>
                     </div>
                     <button className="post-modal-close" onClick={() => setSelectedPost(null)}>
@@ -164,7 +184,7 @@ const Board: React.FC<BoardProps> = ({ pageId, lang, titleKo, titleEn }) => {
             <div className="post-modal-body bg-gray-50/30">
               <div 
                 className="prose prose-lg dark:prose-invert max-w-none text-gray-800 leading-relaxed font-medium prose-img:rounded-3xl prose-a:text-blue-600"
-                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(selectedPost.content) }}
+                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(getPostContent(selectedPost)) }}
               />
             </div>
           </div>

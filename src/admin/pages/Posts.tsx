@@ -16,8 +16,12 @@ import {
 interface Post {
   id: string;
   title: string | null;
+  title_ko: string | null;
+  title_en: string | null;
   author_name: string;
   content: string;
+  content_ko: string | null;
+  content_en: string | null;
   created_at: string;
   page_id: string | null;
   is_approved: boolean;
@@ -55,8 +59,12 @@ const Posts = () => {
   };
 
   const filteredPosts = posts.filter(p => 
+    (p.title_ko?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+    (p.title_en?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
     (p.title?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
     (p.author_name?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+    (p.content_ko?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+    (p.content_en?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
     (p.content?.toLowerCase() || '').includes(searchQuery.toLowerCase())
   );
 
@@ -112,7 +120,7 @@ const Posts = () => {
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="font-bold text-gray-900 dark:text-white truncate">
-                        {post.title || '제목 없음'}
+                        {post.title_ko || post.title || post.title_en || '제목 없음'}
                     </span>
                     <span className="text-[10px] text-gray-400 flex items-center gap-1 font-mono shrink-0">
                       <Calendar className="w-3 h-3" />
@@ -124,7 +132,7 @@ const Posts = () => {
                       <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
                       <div 
                         className="line-clamp-1 opacity-70"
-                        dangerouslySetInnerHTML={{ __html: post.content.replace(/<[^>]*>/g, '').substring(0, 100) }}
+                        dangerouslySetInnerHTML={{ __html: (post.content_ko || post.content || post.content_en || '').replace(/<[^>]*>/g, '').substring(0, 100) }}
                       />
                   </div>
                 </div>
