@@ -35,7 +35,7 @@ const SECTIONS = [
   { id: 'guide', label: '참여안내', icon: Info, pattern: ['guide_', 'letter_modal'] },
   { id: 'support', label: '후원하기', icon: Heart, pattern: ['support_'] },
   { id: 'schedule', label: '방송시간', icon: Settings, pattern: ['schedule_'] },
-  { id: 'nav', label: '공통/메뉴', icon: Globe, pattern: ['nav_', 'footer_', 'page_', 'alt_logo'] },
+  { id: 'nav', label: '공통/메뉴', icon: Globe, pattern: ['nav_', 'footer_', 'page_', 'alt_logo', 'image_logo'] },
   { id: 'seo', label: 'SEO', icon: Search, pattern: ['meta_'] },
 ];
 
@@ -75,6 +75,7 @@ const KEY_LABELS: { [key: string]: string } = {
   'nav_support': '메뉴: 후원하기',
   'footer_address': '하단 주소',
   'footer_rights': '하단 저작권 문구',
+  'image_logo': '사이트 로고 이미지',
   'alt_logo': '로고 대체 텍스트',
 
   // SEO
@@ -103,8 +104,23 @@ const Content = () => {
     setLoading(true);
     const { data, error } = await supabase.from('content').select('*').order('key', { ascending: true });
     if (!error) {
-        setContent(data || []);
-        setOriginalContent(JSON.parse(JSON.stringify(data || [])));
+        let items = data || [];
+        
+        // Ensure essential keys exist in the list even if not in DB
+        const essentialKeys = ['image_logo'];
+        essentialKeys.forEach(key => {
+          if (!items.find(i => i.key === key)) {
+            items.push({
+              id: `missing-${key}`,
+              key: key,
+              value_ko: '',
+              value_en: ''
+            });
+          }
+        });
+
+        setContent(items);
+        setOriginalContent(JSON.parse(JSON.stringify(items)));
     }
     setLoading(false);
   };
@@ -148,14 +164,32 @@ const Content = () => {
 
   const handleUpdate = async (item: ContentItem) => {
     setSavingId(item.id);
-    const { error } = await supabase.from('content').update({ value_ko: item.value_ko, value_en: item.value_en }).eq('id', item.id);
+    
+    const payload = { value_ko: item.value_ko, value_en: item.value_en };
+    let error;
+
+    if (item.id.startsWith('missing-')) {
+      // Create new record
+      const { error: insertError } = await supabase.from('content').insert([{
+        key: item.key,
+        ...payload
+      }]);
+      error = insertError;
+    } else {
+      // Update existing record
+      const { error: updateError } = await supabase.from('content').update(payload).eq('id', item.id);
+      error = updateError;
+    }
+
     if (!error) {
-        setOriginalContent(prev => prev.map(o => o.id === item.id ? { ...item } : o));
+        // Refresh to get real IDs
+        await fetchContent();
         setModifiedIds(prev => {
             const next = new Set(prev);
             next.delete(item.id);
             return next;
         });
+        setSavingId(item.id); // Show success briefly
         setTimeout(() => setSavingId(null), 800);
     } else {
         alert('저장 실패: ' + error.message);
@@ -168,17 +202,19 @@ const Content = () => {
     if (itemsToUpdate.length === 0) return;
     setBatchSaving(true);
     try {
-        const updates = itemsToUpdate.map(item => ({ id: item.id, key: item.key, value_ko: item.value_ko, value_en: item.value_en }));
-        const { error } = await supabase.from('content').upsert(updates);
-        if (error) throw error;
-        setOriginalContent(prev => {
-            const next = [...prev];
-            updates.forEach(upd => {
-                const idx = next.findIndex(o => o.id === upd.id);
-                if (idx > -1) next[idx] = { ...upd };
-            });
-            return next;
-        });
+        const inserts = itemsToUpdate.filter(i => i.id.startsWith('missing-')).map(i => ({ key: i.key, value_ko: i.value_ko, value_en: i.value_en }));
+        const updates = itemsToUpdate.filter(i => !i.id.startsWith('missing-')).map(item => ({ id: item.id, key: item.key, value_ko: item.value_ko, value_en: item.value_en }));
+        
+        if (inserts.length > 0) {
+          const { error } = await supabase.from('content').insert(inserts);
+          if (error) throw error;
+        }
+        if (updates.length > 0) {
+          const { error } = await supabase.from('content').upsert(updates);
+          if (error) throw error;
+        }
+        
+        await fetchContent();
         setModifiedIds(new Set());
         alert('저장되었습니다.');
     } catch (error: any) {
