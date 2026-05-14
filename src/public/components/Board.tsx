@@ -73,71 +73,93 @@ const Board: React.FC<BoardProps> = ({ pageId, lang, titleKo, titleEn }) => {
   const boardTitle = lang === 'ko' ? (titleKo || '공지 및 소식') : (titleEn || 'Board & Updates');
 
   return (
-    <section className="board-section font-pretendard">
+    <section className="premium-board-section font-pretendard">
       <div className="container mx-auto px-4 max-w-5xl">
-        {/* Header Section */}
-        <div className="board-header">
-          <div>
-            <h2 className="board-title">{boardTitle}</h2>
-            <p className="board-subtitle">
+        {/* Premium Board Header */}
+        <div className="premium-board-header">
+          <div className="header-top">
+            <div className="category-tag">
+                <ShieldCheck size={12} className="mr-1.5" />
+                COMMUNITY & NEWS
+            </div>
+            <h2 className="premium-board-title">{boardTitle}</h2>
+            <p className="premium-board-subtitle">
               {lang === 'ko' 
-                ? '뉴코리아 희망방송의 소중한 소식과 공식 업데이트입니다.' 
-                : 'Official news and updates from New Korea Hope Broadcasting.'}
+                ? '뉴코리아 희망방송의 소중한 소식과 공식 업데이트를 전해드립니다.' 
+                : 'Delivering valuable news and official updates from NKHB.'}
             </p>
           </div>
-          <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-gray-50 text-blue-600 rounded-lg text-xs font-bold border border-gray-100">
-            <ShieldCheck size={14} />
-            {lang === 'ko' ? '공식 채널' : 'Official Channel'}
+          
+          <div className="board-controls">
+            <div className="post-count">
+                <span className="count-num">{posts.length}</span>
+                <span className="count-label">{lang === 'ko' ? '개의 소식' : 'Updates'}</span>
+            </div>
+            {/* Filter Pills Simulation */}
+            <div className="filter-pills">
+                <button className="pill active">{lang === 'ko' ? '전체' : 'All'}</button>
+                <button className="pill">{lang === 'ko' ? '공지' : 'Notice'}</button>
+                <button className="pill">{lang === 'ko' ? '소식' : 'News'}</button>
+            </div>
           </div>
         </div>
 
-        {/* Board Table */}
-        <div className="board-table-container">
-          <div className="board-table-header">
-            <div>NO.</div>
-            <div>{lang === 'ko' ? '제목' : 'TITLE'}</div>
-            <div>{lang === 'ko' ? '작성자' : 'AUTHOR'}</div>
-            <div>{lang === 'ko' ? '날짜' : 'DATE'}</div>
-          </div>
-
-          <div className="board-list">
-            {loading ? (
-              <div className="py-20 text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-              </div>
-            ) : posts.length === 0 ? (
-              <div className="board-empty">
-                <p>{lang === 'ko' ? '등록된 소식이 없습니다.' : 'No updates have been posted yet.'}</p>
-              </div>
-            ) : (
-              posts.map((post, index) => (
+        {/* Premium List View */}
+        <div className="premium-list-container">
+          {loading ? (
+            <div className="py-32 text-center">
+              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto opacity-50"></div>
+              <p className="mt-4 text-gray-400 font-bold text-sm tracking-widest uppercase">Loading Contents...</p>
+            </div>
+          ) : posts.length === 0 ? (
+            <div className="premium-empty-state">
+              <div className="empty-icon">📂</div>
+              <p>{lang === 'ko' ? '아직 등록된 소식이 없습니다.' : 'No updates have been posted yet.'}</p>
+            </div>
+          ) : (
+            <div className="premium-feed">
+              {posts.map((post, index) => (
                 <div 
                   key={post.id} 
-                  className="board-row"
+                  className="premium-feed-item group"
                   onClick={() => setSelectedPost(post)}
-                  style={{ cursor: 'pointer' }}
                 >
-                  <div className="col-num">{posts.length - index}</div>
-                  <div className="col-content-wrap">
-                    <span className="col-title">
-                        {getPostTitle(post)}
-                    </span>
+                  <div className="item-meta">
+                    <div className="item-index">{(posts.length - index).toString().padStart(2, '0')}</div>
+                    <div className="item-date">
+                        {new Date(post.created_at).toLocaleDateString(lang === 'ko' ? 'ko-KR' : 'en-US', {
+                          month: 'short',
+                          day: 'numeric'
+                        })}
+                    </div>
                   </div>
-                  <div className="col-author">
-                    {post.author_name}
-                    <span className="admin-badge">Admin</span>
+
+                  <div className="item-main">
+                    <div className="item-header">
+                        <span className="item-badge">{post.author_name === 'NKHB 관리자' ? 'OFFICIAL' : 'ADMIN'}</span>
+                        <h4 className="item-title">{getPostTitle(post)}</h4>
+                    </div>
+                    <p className="item-excerpt">
+                        {getPostContent(post).replace(/<[^>]*>/g, '').substring(0, 120)}...
+                    </p>
+                    <div className="item-footer">
+                        <div className="item-author">
+                            <div className="author-avatar"><User size={10} /></div>
+                            {post.author_name}
+                        </div>
+                        <div className="read-more">
+                            {lang === 'ko' ? '자세히 보기' : 'Read More'}
+                            <X size={14} className="rotate-45 ml-1 transition-transform group-hover:translate-x-1" />
+                        </div>
+                    </div>
                   </div>
-                  <div className="col-date">
-                    {new Date(post.created_at).toLocaleDateString(lang === 'ko' ? 'ko-KR' : 'en-US', {
-                      year: 'numeric',
-                      month: '2-digit',
-                      day: '2-digit'
-                    })}
-                  </div>
+                  
+                  {/* Decorative background on hover */}
+                  <div className="item-hover-bg"></div>
                 </div>
-              ))
-            )}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
