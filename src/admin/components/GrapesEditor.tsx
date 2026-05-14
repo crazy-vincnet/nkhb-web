@@ -22,8 +22,8 @@ const GrapesEditor = ({ initialData, onReady }: GrapesEditorProps) => {
         const editor = grapesjs.init({
           container: editorRef.current,
           fromElement: false,
-          height: '100%',
-          width: 'auto',
+          height: '100vh',
+          width: '100%',
           storageManager: false,
           plugins: [webpagePreset],
           i18n: {
@@ -129,7 +129,11 @@ const GrapesEditor = ({ initialData, onReady }: GrapesEditorProps) => {
 
     return () => {
       if (grapesInstance.current) {
-        grapesInstance.current.destroy();
+        try {
+          grapesInstance.current.destroy();
+        } catch (e) {
+          console.warn('GrapesJS Destroy Error:', e);
+        }
         grapesInstance.current = null;
       }
     };
@@ -143,40 +147,46 @@ const GrapesEditor = ({ initialData, onReady }: GrapesEditorProps) => {
         .gjs-custom-wrapper {
             display: flex;
             flex-direction: column;
+            width: 100%;
+            height: 100%;
+        }
+        #gjs {
+          border: 3px solid #eee;
         }
         .gjs-editor-cont {
             height: 100% !important;
+            width: 100% !important;
             display: flex !important;
+            flex-direction: row-reverse !important;
         }
         
-        /* Fix Panels */
+        /* Sidebar/Views container */
+        .gjs-pn-views-container {
+            width: 300px !important;
+            height: 100% !important;
+            background: #fff !important;
+            border-left: 1px solid #e2e8f0 !important;
+            position: relative !important;
+            top: 0 !important;
+            right: 0 !important;
+            box-shadow: none !important;
+        }
+        
+        /* Canvas area */
+        .gjs-cv-canvas {
+            width: calc(100% - 300px) !important;
+            height: 100% !important;
+            top: 0 !important;
+            position: relative !important;
+            background-color: #f1f5f9 !important;
+        }
+        
+        /* Panels */
         .gjs-pn-panels {
             position: relative !important;
             z-index: 10;
             background: #fff;
             border-bottom: 1px solid #e2e8f0;
-        }
-        
-        /* Fix Sidebar width and position */
-        .gjs-pn-views-container {
-            width: 300px !important;
-            background: #fff !important;
-            border-left: 1px solid #e2e8f0;
-            position: relative !important;
-            right: 0 !important;
-            height: 100% !important;
-        }
-        
-        /* Fix Canvas area */
-        .gjs-cv-canvas {
-            width: 100% !important;
-            height: 100% !important;
-            top: 0 !important;
-            position: relative !important;
-        }
-        
-        .gjs-editor {
-            background-color: #f1f5f9;
         }
 
         /* Buttons Styling */
