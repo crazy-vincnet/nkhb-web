@@ -48,20 +48,36 @@ const SEOAdmin = () => {
 
   const fetchData = async () => {
     setLoading(true);
-    const { data: seoData } = await supabase.from('seo_settings').select('*').order('page_slug');
-    const { data: siteData } = await supabase.from('sites_settings').select('*');
-    const { data: pagesData } = await supabase.from('pages').select('slug');
+    const [
+        { data: seoData },
+        { data: siteData },
+        { data: pagesData },
+        { data: postsData }
+    ] = await Promise.all([
+        supabase.from('seo_settings').select('*').order('page_slug'),
+        supabase.from('sites_settings').select('*'),
+        supabase.from('pages').select('slug'),
+        supabase.from('nkhb_posts').select('slug')
+    ]);
     
     if (seoData) {
       const pageSlugs = new Set((pagesData || []).map(p => p.slug));
-      // home and about are protected system slugs
+      const postSlugs = new Set((postsData || []).map(p => `posts/${p.slug}`));
+      
+      // System slugs & base routes
       pageSlugs.add('home');
       pageSlugs.add('about');
+      pageSlugs.add('posts');
+      pageSlugs.add('audio');
+      pageSlugs.add('schedule');
 
-      const processedSEO = seoData.map(item => ({
-        ...item,
-        is_orphan: !pageSlugs.has(item.page_slug)
-      }));
+      const processedSEO = seoData.map(item => {
+        const isOrphan = !pageSlugs.has(item.page_slug) && !postSlugs.has(item.page_slug);
+        return {
+          ...item,
+          is_orphan: isOrphan
+        };
+      });
       setSettings(processedSEO);
     }
     if (siteData) setSiteSettings(siteData);
@@ -151,12 +167,16 @@ const SEOAdmin = () => {
 
       {activeTab === 'global' ? (
         <div className="grid grid-cols-1 gap-6">
-            {['site_name', 'default_og_image'].map(key => {
+            {['site_name', 'default_og_image', 'google_site_verification', 'naver_site_verification'].map(key => {
                 const setting = siteSettings.find(s => s.key === key) || { key, value_ko: '', value_en: '' };
+                const isVerificationKey = key.includes('verification');
+                
                 return (
                     <div key={key} className="bg-white dark:bg-gray-800 p-8 rounded-[2rem] border border-gray-100 dark:border-gray-700 shadow-sm space-y-6">
                         <div className="flex justify-between items-center border-b dark:border-gray-700 pb-4">
-                            <h3 className="font-bold text-lg uppercase tracking-wider text-blue-600">{key.replace(/_/g, ' ')}</h3>
+                            <h3 className="font-bold text-lg uppercase tracking-wider text-blue-600">
+                                {key.replace(/_/g, ' ')}
+                            </h3>
                             <button 
                                 onClick={() => handleUpdateSite(key, setting.value_ko, setting.value_en)}
                                 disabled={saving === key}
@@ -167,10 +187,13 @@ const SEOAdmin = () => {
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-2">
-                                <label className="text-[10px] font-black text-gray-400 uppercase">Korean Value</label>
+                                <label className="text-[10px] font-black text-gray-400 uppercase">
+                                    {isVerificationKey ? 'Verification Code (Common)' : 'Korean Value'}
+                                </label>
                                 <input 
                                     type="text"
                                     value={setting.value_ko}
+                                    placeholder={isVerificationKey ? 'Enter verification code here...' : ''}
                                     onChange={(e) => setSiteSettings(prev => {
                                         const exists = prev.find(s => s.key === key);
                                         if (exists) return prev.map(s => s.key === key ? { ...s, value_ko: e.target.value } : s);
@@ -179,19 +202,30 @@ const SEOAdmin = () => {
                                     className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-bold"
                                 />
                             </div>
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black text-gray-400 uppercase">English Value</label>
-                                <input 
-                                    type="text"
-                                    value={setting.value_en}
-                                    onChange={(e) => setSiteSettings(prev => {
-                                        const exists = prev.find(s => s.key === key);
-                                        if (exists) return prev.map(s => s.key === key ? { ...s, value_en: e.target.value } : s);
-                                        return [...prev, { key, value_ko: '', value_en: e.target.value }];
-                                    })}
-                                    className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-bold"
-                                />
-                            </div>
+                            {!isVerificationKey && (
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-gray-400 uppercase">English Value</label>
+                                    <input 
+                                        type="text"
+                                        value={setting.value_en}
+                                        onChange={(e) => setSiteSettings(prev => {
+                                            const exists = prev.find(s => s.key === key);
+                                            if (exists) return prev.map(s => s.key === key ? { ...s, value_en: e.target.value } : s);
+                                            return [...prev, { key, value_ko: '', value_en: e.target.value }];
+                                        })}
+                                        className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-bold"
+                                    />
+                                </div>
+                            )}
+                            {isVerificationKey && (
+                                <div className="flex items-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800">
+                                    <AlertCircle className="w-5 h-5 text-blue-600 mr-3 shrink-0" />
+                                    <p className="text-[11px] text-blue-700 dark:text-blue-300 font-medium leading-relaxed">
+                                        웹마스터 도구에서 제공받은 메타 태그의 <strong>content</strong> 속성값만 입력하세요.<br/>
+                                        예: 구글(google-site-verification), 네이버(naver-site-verification)
+                                    </p>
+                                </div>
+                            )}
                         </div>
                     </div>
                 );

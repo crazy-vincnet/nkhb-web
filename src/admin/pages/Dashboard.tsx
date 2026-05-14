@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import { 
   Mail, 
@@ -31,9 +32,11 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     fetchStats();
+    supabase.auth.getUser().then(({ data: { user } }) => setUser(user));
   }, []);
 
   const fetchStats = async () => {
@@ -153,8 +156,9 @@ const Dashboard = () => {
         </div>
         <div className="flex items-center gap-3 bg-white dark:bg-gray-800 px-5 py-3 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
           <Clock className="w-5 h-5 text-blue-600" />
-          <div className="text-sm font-bold">
-            <span className="text-gray-400">마지막 접속:</span> {new Date().toLocaleTimeString()}
+          <div className="text-sm font-bold flex flex-col">
+            <span className="text-gray-400 text-[10px] uppercase">Logged in as</span>
+            <span>{user?.email || 'Admin'}</span>
           </div>
         </div>
       </div>

@@ -20,20 +20,30 @@ interface SEOData {
 const SEO: React.FC<SEOProps> = ({ slug }) => {
   const { lang } = useI18n();
   const [data, setData] = useState<SEOData | null>(null);
+  const [siteSettings, setSiteSettings] = useState<any>({});
 
   useEffect(() => {
     const fetchSEO = async () => {
-      // 1. Try to fetch from seo_settings first
-      const { data: seoData, error: seoError } = await supabase
-        .from('seo_settings')
-        .select('*')
-        .eq('page_slug', slug)
-        .single();
+      // Fetch SEO and Site Settings in parallel
+      const [seoRes, siteRes] = await Promise.all([
+        supabase.from('seo_settings').select('*').eq('page_slug', slug).single(),
+        supabase.from('sites_settings').select('*')
+      ]);
+
+      const { data: seoData, error: seoError } = seoRes;
+      const { data: siteData } = siteRes;
+
+      if (siteData) {
+        const settingsMap = siteData.reduce((acc: any, curr) => {
+          acc[curr.key] = curr;
+          return acc;
+        }, {});
+        setSiteSettings(settingsMap);
+      }
 
       if (!seoError && seoData) {
         setData(seoData);
       } else {
-        // 2. If not found, try to fetch from pages table (for dynamic sub-pages)
         const { data: pageData, error: pageError } = await supabase
           .from('pages')
           .select('title_ko, title_en, content_ko, content_en')
@@ -55,19 +65,27 @@ const SEO: React.FC<SEOProps> = ({ slug }) => {
 
   if (!data) return null;
 
+  const siteName = lang === 'ko' 
+    ? (siteSettings.site_name?.value_ko || '뉴코리아 희망방송 (NKHB)')
+    : (siteSettings.site_name?.value_en || 'New Korea Hope Broadcasting (NKHB)');
+
   const title = lang === 'ko' ? data.title_ko : data.title_en;
   const description = lang === 'ko' ? data.description_ko : data.description_en;
   const keywords = lang === 'ko' ? data.keywords_ko : data.keywords_en;
-  const ogImage = data.og_image_url || 'https://cdn.imweb.me/thumbnail/20260424/16a5ea55af28a.png';
+  
+  const ogImage = data.og_image_url || siteSettings.default_og_image?.value_ko || 'https://cdn.imweb.me/thumbnail/20260424/16a5ea55af28a.png';
   const siteUrl = 'https://nkhb.org';
   const currentUrl = `${siteUrl}${window.location.pathname === '/' ? '' : window.location.pathname}`;
+
+  const googleVerification = siteSettings.google_site_verification?.value_ko;
+  const naverVerification = siteSettings.naver_site_verification?.value_ko;
 
   const structuredData = {
     "@context": "https://schema.org",
     "@type": slug === 'home' ? "Organization" : "WebPage",
-    "name": "뉴코리아 희망방송 (NKHB)",
+    "name": siteName,
     "url": siteUrl,
-    "logo": "https://cdn.imweb.me/thumbnail/20260424/16a5ea55af28a.png",
+    "logo": ogImage,
     "description": description,
     "sameAs": [
         "https://nkfi.org"
@@ -81,12 +99,16 @@ const SEO: React.FC<SEOProps> = ({ slug }) => {
       {keywords && <meta name="keywords" content={keywords} />}
       <link rel="canonical" href={currentUrl} />
       
+      {/* Verification Tags */}
+      {googleVerification && <meta name="google-site-verification" content={googleVerification} />}
+      {naverVerification && <meta name="naver-site-verification" content={naverVerification} />}
+      
       <link rel="alternate" href={currentUrl} hrefLang="ko" />
       <link rel="alternate" href={currentUrl} hrefLang="en" />
       <link rel="alternate" href={currentUrl} hrefLang="x-default" />
 
       <meta property="og:type" content="website" />
-      <meta property="og:site_name" content="뉴코리아 희망방송 (NKHB)" />
+      <meta property="og:site_name" content={siteName} />
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />
       <meta property="og:image" content={ogImage} />

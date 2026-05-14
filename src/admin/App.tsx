@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import { Session } from '@supabase/supabase-js';
 import { supabase } from './lib/supabase';
 import Layout from './components/Layout';
 import Login from './pages/Login';
@@ -16,7 +17,7 @@ import PostEditor from './pages/PostEditor';
 import Dashboard from './pages/Dashboard';
 
 function App() {
-  const [session, setSession] = useState<any>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
