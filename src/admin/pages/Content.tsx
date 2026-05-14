@@ -159,33 +159,34 @@ const Content = () => {
 
   const filteredItems = useMemo(() => {
     let items = content;
-    if (searchQuery) {
-        items = items.filter(item => 
-            (item.key || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-            (item.value_ko || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-            (item.value_en || '').toLowerCase().includes(searchQuery.toLowerCase())
-        );
-    } else {
-        const section = SECTIONS.find(s => s.id === activeTab);
-        items = items.filter(item => section?.pattern.some(p => item.key.toLowerCase().startsWith(p) || item.key.toLowerCase().includes(p)));
-    }
-
     if (statusFilter === 'missing') items = items.filter(i => !i.value_en || !i.value_ko);
     else if (statusFilter === 'modified') items = items.filter(i => modifiedIds.has(i.id));
-
     return items;
-  }, [content, activeTab, searchQuery, statusFilter, modifiedIds]);
+  }, [content, statusFilter, modifiedIds]);
 
   const groupedItems = useMemo(() => {
-    const groups: { [key: string]: ContentItem[] } = {};
-    filteredItems.forEach(item => {
-        const parts = item.key.split('_');
-        const groupKey = parts.length > 1 ? parts[0] : 'general';
-        if (!groups[groupKey]) groups[groupKey] = [];
-        groups[groupKey].push(item);
-    });
-    return groups;
-  }, [filteredItems]);
+    const groups = GROUP_CONFIG[activeTab] || [{ label: '일반', pattern: '' }];
+    
+    return groups.map(group => {
+      const items = filteredItems.filter(item => {
+        // 1. 해당 섹션에 속하는지 확인
+        const matchesSection = item.key.toLowerCase().startsWith(activeTab.toLowerCase()) || 
+                               item.key.toLowerCase().includes(activeTab.toLowerCase());
+        
+        // 2. 해당 그룹 패턴과 일치하는지 확인
+        const matchesGroup = group.pattern === '' || item.key.toLowerCase().includes(group.pattern.toLowerCase());
+        
+        // 3. 검색어 필터링
+        const matchesSearch = searchQuery === '' || 
+          item.key.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (item.value_ko || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (item.value_en || '').toLowerCase().includes(searchQuery.toLowerCase());
+        
+        return matchesSection && matchesGroup && matchesSearch;
+      });
+      return { ...group, items };
+    }).filter(g => g.items.length > 0);
+  }, [filteredItems, activeTab, searchQuery]);
 
   const handleUpdate = async (item: ContentItem) => {
     setSavingId(item.id);
@@ -351,16 +352,16 @@ const Content = () => {
 
       {/* Workspace */}
       <div className="max-w-[1400px] mx-auto px-8 w-full py-12 space-y-16 pb-40">
-        {Object.entries(groupedItems).map(([groupKey, items]) => (
-            <div key={groupKey} className="space-y-6">
+        {groupedItems.map((group, index) => (
+            <div key={index} className="space-y-6">
                 <div className="flex items-center gap-4 ml-4">
                     <div className="w-1 h-6 bg-blue-600 rounded-full" />
-                    <h3 className="text-lg font-black text-gray-900 dark:text-white uppercase tracking-widest">{groupKey} 영역</h3>
-                    <span className="text-xs font-bold text-gray-300 bg-gray-50 dark:bg-gray-800 px-2 py-0.5 rounded-lg">{items.length}개 항목</span>
+                    <h3 className="text-lg font-black text-gray-900 dark:text-white uppercase tracking-widest">{group.label} 영역</h3>
+                    <span className="text-xs font-bold text-gray-300 bg-gray-50 dark:bg-gray-800 px-2 py-0.5 rounded-lg">{group.items.length}개 항목</span>
                 </div>
 
                 <div className="grid grid-cols-1 gap-6">
-                    {items.map((item) => (
+                    {group.items.map((item) => (
                         <div 
                             key={item.id} 
                             className={`bg-white dark:bg-gray-900 rounded-[2.5rem] border transition-all ${
@@ -444,7 +445,7 @@ const Content = () => {
         ))}
       </div>
 
-      {Object.keys(groupedItems).length === 0 && (
+      {groupedItems.length === 0 && (
         <div className="py-40 text-center bg-white dark:bg-gray-900 rounded-[3rem] border-2 border-dashed border-gray-100 dark:border-gray-800">
             <Search className="w-16 h-16 text-gray-100 mx-auto mb-6" />
             <p className="text-gray-400 text-lg font-bold">표시할 항목이 없습니다.</p>
