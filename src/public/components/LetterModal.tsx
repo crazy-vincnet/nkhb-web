@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useI18n } from '../lib/i18n';
 import { supabase } from '../lib/supabase';
-import emailjs from '@emailjs/browser';
 
 interface LetterModalProps {
     isOpen: boolean;
@@ -35,27 +34,14 @@ const LetterModal: React.FC<LetterModalProps> = ({ isOpen, onClose }) => {
 
             if (dbError) throw dbError;
 
-            // 2. Send via EmailJS (Real-time Notification)
-            // Note: These IDs should be in your .env file
-            const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
-            const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
-            const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
-
-            if (serviceId && templateId && publicKey) {
-                await emailjs.send(
-                    serviceId,
-                    templateId,
-                    {
-                        from_name: data.name,
-                        from_email: data.email,
-                        location: data.location,
-                        reason: data.reason,
-                        message: data.message,
-                        to_name: "NKHB Admin", // You can customize this
-                    },
-                    publicKey
-                );
-            }
+            // 2. Send via Server API (Real-time Notification)
+            await fetch('/api/send-email', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
 
             const msg = lang === 'en' ? 'Letter sent successfully.' : '편지가 성공적으로 전송되었습니다.';
             alert(msg);
