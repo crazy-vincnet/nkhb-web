@@ -29,6 +29,13 @@ const GrapesEditor = ({ initialData, onReady }: GrapesEditorProps) => {
         locale: 'ko',
         messages: { ko: grapesKo },
       },
+      deviceManager: {
+        devices: [
+          { name: 'Desktop', width: '' },
+          { name: 'Tablet', width: '768px', widthMedia: '768px' },
+          { name: 'Mobile', width: '375px', widthMedia: '375px' },
+        ],
+      },
       assetManager: {
         upload: false,
         assets: [],
@@ -40,6 +47,64 @@ const GrapesEditor = ({ initialData, onReady }: GrapesEditorProps) => {
         ]
       }
     });
+
+    // --- Custom UI Panels ---
+    const pn = editor.Panels;
+    
+    // Add Devices Panel
+    pn.addPanel({
+      id: 'devices-c',
+      el: '.panel__devices',
+    });
+
+    pn.addButton('devices-c', [
+      {
+        id: 'device-desktop',
+        label: '🖥️',
+        command: (editor: any) => editor.setDevice('Desktop'),
+        active: true,
+        attributes: { title: '데스크탑' },
+      },
+      {
+        id: 'device-tablet',
+        label: '📱',
+        command: (editor: any) => editor.setDevice('Tablet'),
+        attributes: { title: '태블릿' },
+      },
+      {
+        id: 'device-mobile',
+        label: '📲',
+        command: (editor: any) => editor.setDevice('Mobile'),
+        attributes: { title: '모바일' },
+      },
+    ]);
+
+    // Add Action Buttons to Options Panel
+    const optionsPanel = pn.getPanel('options');
+    if (optionsPanel) {
+        pn.addButton('options', [
+            {
+                id: 'undo',
+                className: 'fa fa-undo',
+                command: 'core:undo',
+                attributes: { title: '되돌리기 (Ctrl+Z)' }
+            },
+            {
+                id: 'redo',
+                className: 'fa fa-redo',
+                command: 'core:redo',
+                attributes: { title: '다시실행 (Ctrl+Y)' }
+            },
+            {
+                id: 'clean-all',
+                className: 'fa fa-trash',
+                command: (editor: any) => {
+                    if (confirm('전체 내용을 삭제하시겠습니까?')) editor.runCommand('core:canvas-clear');
+                },
+                attributes: { title: '전체 삭제' }
+            }
+        ]);
+    }
 
     // Setup Custom Image Upload Bridge to Supabase
     editor.on('run:open-assets', () => {
@@ -151,8 +216,29 @@ const GrapesEditor = ({ initialData, onReady }: GrapesEditorProps) => {
   }, []);
 
   return (
-    <div className="absolute inset-0 bg-white overflow-hidden">
+    <div className="absolute inset-0 bg-white overflow-hidden flex flex-col">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+      
+      {/* Custom Top Panel */}
+      <div className="h-10 bg-gray-50 dark:bg-gray-800 border-b dark:border-gray-700 flex items-center justify-between px-4 shrink-0">
+        <div className="panel__devices flex items-center"></div>
+        <div className="flex-1 flex justify-center">
+            <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+                Live Design Studio
+            </div>
+        </div>
+        <div className="panel__basic-actions flex items-center"></div>
+      </div>
+
+      <div className="flex-1 relative overflow-hidden">
+        <div ref={editorRef} className="h-full w-full"></div>
+      </div>
+
       <style>{`
+        .gjs-editor-cont {
+            height: 100% !important;
+        }
         .gjs-cv-canvas {
           width: 100% !important;
           height: 100% !important;
@@ -160,15 +246,74 @@ const GrapesEditor = ({ initialData, onReady }: GrapesEditorProps) => {
         }
         .gjs-editor {
           background-color: #fff;
-          height: 100% !important;
         }
-        .gjs-pn-panels::-webkit-scrollbar {
+        
+        /* Panel Styling */
+        .gjs-pn-panels {
+            position: relative;
+        }
+        .gjs-pn-commands {
+            display: none; /* Hide default sidebar panels to use our layout */
+        }
+        .gjs-pn-options {
+            padding: 0;
+            background: transparent;
+            box-shadow: none;
+            position: relative;
+            right: 0;
+            top: 0;
+        }
+        .gjs-pn-options .gjs-pn-buttons {
+            display: flex;
+            gap: 5px;
+        }
+        .gjs-pn-btn {
+            border-radius: 8px !important;
+            padding: 8px !important;
+            transition: all 0.2s;
+            color: #64748b !important;
+        }
+        .gjs-pn-btn:hover {
+            background-color: #f1f5f9 !important;
+            color: #2563eb !important;
+        }
+        .gjs-pn-active {
+            background-color: #eff6ff !important;
+            color: #2563eb !important;
+            box-shadow: none !important;
+        }
+
+        .panel__devices {
+            background: #f1f5f9;
+            padding: 3px;
+            border-radius: 10px;
+            display: flex;
+            gap: 2px;
+        }
+        .panel__devices .gjs-pn-btn {
+            padding: 5px 12px !important;
+            font-size: 14px;
+        }
+
+        .gjs-pn-views-container {
+          width: 280px !important;
+          border-left: 1px solid #e2e8f0;
+          padding: 10px;
+          background: #fff;
+        }
+        .gjs-cv-canvas {
+            width: calc(100% - 280px) !important;
+        }
+
+        /* Custom Scrollbar */
+        .gjs-pn-views-container::-webkit-scrollbar {
           width: 4px;
         }
-        .gjs-pn-panels::-webkit-scrollbar-thumb {
+        .gjs-pn-views-container::-webkit-scrollbar-thumb {
           background: rgba(0,0,0,0.1);
           border-radius: 10px;
         }
+
         .nkhb-upload-btn {
           cursor: pointer;
           background-color: #2563eb !important;
@@ -179,23 +324,7 @@ const GrapesEditor = ({ initialData, onReady }: GrapesEditorProps) => {
           font-weight: bold !important;
           transition: all 0.2s;
         }
-        .nkhb-upload-btn:hover {
-          background-color: #1d4ed8 !important;
-          transform: translateY(-1px);
-        }
-        .nkhb-upload-btn:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-        /* Ensure the canvas and sidebar are fully visible */
-        .gjs-cv-canvas {
-            width: calc(100% - 230px) !important;
-        }
-        .gjs-pn-views-container {
-            width: 230px !important;
-        }
       `}</style>
-      <div ref={editorRef} className="h-full w-full"></div>
     </div>
   );
 };

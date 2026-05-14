@@ -125,18 +125,72 @@ export const initNKHBBlocks = (editor: Editor) => {
   });
 
   // --- Category: Sections (섹션) ---
-  bm.add('nkhb-hero-modern', {
-    label: '모던 히어로',
+  bm.add('nkhb-hero-video', {
+    label: '비디오 히어로',
     category: 'Sections',
-    media: createIcon('🖼️'),
+    media: createIcon('🎬'),
     content: `
-      <section style="background: linear-gradient(rgba(10,25,47,0.8), rgba(10,25,47,0.8)), url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80') center/cover; padding: 120px 20px; color: white; text-align: center;">
-        <div style="max-width: 800px; margin: 0 auto;">
-          <h1 style="font-size: 3.5rem; font-weight: 800; margin-bottom: 25px; line-height: 1.2;">세상을 변화시키는 목소리</h1>
-          <p style="font-size: 1.25rem; opacity: 0.9; margin-bottom: 45px; line-height: 1.6;">진실과 희망의 메시지를 북한 전역으로 전달하여 자유와 회복을 꿈꾸게 합니다.</p>
-          <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
-            <a href="#" style="background: #2563eb; color: white; padding: 16px 40px; border-radius: 12px; font-weight: 700; text-decoration: none;">지금 시작하기</a>
-            <a href="#" style="border: 2px solid white; color: white; padding: 16px 40px; border-radius: 12px; font-weight: 700; text-decoration: none;">더 알아보기</a>
+      <section style="position: relative; height: 100vh; overflow: hidden; display: flex; align-items: center; justify-content: center; color: white;">
+        <video autoplay muted loop style="position: absolute; top: 50%; left: 50%; min-width: 100%; min-height: 100%; width: auto; height: auto; z-index: -1; transform: translate(-50%, -50%); object-fit: cover;">
+          <source src="https://assets.mixkit.co/videos/preview/mixkit-clouds-and-blue-sky-2408-large.mp4" type="video/mp4">
+        </video>
+        <div style="background: rgba(0,0,0,0.4); position: absolute; inset: 0; z-index: 0;"></div>
+        <div style="position: relative; z-index: 1; text-align: center; max-width: 900px; padding: 0 20px;">
+          <h1 style="font-size: 4rem; font-weight: 900; margin-bottom: 20px;">희망은 소리 없이 찾아옵니다</h1>
+          <p style="font-size: 1.4rem; opacity: 0.9; margin-bottom: 40px;">진실의 파동이 북한 전역으로 퍼져나가는 순간</p>
+          <a href="#" style="background: #2563eb; color: white; padding: 18px 50px; border-radius: 50px; font-weight: 800; text-decoration: none; font-size: 1.1rem; box-shadow: 0 15px 30px rgba(37,99,235,0.3);">지금 라이브 듣기</a>
+        </div>
+      </section>
+    `,
+  });
+
+  bm.add('nkhb-schedule-grid', {
+    label: '방송 시간표 섹션',
+    category: 'Sections',
+    media: createIcon('⏰'),
+    content: `
+      <section style="padding: 100px 20px; background: #0f172a; color: white;">
+        <div style="max-width: 1100px; margin: 0 auto;">
+          <h2 style="text-align: center; font-size: 2.5rem; font-weight: 800; margin-bottom: 60px;">라디오 방송 편성표</h2>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
+            <div style="background: rgba(255,255,255,0.05); padding: 40px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.1);">
+                <h3 style="color: #3b82f6; font-size: 1.2rem; margin-bottom: 20px;">월 · 수 · 금</h3>
+                <div style="font-size: 2.2rem; font-weight: 800; margin-bottom: 10px;">02:30 - 03:00</div>
+                <div style="opacity: 0.6;">주파수: 5920 kHz</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.05); padding: 40px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.1);">
+                <h3 style="color: #3b82f6; font-size: 1.2rem; margin-bottom: 20px;">화 · 목 · 토</h3>
+                <div style="font-size: 2.2rem; font-weight: 800; margin-bottom: 10px;">23:00 - 23:30</div>
+                <div style="opacity: 0.6;">주파수: 9470 kHz</div>
+            </div>
+          </div>
+        </div>
+      </section>
+    `,
+  });
+
+  bm.add('nkhb-donation-cards', {
+    label: '후원 옵션 카드',
+    category: 'Sections',
+    media: createIcon('❤️'),
+    content: `
+      <section style="padding: 100px 20px;">
+        <div style="max-width: 1200px; margin: 0 auto;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px;">
+            <div style="border: 2px solid #f1f5f9; padding: 40px; border-radius: 30px; text-align: center; transition: all 0.3s;">
+                <div style="font-size: 40px; margin-bottom: 20px;">📻</div>
+                <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 15px;">라디오 보내기</h3>
+                <p style="color: #64748b; margin-bottom: 25px;">북한 주민 한 명에게 정보를 전달할 소중한 도구를 선물합니다.</p>
+                <div style="font-size: 1.8rem; font-weight: 900; color: #2563eb; margin-bottom: 25px;">$25</div>
+                <a href="#" style="display: block; padding: 15px; background: #f1f5f9; color: #1e293b; border-radius: 15px; text-decoration: none; font-weight: 700;">선택하기</a>
+            </div>
+            <div style="border: 2px solid #2563eb; padding: 40px; border-radius: 30px; text-align: center; background: #eff6ff;">
+                <div style="font-size: 40px; margin-bottom: 20px;">🎙️</div>
+                <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 15px;">방송 제작 지원</h3>
+                <p style="color: #64748b; margin-bottom: 25px;">한 시간 분량의 고품질 콘텐츠가 제작될 수 있도록 돕습니다.</p>
+                <div style="font-size: 1.8rem; font-weight: 900; color: #2563eb; margin-bottom: 25px;">$100</div>
+                <a href="#" style="display: block; padding: 15px; background: #2563eb; color: white; border-radius: 15px; text-decoration: none; font-weight: 700;">가장 인기있는 항목</a>
+            </div>
           </div>
         </div>
       </section>
@@ -170,6 +224,42 @@ export const initNKHBBlocks = (editor: Editor) => {
               <h3 style="font-size: 1.6rem; font-weight: 700; margin-bottom: 15px; color: #1e293b;">회복과 소망</h3>
               <p style="color: #64748b; line-height: 1.7;">음악과 생활 정보를 통해 일상의 작은 여유와 회복을 선물합니다.</p>
             </div>
+          </div>
+        </div>
+      </section>
+    `,
+  });
+
+  bm.add('nkhb-letter-cta', {
+    label: '희망의 편지 CTA',
+    category: 'Sections',
+    media: createIcon('✉️'),
+    content: `
+      <section style="padding: 80px 20px; background: #fff7ed; border-radius: 40px; margin: 40px 20px; border: 2px dashed #ffedd5;">
+        <div style="max-width: 800px; margin: 0 auto; text-align: center;">
+          <div style="font-size: 50px; margin-bottom: 20px;">✉️</div>
+          <h2 style="font-size: 2.2rem; font-weight: 800; color: #9a3412; margin-bottom: 20px;">북한 주민에게 희망의 편지를 보내주세요</h2>
+          <p style="font-size: 1.1rem; color: #c2410c; margin-bottom: 35px; line-height: 1.6;">당신의 따뜻한 말 한마디가 누군가에게는 삶을 지탱하는 커다란 힘이 됩니다. 지금 마음을 전해보세요.</p>
+          <a href="/#letters" style="display: inline-block; background: #ea580c; color: white; padding: 16px 45px; border-radius: 15px; font-weight: 800; text-decoration: none; box-shadow: 0 10px 20px rgba(234,88,12,0.2);">편지 쓰러 가기</a>
+        </div>
+      </section>
+    `,
+  });
+
+  bm.add('nkhb-impact-story', {
+    label: '임팩트 스토리',
+    category: 'Sections',
+    media: createIcon('📖'),
+    content: `
+      <section style="padding: 100px 20px;">
+        <div style="max-width: 1000px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 50px; align-items: center; background: #f8fafc; padding: 60px; border-radius: 40px;">
+          <div style="flex: 1; min-width: 300px;">
+            <img src="https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?auto=format&fit=crop&q=80" style="width: 100%; border-radius: 20px; filter: grayscale(100%) sepia(20%);" />
+          </div>
+          <div style="flex: 1.5; min-width: 300px;">
+            <div style="font-size: 60px; color: #cbd5e1; margin-bottom: -20px;">"</div>
+            <p style="font-size: 1.4rem; font-weight: 600; color: #1e293b; line-height: 1.6; margin-bottom: 25px;">라디오에서 들려오는 목소리는 마치 어두운 방 안에 켜진 작은 등불 같았습니다. 저는 그 소리를 통해 제가 혼자가 아니라는 것을 알게 되었습니다.</p>
+            <div style="font-weight: 800; color: #2563eb;">- 익명의 청취자 소감 중</div>
           </div>
         </div>
       </section>
