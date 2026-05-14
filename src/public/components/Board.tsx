@@ -20,9 +20,11 @@ interface BoardProps {
   lang: 'ko' | 'en';
   titleKo?: string;
   titleEn?: string;
+  subtitleKo?: string;
+  subtitleEn?: string;
 }
 
-const Board: React.FC<BoardProps> = ({ pageId, lang, titleKo, titleEn }) => {
+const Board: React.FC<BoardProps> = ({ pageId, lang, titleKo, titleEn, subtitleKo, subtitleEn }) => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
@@ -71,6 +73,9 @@ const Board: React.FC<BoardProps> = ({ pageId, lang, titleKo, titleEn }) => {
   };
 
   const boardTitle = lang === 'ko' ? (titleKo || '공지 및 소식') : (titleEn || 'Board & Updates');
+  const boardSubtitle = lang === 'ko' 
+    ? (subtitleKo || '뉴코리아 희망방송의 소중한 소식과 공식 업데이트를 전해드립니다.') 
+    : (subtitleEn || 'Delivering valuable news and official updates from NKHB.');
 
   return (
     <section className="premium-board-section font-pretendard">
@@ -83,11 +88,7 @@ const Board: React.FC<BoardProps> = ({ pageId, lang, titleKo, titleEn }) => {
                 COMMUNITY & NEWS
             </div>
             <h2 className="premium-board-title">{boardTitle}</h2>
-            <p className="premium-board-subtitle">
-              {lang === 'ko' 
-                ? '뉴코리아 희망방송의 소중한 소식과 공식 업데이트를 전해드립니다.' 
-                : 'Delivering valuable news and official updates from NKHB.'}
-            </p>
+            <p className="premium-board-subtitle">{boardSubtitle}</p>
           </div>
           
           <div className="board-controls">

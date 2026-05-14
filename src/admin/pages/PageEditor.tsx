@@ -29,6 +29,8 @@ interface Page {
   has_board: boolean;
   board_title_ko: string;
   board_title_en: string;
+  board_subtitle_ko: string;
+  board_subtitle_en: string;
 }
 
 interface SEOData {
@@ -165,6 +167,8 @@ const PageEditor = () => {
         has_board: page.has_board,
         board_title_ko: page.board_title_ko,
         board_title_en: page.board_title_en,
+        board_subtitle_ko: page.board_subtitle_ko,
+        board_subtitle_en: page.board_subtitle_en,
         updated_at: new Date().toISOString()
       };
 
@@ -427,29 +431,60 @@ const PageEditor = () => {
                       {/* Board Title Settings */}
                       <div className="p-5 bg-white dark:bg-gray-800 rounded-2xl border dark:border-gray-700 space-y-4 shadow-sm">
                         <div className="flex items-center gap-2 text-[10px] font-black text-blue-600 uppercase tracking-widest px-1">
-                          <Type className="w-3 h-3" /> 게시판 타이틀 설정
+                          <Type className="w-3 h-3" /> 게시판 텍스트 설정
                         </div>
-                        <div className="space-y-3">
-                            <input 
-                                type="text"
-                                value={page.board_title_ko}
-                                onChange={(e) => {
-                                  const val = e.target.value;
-                                  setPage(prev => prev ? ({...prev, board_title_ko: val}) : null);
-                                }}
-                                className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-lg text-xs outline-none focus:ring-1 focus:ring-blue-500 text-gray-900 dark:text-white"
-                                placeholder="한국어 제목"
-                            />
-                            <input 
-                                type="text"
-                                value={page.board_title_en}
-                                onChange={(e) => {
-                                  const val = e.target.value;
-                                  setPage(prev => prev ? ({...prev, board_title_en: val}) : null);
-                                }}
-                                className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-lg text-xs outline-none focus:ring-1 focus:ring-blue-500 text-gray-900 dark:text-white"
-                                placeholder="English Title"
-                            />
+                        <div className="space-y-4">
+                            <div className="space-y-1.5">
+                                <label className="text-[10px] font-bold text-gray-400 ml-1">게시판 제목 (KO/EN)</label>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <input 
+                                        type="text"
+                                        value={page.board_title_ko}
+                                        onChange={(e) => {
+                                          const val = e.target.value;
+                                          setPage(prev => prev ? ({...prev, board_title_ko: val}) : null);
+                                        }}
+                                        className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-lg text-xs outline-none focus:ring-1 focus:ring-blue-500 text-gray-900 dark:text-white"
+                                        placeholder="한국어 제목"
+                                    />
+                                    <input 
+                                        type="text"
+                                        value={page.board_title_en}
+                                        onChange={(e) => {
+                                          const val = e.target.value;
+                                          setPage(prev => prev ? ({...prev, board_title_en: val}) : null);
+                                        }}
+                                        className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-lg text-xs outline-none focus:ring-1 focus:ring-blue-500 text-gray-900 dark:text-white"
+                                        placeholder="English Title"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <label className="text-[10px] font-bold text-gray-400 ml-1">게시판 설명 (KO)</label>
+                                <textarea 
+                                    value={page.board_subtitle_ko}
+                                    onChange={(e) => {
+                                      const val = e.target.value;
+                                      setPage(prev => prev ? ({...prev, board_subtitle_ko: val}) : null);
+                                    }}
+                                    className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-lg text-xs outline-none focus:ring-1 focus:ring-blue-500 text-gray-900 dark:text-white min-h-[60px] resize-none"
+                                    placeholder="한국어 설명"
+                                />
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <label className="text-[10px] font-bold text-gray-400 ml-1">게시판 설명 (EN)</label>
+                                <textarea 
+                                    value={page.board_subtitle_en}
+                                    onChange={(e) => {
+                                      const val = e.target.value;
+                                      setPage(prev => prev ? ({...prev, board_subtitle_en: val}) : null);
+                                    }}
+                                    className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-lg text-xs outline-none focus:ring-1 focus:ring-blue-500 text-gray-900 dark:text-white min-h-[60px] resize-none"
+                                    placeholder="English Subtitle"
+                                />
+                            </div>
                         </div>
                       </div>
 

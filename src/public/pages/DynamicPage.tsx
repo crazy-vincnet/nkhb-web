@@ -16,6 +16,8 @@ interface PageData {
   has_board: boolean;
   board_title_ko: string;
   board_title_en: string;
+  board_subtitle_ko: string;
+  board_subtitle_en: string;
 }
 
 const DynamicPage = () => {
@@ -92,6 +94,8 @@ const DynamicPage = () => {
           lang={lang} 
           titleKo={page.board_title_ko} 
           titleEn={page.board_title_en} 
+          subtitleKo={page.board_subtitle_ko}
+          subtitleEn={page.board_subtitle_en}
         />
       )}
     </main>
