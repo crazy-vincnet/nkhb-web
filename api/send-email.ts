@@ -14,7 +14,9 @@ export default async function handler(
   // Verify credentials
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
-  const to = process.env.SMTP_TO || user;
+  const adminEmail = process.env.SMTP_TO || user;
+
+  console.log(`Email request received from: ${email} to: ${adminEmail}`);
 
   if (!user || !pass) {
     console.error('SMTP credentials missing');
@@ -28,9 +30,9 @@ export default async function handler(
 
   const mailOptions = {
     from: `"NKHB Website" <${user}>`,
-    to: to,
+    to: [adminEmail, email].join(', '), // Send to both admin and sender
     replyTo: email,
-    subject: `[희망의 편지] ${name}님이 보낸 메시지`,
+    subject: `[NKHB] ${name}님이 보낸 새로운 메시지`,
     text: `
 이름: ${name}
 이메일: ${email}
