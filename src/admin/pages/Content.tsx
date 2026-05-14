@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { 
   Save, 
@@ -22,7 +22,11 @@ import {
   ArrowRight,
   Languages,
   ExternalLink,
-  Zap
+  Zap,
+  ArrowUpRight,
+  Maximize2,
+  Minimize2,
+  Undo2
 } from 'lucide-react';
 
 interface ContentItem {
@@ -56,6 +60,7 @@ const Content = () => {
   const [batchSaving, setBatchSaving] = useState<string | null>(null);
   const [uploading, setUploading] = useState<{id: string, field: string} | null>(null);
   const [modifiedIds, setModifiedIds] = useState<Set<string>>(new Set());
+  const [originalContent, setOriginalContent] = useState<ContentItem[]>([]);
 
   useEffect(() => {
     fetchContent();
@@ -72,6 +77,7 @@ const Content = () => {
       console.error('Error fetching content:', error);
     } else {
       setContent(data || []);
+      setOriginalContent(JSON.parse(JSON.stringify(data || [])));
     }
     setLoading(false);
   };
@@ -81,7 +87,7 @@ const Content = () => {
     return k.includes('logo') || k.includes('image') || k.includes('url') || k.startsWith('image_');
   };
 
-  const getFilteredItems = (sectionId: string | null, search: string, filter: string) => {
+  const getFilteredItems = useCallback((sectionId: string | null, search: string, filter: string) => {
     let result = content;
 
     if (search) {
@@ -108,11 +114,11 @@ const Content = () => {
     }
 
     return result;
-  };
+  }, [content]);
 
   const filteredContent = useMemo(() => 
     getFilteredItems(activeSection, searchQuery, statusFilter), 
-  [content, activeSection, searchQuery, statusFilter]);
+  [getFilteredItems, activeSection, searchQuery, statusFilter]);
 
   const groupedContent = useMemo(() => {
     const groups: { [key: string]: ContentItem[] } = {};
@@ -139,6 +145,8 @@ const Content = () => {
       console.error('Error updating content:', error);
       alert('저장 실패: ' + error.message);
     } else {
+      // Update original content to match new value
+      setOriginalContent(prev => prev.map(o => o.id === item.id ? { ...item } : o));
       const nextModified = new Set(modifiedIds);
       nextModified.delete(item.id);
       setModifiedIds(nextModified);
@@ -163,9 +171,15 @@ const Content = () => {
       if (error) throw error;
       
       const nextModified = new Set(modifiedIds);
-      items.forEach(item => {
-        setSaving(item.id);
-        nextModified.delete(item.id);
+      setOriginalContent(prev => {
+        const next = [...prev];
+        items.forEach(item => {
+          const idx = next.findIndex(o => o.id === item.id);
+          if (idx > -1) next[idx] = { ...item };
+          setSaving(item.id);
+          nextModified.delete(item.id);
+        });
+        return next;
       });
       setModifiedIds(nextModified);
       
@@ -180,12 +194,31 @@ const Content = () => {
   };
 
   const handleChange = (id: string, field: 'value_ko' | 'value_en', value: string) => {
-    const nextModified = new Set(modifiedIds);
-    nextModified.add(id);
-    setModifiedIds(nextModified);
     setContent(prev => prev.map(item => 
       item.id === id ? { ...item, [field]: value } : item
     ));
+    
+    // Check if truly modified from original
+    const original = originalContent.find(o => o.id === id);
+    const current = content.find(c => c.id === id);
+    if (!original || !current) return;
+
+    const nextVal = { ...current, [field]: value };
+    const isModified = nextVal.value_ko !== original.value_ko || nextVal.value_en !== original.value_en;
+
+    const nextModified = new Set(modifiedIds);
+    if (isModified) nextModified.add(id);
+    else nextModified.delete(id);
+    setModifiedIds(nextModified);
+  };
+
+  const revertItem = (id: string) => {
+    const original = originalContent.find(o => o.id === id);
+    if (!original) return;
+    setContent(prev => prev.map(item => item.id === id ? { ...original } : item));
+    const nextModified = new Set(modifiedIds);
+    nextModified.delete(id);
+    setModifiedIds(nextModified);
   };
 
   const handleFileUpload = async (id: string, field: 'value_ko' | 'value_en', file: File) => {
@@ -213,24 +246,20 @@ const Content = () => {
     }
   };
 
-  const copyToClipboard = (text: string) => {
-    if (!text) return;
-    navigator.clipboard.writeText(text);
-  };
-
-  const highlightText = (text: string, query: string) => {
-    if (!query) return text;
-    const parts = text.split(new RegExp(`(${query})`, 'gi'));
-    return (
-      <>
-        {parts.map((part, i) => 
-          part.toLowerCase() === query.toLowerCase() 
-            ? <span key={i} className="bg-yellow-200 dark:bg-yellow-900/50 text-gray-900 dark:text-white px-0.5 rounded font-bold">{part}</span> 
-            : part
-        )}
-      </>
-    );
-  };
+  // Keyboard shortcut Cmd/Ctrl + S
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+        e.preventDefault();
+        // If there are modified IDs, save them all
+        if (modifiedIds.size > 0) {
+          handleBatchUpdate(content.filter(i => modifiedIds.has(i.id)), 'shortcut_batch');
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [modifiedIds, content]);
 
   if (loading) return (
     <div className="flex items-center justify-center h-64">
@@ -269,7 +298,7 @@ const Content = () => {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input 
               type="text" 
-              placeholder="문구 키워드 또는 내용 검색..."
+              placeholder="문구 키워드 또는 내용 검색... (Cmd+S로 저장)"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-12 pr-4 py-4 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl text-sm focus:ring-2 focus:ring-blue-500 shadow-inner"
@@ -308,13 +337,21 @@ const Content = () => {
           </div>
 
           {modifiedIds.size > 0 && (
-            <button
-              onClick={() => handleBatchUpdate(content.filter(i => modifiedIds.has(i.id)), 'all_modified')}
-              className="flex items-center gap-2 px-6 py-2.5 bg-rose-600 text-white rounded-xl text-xs font-black transition-all shadow-lg shadow-rose-200 animate-bounce"
-            >
-              <Zap className="w-4 h-4" />
-              변경된 {modifiedIds.size}개 항목 모두 저장
-            </button>
+            <div className="flex items-center gap-3">
+               <button
+                onClick={() => modifiedIds.forEach(id => revertItem(id))}
+                className="text-gray-400 hover:text-gray-600 text-xs font-bold flex items-center gap-1.5"
+              >
+                <Undo2 className="w-3.5 h-3.5" /> 모두 되돌리기
+              </button>
+              <button
+                onClick={() => handleBatchUpdate(content.filter(i => modifiedIds.has(i.id)), 'all_modified')}
+                className="flex items-center gap-2 px-6 py-2.5 bg-rose-600 text-white rounded-xl text-xs font-black transition-all shadow-lg shadow-rose-200 animate-pulse"
+              >
+                <Zap className="w-4 h-4" />
+                {modifiedIds.size}개 항목 즉시 저장
+              </button>
+            </div>
           )}
         </div>
       </div>
@@ -387,163 +424,53 @@ const Content = () => {
           })}
         </div>
       ) : (
-        <div className="space-y-12">
+        <div className="space-y-20">
           {Object.entries(groupedContent).map(([prefix, items]) => (
             <div key={prefix} className="space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 ml-2">
+              {/* Sticky Group Header */}
+              <div className="sticky top-0 z-20 bg-gray-100/80 dark:bg-gray-900/80 backdrop-blur-md py-4 -mx-4 px-4 rounded-b-2xl border-b border-gray-200 dark:border-gray-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 text-blue-600 rounded-lg flex items-center justify-center">
-                    <Sparkles className="w-4 h-4" />
+                  <div className="w-10 h-10 bg-blue-600 text-white rounded-xl flex items-center justify-center shadow-lg shadow-blue-200 dark:shadow-none">
+                    <Sparkles className="w-5 h-5" />
                   </div>
-                  <h3 className="text-lg font-black text-gray-900 dark:text-white uppercase tracking-wider">
-                    {prefix === 'general' ? '기타 항목' : `${prefix} 그룹`}
-                  </h3>
-                  <span className="text-xs font-bold text-gray-400 bg-gray-50 dark:bg-gray-800 px-2.5 py-1 rounded-lg">{items.length} 항목</span>
+                  <div>
+                    <h3 className="text-lg font-black text-gray-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                      {prefix === 'general' ? '기타 항목' : `${prefix} 그룹`}
+                      <span className="text-xs font-bold text-gray-400 bg-white dark:bg-gray-800 px-2.5 py-1 rounded-lg border border-gray-100 dark:border-gray-700">{items.length}</span>
+                    </h3>
+                  </div>
                 </div>
                 
-                {items.some(i => modifiedIds.has(i.id)) && (
-                  <button
-                    onClick={() => handleBatchUpdate(items.filter(i => modifiedIds.has(i.id)), prefix)}
-                    disabled={batchSaving === prefix}
-                    className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl text-xs font-black transition-all shadow-lg shadow-blue-200 dark:shadow-none hover:bg-blue-700"
-                  >
-                    {batchSaving === prefix ? <CheckCircle2 className="w-4 h-4 animate-bounce" /> : <Save className="w-4 h-4" />}
-                    {batchSaving === prefix ? '저장 중...' : '이 그룹의 수정사항 일괄 저장'}
-                  </button>
-                )}
+                <div className="flex items-center gap-3">
+                  {items.some(i => modifiedIds.has(i.id)) && (
+                    <button
+                      onClick={() => handleBatchUpdate(items.filter(i => modifiedIds.has(i.id)), prefix)}
+                      disabled={batchSaving === prefix}
+                      className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl text-xs font-black transition-all shadow-lg shadow-blue-200 dark:shadow-none hover:bg-blue-700"
+                    >
+                      {batchSaving === prefix ? <CheckCircle2 className="w-4 h-4 animate-bounce" /> : <Save className="w-4 h-4" />}
+                      {batchSaving === prefix ? '저장 중...' : '이 그룹 일괄 저장'}
+                    </button>
+                  )}
+                </div>
               </div>
 
-              <div className="grid grid-cols-1 gap-6">
+              <div className="grid grid-cols-1 gap-8">
                 {items.map((item) => (
-                  <div 
-                    key={item.id} 
-                    className={`bg-white dark:bg-gray-800 rounded-3xl border transition-all overflow-hidden group/item ${
-                      modifiedIds.has(item.id) 
-                        ? 'border-blue-300 ring-4 ring-blue-500/5 shadow-xl' 
-                        : 'border-gray-100 dark:border-gray-700 shadow-sm'
-                    }`}
-                  >
-                    <div className="px-6 py-4 bg-gray-50 dark:bg-gray-800/50 border-b dark:border-gray-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                      <div className="flex flex-wrap items-center gap-3">
-                        <div className="flex items-center gap-1">
-                          <code className="text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-3 py-1.5 rounded-lg flex items-center gap-2">
-                            {highlightText(item.key, searchQuery)}
-                            <button 
-                              onClick={() => copyToClipboard(item.key)} 
-                              className="text-gray-400 hover:text-blue-600 transition-colors"
-                              title="Key 복사"
-                            >
-                              <Copy className="w-3 h-3" />
-                            </button>
-                          </code>
-                        </div>
-                        {isImageUrlKey(item.key) && (
-                          <span className="text-[10px] bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 px-2.5 py-0.5 rounded-full font-black tracking-widest uppercase">IMAGE</span>
-                        )}
-                        {(!item.value_ko || !item.value_en) && (
-                          <span className="flex items-center gap-1 text-[10px] bg-amber-100 text-amber-700 px-2.5 py-0.5 rounded-full font-black tracking-widest uppercase">
-                            <AlertCircle className="w-3 h-3" />
-                            미완성
-                          </span>
-                        )}
-                        {modifiedIds.has(item.id) && (
-                          <span className="text-[10px] bg-rose-100 text-rose-700 px-2.5 py-0.5 rounded-full font-black tracking-widest uppercase animate-pulse">
-                            수정됨
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2 w-full sm:w-auto">
-                        <button
-                          onClick={() => handleUpdate(item)}
-                          disabled={saving === item.id}
-                          className={`flex-1 sm:flex-none px-6 py-2.5 rounded-xl text-sm font-black transition-all flex items-center justify-center gap-2 ${
-                            saving === item.id 
-                              ? 'bg-green-100 text-green-700' 
-                              : modifiedIds.has(item.id)
-                                ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-200'
-                                : 'bg-gray-900 text-white hover:bg-black shadow-lg shadow-gray-200 dark:shadow-none'
-                          }`}
-                        >
-                          {saving === item.id ? <CheckCircle2 className="w-4 h-4" /> : <Save className="w-4 h-4" />}
-                          {saving === item.id ? '저장됨' : '저장'}
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="p-8 grid grid-cols-1 lg:grid-cols-2 gap-10">
-                      {/* KO Field */}
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                            <span className="w-2 h-2 rounded-full bg-red-500 shadow-sm shadow-red-200"></span> 한국어 원문
-                          </div>
-                          <button onClick={() => copyToClipboard(item.value_ko)} className="text-[10px] font-bold text-blue-500 hover:underline">Copy Value</button>
-                        </div>
-                        {isImageUrlKey(item.key) ? (
-                          <ImageEditor 
-                            value={item.value_ko} 
-                            onChange={(val) => handleChange(item.id, 'value_ko', val)}
-                            onUpload={(file) => handleFileUpload(item.id, 'value_ko', file)}
-                            isUploading={uploading?.id === item.id && uploading?.field === 'value_ko'}
-                          />
-                        ) : (
-                          <div className="relative">
-                            <textarea
-                              value={item.value_ko || ''}
-                              onChange={(e) => handleChange(item.id, 'value_ko', e.target.value)}
-                              className={`w-full p-4 text-sm border-2 ${!item.value_ko ? 'border-red-100 bg-red-50/10' : 'border-gray-50 dark:border-gray-700'} dark:bg-gray-900 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none min-h-[140px] transition-all font-medium leading-relaxed`}
-                              placeholder="내용을 입력하세요..."
-                            />
-                            {searchQuery && (
-                              <div className="absolute top-4 left-4 right-4 pointer-events-none text-sm text-transparent whitespace-pre-wrap break-words min-h-[140px] p-0 font-medium leading-relaxed">
-                                {highlightText(item.value_ko || '', searchQuery)}
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-
-                      {/* EN Field */}
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                            <span className="w-2 h-2 rounded-full bg-blue-500 shadow-sm shadow-blue-200"></span> English Translation
-                          </div>
-                          <div className="flex gap-3">
-                            <button 
-                              className="flex items-center gap-1 text-[10px] font-bold text-indigo-600 hover:bg-indigo-50 px-2 py-0.5 rounded transition-colors"
-                              onClick={() => alert('AI 번역 기능은 다음 업데이트에 추가될 예정입니다.')}
-                            >
-                              <Languages className="w-3 h-3" /> Auto
-                            </button>
-                            <button onClick={() => copyToClipboard(item.value_en)} className="text-[10px] font-bold text-blue-500 hover:underline">Copy Value</button>
-                          </div>
-                        </div>
-                        {isImageUrlKey(item.key) ? (
-                          <ImageEditor 
-                            value={item.value_en} 
-                            onChange={(val) => handleChange(item.id, 'value_en', val)}
-                            onUpload={(file) => handleFileUpload(item.id, 'value_en', file)}
-                            isUploading={uploading?.id === item.id && uploading?.field === 'value_en'}
-                          />
-                        ) : (
-                          <div className="relative">
-                            <textarea
-                              value={item.value_en || ''}
-                              onChange={(e) => handleChange(item.id, 'value_en', e.target.value)}
-                              className={`w-full p-4 text-sm border-2 ${!item.value_en ? 'border-amber-100 bg-amber-50/10' : 'border-gray-50 dark:border-gray-700'} dark:bg-gray-900 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none min-h-[140px] transition-all font-medium leading-relaxed`}
-                              placeholder="Translation here..."
-                            />
-                            {searchQuery && (
-                              <div className="absolute top-4 left-4 right-4 pointer-events-none text-sm text-transparent whitespace-pre-wrap break-words min-h-[140px] p-0 font-medium leading-relaxed">
-                                {highlightText(item.value_en || '', searchQuery)}
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
+                  <ContentCard 
+                    key={item.id}
+                    item={item}
+                    isModified={modifiedIds.has(item.id)}
+                    isSaving={saving === item.id}
+                    searchQuery={searchQuery}
+                    onUpdate={handleUpdate}
+                    onChange={handleChange}
+                    onRevert={revertItem}
+                    onFileUpload={handleFileUpload}
+                    isUploading={uploading?.id === item.id}
+                    uploadField={uploading?.field}
+                    isImageUrl={isImageUrlKey(item.key)}
+                  />
                 ))}
               </div>
             </div>
@@ -566,6 +493,245 @@ const Content = () => {
   );
 };
 
+interface ContentCardProps {
+  item: ContentItem;
+  isModified: boolean;
+  isSaving: boolean;
+  searchQuery: string;
+  onUpdate: (item: ContentItem) => void;
+  onChange: (id: string, field: 'value_ko' | 'value_en', value: string) => void;
+  onRevert: (id: string) => void;
+  onFileUpload: (id: string, field: 'value_ko' | 'value_en', file: File) => void;
+  isUploading: boolean;
+  uploadField?: string;
+  isImageUrl: boolean;
+}
+
+const ContentCard = ({ 
+  item, isModified, isSaving, searchQuery, onUpdate, onChange, onRevert, onFileUpload, isUploading, uploadField, isImageUrl 
+}: ContentCardProps) => {
+  const [isFullscreen, setIsFullscreen] = useState<'ko' | 'en' | null>(null);
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+  };
+
+  const highlightText = (text: string, query: string) => {
+    if (!query) return text;
+    const parts = text.split(new RegExp(`(${query})`, 'gi'));
+    return (
+      <>
+        {parts.map((part, i) => 
+          part.toLowerCase() === query.toLowerCase() 
+            ? <span key={i} className="bg-yellow-200 dark:bg-yellow-900/50 text-gray-900 dark:text-white px-0.5 rounded font-bold">{part}</span> 
+            : part
+        )}
+      </>
+    );
+  };
+
+  return (
+    <div 
+      className={`bg-white dark:bg-gray-800 rounded-[2.5rem] border transition-all group/item ${
+        isModified 
+          ? 'border-blue-400 ring-4 ring-blue-500/5 shadow-2xl scale-[1.01]' 
+          : 'border-gray-100 dark:border-gray-700 shadow-sm'
+      }`}
+    >
+      <div className="px-8 py-5 bg-gray-50/50 dark:bg-gray-800/50 border-b dark:border-gray-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2">
+            <code className="text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-4 py-2 rounded-xl flex items-center gap-3">
+              {highlightText(item.key, searchQuery)}
+              <button 
+                onClick={() => copyToClipboard(item.key)} 
+                className="text-gray-400 hover:text-blue-600 transition-colors"
+                title="Key 복사"
+              >
+                <Copy className="w-3.5 h-3.5" />
+              </button>
+            </code>
+          </div>
+          {isImageUrl && (
+            <span className="text-[10px] bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 px-3 py-1 rounded-full font-black tracking-widest uppercase">IMAGE</span>
+          )}
+          {(!item.value_ko || !item.value_en) && (
+            <span className="flex items-center gap-1.5 text-[10px] bg-amber-100 text-amber-700 px-3 py-1 rounded-full font-black tracking-widest uppercase">
+              <AlertCircle className="w-3.5 h-3.5" /> 미완성
+            </span>
+          )}
+          {isModified && (
+            <span className="text-[10px] bg-blue-600 text-white px-3 py-1 rounded-full font-black tracking-widest uppercase">수정됨</span>
+          )}
+        </div>
+        
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          {isModified && (
+            <button
+              onClick={() => onRevert(item.id)}
+              className="p-2.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
+              title="원래대로 되돌리기"
+            >
+              <Undo2 className="w-5 h-5" />
+            </button>
+          )}
+          <button
+            onClick={() => onUpdate(item)}
+            disabled={isSaving}
+            className={`flex-1 sm:flex-none px-8 py-3 rounded-2xl text-sm font-black transition-all flex items-center justify-center gap-2 ${
+              isSaving 
+                ? 'bg-green-100 text-green-700' 
+                : isModified
+                  ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-xl shadow-blue-200 dark:shadow-none'
+                  : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
+            }`}
+          >
+            {isSaving ? <CheckCircle2 className="w-4 h-4" /> : <Save className="w-4 h-4" />}
+            {isSaving ? '저장됨' : '저장'}
+          </button>
+        </div>
+      </div>
+
+      <div className="p-10 grid grid-cols-1 lg:grid-cols-2 gap-12">
+        {/* KO Field */}
+        <div className={`space-y-4 transition-all ${isFullscreen === 'ko' ? 'fixed inset-4 z-50 bg-white dark:bg-gray-900 p-10 rounded-3xl shadow-2xl overflow-y-auto' : ''}`}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3 text-[11px] font-black text-gray-400 uppercase tracking-widest">
+              <span className="w-2.5 h-2.5 rounded-full bg-red-500 shadow-lg shadow-red-200"></span> 한국어 원문
+              <span className="text-gray-300">|</span>
+              <span className="bg-gray-50 dark:bg-gray-800 px-2 py-0.5 rounded text-[10px]">{item.value_ko?.length || 0}자</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={() => setIsFullscreen(isFullscreen === 'ko' ? null : 'ko')}
+                className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                title={isFullscreen === 'ko' ? "축소" : "크게 보기"}
+              >
+                {isFullscreen === 'ko' ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+              </button>
+              <button onClick={() => copyToClipboard(item.value_ko)} className="text-[10px] font-black text-blue-500 hover:bg-blue-50 px-2.5 py-1 rounded-lg transition-all uppercase">Copy</button>
+            </div>
+          </div>
+          
+          {isImageUrl ? (
+            <ImageEditor 
+              value={item.value_ko} 
+              onChange={(val) => onChange(item.id, 'value_ko', val)}
+              onUpload={(file) => onFileUpload(item.id, 'value_ko', file)}
+              isUploading={isUploading && uploadField === 'value_ko'}
+            />
+          ) : (
+            <AutoResizeTextarea
+              value={item.value_ko || ''}
+              onChange={(val) => onChange(item.id, 'value_ko', val)}
+              placeholder="내용을 입력하세요..."
+              isError={!item.value_ko}
+              searchQuery={searchQuery}
+            />
+          )}
+        </div>
+
+        {/* EN Field */}
+        <div className={`space-y-4 transition-all ${isFullscreen === 'en' ? 'fixed inset-4 z-50 bg-white dark:bg-gray-900 p-10 rounded-3xl shadow-2xl overflow-y-auto' : ''}`}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3 text-[11px] font-black text-gray-400 uppercase tracking-widest">
+              <span className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-lg shadow-blue-200"></span> English Translation
+              <span className="text-gray-300">|</span>
+              <span className="bg-gray-50 dark:bg-gray-800 px-2 py-0.5 rounded text-[10px]">{item.value_en?.length || 0}자</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={() => setIsFullscreen(isFullscreen === 'en' ? null : 'en')}
+                className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                title={isFullscreen === 'en' ? "축소" : "크게 보기"}
+              >
+                {isFullscreen === 'en' ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+              </button>
+              <button 
+                className="flex items-center gap-1.5 text-[10px] font-black text-indigo-600 hover:bg-indigo-50 px-3 py-1 rounded-lg transition-all uppercase"
+                onClick={() => onChange(item.id, 'value_en', item.value_ko)}
+              >
+                <Languages className="w-3.5 h-3.5" /> KO-To-EN
+              </button>
+              <button onClick={() => copyToClipboard(item.value_en)} className="text-[10px] font-black text-blue-500 hover:bg-blue-50 px-2.5 py-1 rounded-lg transition-all uppercase">Copy</button>
+            </div>
+          </div>
+          
+          {isImageUrl ? (
+            <ImageEditor 
+              value={item.value_en} 
+              onChange={(val) => onChange(item.id, 'value_en', val)}
+              onUpload={(file) => onFileUpload(item.id, 'value_en', file)}
+              isUploading={isUploading && uploadField === 'value_en'}
+            />
+          ) : (
+            <AutoResizeTextarea
+              value={item.value_en || ''}
+              onChange={(val) => onChange(item.id, 'value_en', val)}
+              placeholder="Translation here..."
+              isError={!item.value_en}
+              searchQuery={searchQuery}
+            />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+interface AutoResizeTextareaProps {
+  value: string;
+  onChange: (val: string) => void;
+  placeholder: string;
+  isError: boolean;
+  searchQuery: string;
+}
+
+const AutoResizeTextarea = ({ value, onChange, placeholder, isError, searchQuery }: AutoResizeTextareaProps) => {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    }
+  }, [value]);
+
+  const highlightText = (text: string, query: string) => {
+    if (!query) return text;
+    const parts = text.split(new RegExp(`(${query})`, 'gi'));
+    return (
+      <>
+        {parts.map((part, i) => 
+          part.toLowerCase() === query.toLowerCase() 
+            ? <span key={i} className="bg-yellow-200 dark:bg-yellow-900/50 text-gray-900 dark:text-white px-0.5 rounded font-bold">{part}</span> 
+            : part
+        )}
+      </>
+    );
+  };
+
+  return (
+    <div className="relative group/field">
+      <textarea
+        ref={textareaRef}
+        value={value || ''}
+        onChange={(e) => onChange(e.target.value)}
+        className={`w-full p-6 text-base border-2 ${isError ? 'border-amber-100 bg-amber-50/10' : 'border-gray-50 dark:border-gray-700'} dark:bg-gray-900 rounded-[1.5rem] focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/50 outline-none min-h-[140px] transition-all font-medium leading-relaxed resize-none`}
+        placeholder={placeholder}
+      />
+      {searchQuery && (
+        <div className="absolute top-0 left-0 w-full h-full pointer-events-none p-6 text-base text-transparent whitespace-pre-wrap break-words font-medium leading-relaxed">
+          {highlightText(value || '', searchQuery)}
+        </div>
+      )}
+      <div className="absolute right-4 bottom-4 opacity-0 group-hover/field:opacity-100 transition-opacity">
+        <ArrowUpRight className="w-5 h-5 text-gray-300" />
+      </div>
+    </div>
+  );
+};
+
 interface ImageEditorProps {
   value: string;
   onChange: (val: string) => void;
@@ -575,26 +741,26 @@ interface ImageEditorProps {
 
 const ImageEditor = ({ value, onChange, onUpload, isUploading }: ImageEditorProps) => (
   <div className="space-y-4">
-    <div className="aspect-video bg-gray-50 dark:bg-gray-900 rounded-2xl overflow-hidden flex items-center justify-center border-2 border-dashed border-gray-100 dark:border-gray-700 group/img relative transition-colors hover:border-blue-200">
+    <div className="aspect-video bg-gray-50 dark:bg-gray-900 rounded-[2rem] overflow-hidden flex items-center justify-center border-2 border-dashed border-gray-100 dark:border-gray-700 group/img relative transition-all hover:border-blue-300 hover:bg-gray-100/50">
       {value ? (
-        <img src={value} className="max-h-full max-w-full object-contain" alt="Preview" />
+        <img src={value} className="max-h-full max-w-full object-contain p-4 transition-transform group-hover/img:scale-[1.02]" alt="Preview" />
       ) : (
-        <div className="flex flex-col items-center gap-2 text-gray-300">
-          <ImageIcon className="w-10 h-10" />
-          <span className="text-xs font-bold">이미지 없음</span>
+        <div className="flex flex-col items-center gap-3 text-gray-300">
+          <ImageIcon className="w-12 h-12" />
+          <span className="text-sm font-black uppercase tracking-widest">No Image Asset</span>
         </div>
       )}
       {isUploading && (
-        <div className="absolute inset-0 bg-white/90 dark:bg-black/90 flex flex-col items-center justify-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-3"></div>
-          <span className="text-xs font-black text-blue-600 uppercase tracking-widest">Uploading...</span>
+        <div className="absolute inset-0 bg-white/95 dark:bg-black/95 flex flex-col items-center justify-center backdrop-blur-sm">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mb-4"></div>
+          <span className="text-xs font-black text-blue-600 uppercase tracking-widest animate-pulse">Uploading to Cloud...</span>
         </div>
       )}
       {value && (
-        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
-          <label className="cursor-pointer bg-white text-gray-900 px-4 py-2 rounded-xl text-xs font-bold hover:bg-gray-100 transition-colors flex items-center gap-2 shadow-xl">
+        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/img:opacity-100 transition-all flex items-center justify-center gap-4 backdrop-blur-[2px]">
+          <label className="cursor-pointer bg-white text-gray-900 px-6 py-3 rounded-2xl text-xs font-black hover:bg-gray-100 transition-all flex items-center gap-2 shadow-2xl hover:scale-105 active:scale-95">
             <Upload className="w-4 h-4" />
-            이미지 교체
+            파일 교체
             <input
               type="file"
               accept="image/*"
@@ -605,13 +771,16 @@ const ImageEditor = ({ value, onChange, onUpload, isUploading }: ImageEditorProp
               }}
             />
           </label>
+          <a href={value} target="_blank" rel="noreferrer" className="bg-white/20 hover:bg-white/30 text-white p-3 rounded-2xl transition-all backdrop-blur-md">
+            <ExternalLink size={18} />
+          </a>
         </div>
       )}
     </div>
     {!value && (
-      <label className="w-full cursor-pointer bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 px-4 py-3 rounded-xl border-2 border-transparent transition-all flex items-center justify-center gap-2 text-sm font-bold text-gray-500">
-        <Upload className="w-4 h-4" />
-        컴퓨터에서 파일 업로드
+      <label className="w-full cursor-pointer bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 px-4 py-4 rounded-2xl border-2 border-dashed border-blue-200 dark:border-blue-800 transition-all flex items-center justify-center gap-3 text-sm font-black text-blue-600">
+        <Upload className="w-5 h-5" />
+        컴퓨터에서 자산 업로드
         <input
           type="file"
           accept="image/*"
@@ -623,15 +792,15 @@ const ImageEditor = ({ value, onChange, onUpload, isUploading }: ImageEditorProp
         />
       </label>
     )}
-    <div className="relative group">
+    <div className="relative group/url">
       <input
         type="text"
         value={value || ''}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full pl-4 pr-10 py-3 text-xs bg-gray-50 dark:bg-gray-900 border-2 border-gray-50 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all font-mono"
-        placeholder="또는 이미지 URL 주소 직접 입력"
+        className="w-full pl-6 pr-12 py-4 text-xs bg-gray-50 dark:bg-gray-900 border-2 border-gray-50 dark:border-gray-700 rounded-2xl outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/50 transition-all font-mono"
+        placeholder="Cloud URL 직접 입력"
       />
-      <Globe className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
+      <Globe className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 group-focus-within/url:text-blue-500 transition-colors" />
     </div>
   </div>
 );
