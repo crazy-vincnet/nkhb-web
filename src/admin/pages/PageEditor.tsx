@@ -12,8 +12,6 @@ import {
   Trash2,
   Calendar,
   Type,
-  Send,
-  User,
   Plus,
   MessageSquare
 } from 'lucide-react';
@@ -70,9 +68,6 @@ const PageEditor = () => {
   
   const [posts, setPosts] = useState<Post[]>([]);
   const [loadingPosts, setLoadingPosts] = useState(false);
-  const [newPostName, setNewPostName] = useState('NKHB 관리자');
-  const [newPostContent, setNewPostContent] = useState('');
-  const [submittingPost, setSubmittingPost] = useState(false);
 
   const editorRef = useRef<any>(null);
 
@@ -143,31 +138,6 @@ const PageEditor = () => {
       setPosts(data);
     }
     setLoadingPosts(false);
-  };
-
-  const handleCreatePost = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!page || !newPostContent.trim()) return;
-
-    setSubmittingPost(true);
-    const { error } = await supabase
-      .from('posts')
-      .insert([
-        {
-          page_id: page.id,
-          author_name: newPostName,
-          content: newPostContent,
-          is_approved: true
-        }
-      ]);
-
-    if (!error) {
-      setNewPostContent('');
-      fetchPosts();
-    } else {
-      alert('게시글 등록 실패: ' + error.message);
-    }
-    setSubmittingPost(false);
   };
 
   const deletePost = async (postId: string) => {
@@ -454,41 +424,6 @@ const PageEditor = () => {
 
                   {page?.has_board && (
                     <div className="space-y-8">
-                      {/* Create Post Form */}
-                      <div className="p-6 bg-gray-50 dark:bg-gray-900 rounded-[2rem] border border-gray-100 dark:border-gray-700 space-y-4">
-                        <div className="flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">
-                          <Plus className="w-3 h-3" /> 새 소식 작성 (Admin Only)
-                        </div>
-                        <form onSubmit={handleCreatePost} className="space-y-3">
-                            <div className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-xl">
-                                <User className="w-3.5 h-3.5 text-gray-400" />
-                                <input 
-                                    type="text"
-                                    value={newPostName}
-                                    onChange={(e) => setNewPostName(e.target.value)}
-                                    className="w-full bg-transparent border-none outline-none text-xs font-bold text-gray-900 dark:text-white"
-                                    placeholder="작성자"
-                                    required
-                                />
-                            </div>
-                            <textarea 
-                                value={newPostContent}
-                                onChange={(e) => setNewPostContent(e.target.value)}
-                                className="w-full px-4 py-3 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-2xl text-xs outline-none focus:ring-1 focus:ring-blue-500 min-h-[100px] resize-none text-gray-900 dark:text-white"
-                                placeholder="소식 내용을 입력하세요..."
-                                required
-                            />
-                            <button 
-                                type="submit"
-                                disabled={submittingPost}
-                                className="w-full flex items-center justify-center gap-2 py-3 bg-gray-900 text-white rounded-xl text-xs font-bold hover:bg-black transition-all disabled:opacity-50"
-                            >
-                                {submittingPost ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
-                                소식 올리기
-                            </button>
-                        </form>
-                      </div>
-
                       {/* Board Title Settings */}
                       <div className="p-5 bg-white dark:bg-gray-800 rounded-2xl border dark:border-gray-700 space-y-4 shadow-sm">
                         <div className="flex items-center gap-2 text-[10px] font-black text-blue-600 uppercase tracking-widest px-1">
