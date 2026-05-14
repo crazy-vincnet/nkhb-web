@@ -1,6 +1,20 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { supabase } from '../lib/supabase';
-import { Trash2, Plus } from 'lucide-react';
+import { 
+  Trash2, 
+  Plus, 
+  Play, 
+  Pause, 
+  Edit2, 
+  Save, 
+  X, 
+  Music, 
+  Upload, 
+  CheckCircle2,
+  AlertCircle,
+  Clock,
+  Globe
+} from 'lucide-react';
 
 interface AudioTrack {
   id: string;
@@ -15,13 +29,26 @@ const Audio = () => {
   const [tracks, setTracks] = useState<AudioTrack[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
-  const [showUploadModal, setShowUploadModal] = useState(false);
-  const [newTitleKo, setNewTitleKo] = useState('');
-  const [newTitleEn, setNewTitleEn] = useState('');
+  const [showModal, setShowModal] = useState(false);
+  
+  // Form State
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [titleKo, setTitleKo] = useState('');
+  const [titleEn, setTitleEn] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  
+  // Audio Player State
+  const [playingId, setPlayingId] = useState<string | null>(null);
+  const audioInstance = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     fetchTracks();
+    return () => {
+      if (audioInstance.current) {
+        audioInstance.current.pause();
+        audioInstance.current = null;
+      }
+    };
   }, []);
 
   const fetchTracks = async () => {
@@ -39,41 +66,72 @@ const Audio = () => {
     setLoading(false);
   };
 
-  const handleUpload = async (e: React.FormEvent) => {
+  const openAddModal = () => {
+    setEditingId(null);
+    setTitleKo('');
+    setTitleEn('');
+    setSelectedFile(null);
+    setShowModal(true);
+  };
+
+  const openEditModal = (track: AudioTrack) => {
+    setEditingId(track.id);
+    setTitleKo(track.title_ko);
+    setTitleEn(track.title_en);
+    setSelectedFile(null);
+    setShowModal(true);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedFile || !newTitleKo || !newTitleEn) return;
-
     setUploading(true);
+    
     try {
-      const fileExt = selectedFile.name.split('.').pop();
-      const fileName = `${Math.random()}.${fileExt}`;
-      const filePath = `broadcasts/${fileName}`;
+      let finalUrl = tracks.find(t => t.id === editingId)?.url || '';
 
-      const { error: uploadError } = await supabase.storage
-        .from('audio')
-        .upload(filePath, selectedFile);
+      if (selectedFile) {
+        const fileExt = selectedFile.name.split('.').pop();
+        const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
+        const filePath = `broadcasts/${fileName}`;
 
-      if (uploadError) throw uploadError;
+        const { error: uploadError } = await supabase.storage
+          .from('audio')
+          .upload(filePath, selectedFile);
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('audio')
-        .getPublicUrl(filePath);
+        if (uploadError) throw uploadError;
 
-      const { error: dbError } = await supabase
-        .from('audio_tracks')
-        .insert([{ 
-          title_ko: newTitleKo, 
-          title_en: newTitleEn, 
-          url: publicUrl, 
-          is_active: true 
-        }]);
+        const { data: { publicUrl } } = supabase.storage
+          .from('audio')
+          .getPublicUrl(filePath);
+        
+        finalUrl = publicUrl;
+      }
 
-      if (dbError) throw dbError;
+      if (!finalUrl && !selectedFile) throw new Error('오디오 파일을 선택해주세요.');
 
-      setShowUploadModal(false);
-      setNewTitleKo('');
-      setNewTitleEn('');
-      setSelectedFile(null);
+      if (editingId) {
+        const { error: dbError } = await supabase
+          .from('audio_tracks')
+          .update({ 
+            title_ko: titleKo, 
+            title_en: titleEn, 
+            url: finalUrl 
+          })
+          .eq('id', editingId);
+        if (dbError) throw dbError;
+      } else {
+        const { error: dbError } = await supabase
+          .from('audio_tracks')
+          .insert([{ 
+            title_ko: titleKo, 
+            title_en: titleEn, 
+            url: finalUrl, 
+            is_active: true 
+          }]);
+        if (dbError) throw dbError;
+      }
+
+      setShowModal(false);
       fetchTracks();
     } catch (error: any) {
       alert(error.message);
@@ -91,153 +149,233 @@ const Audio = () => {
     if (error) {
       console.error('Error updating track:', error);
     } else {
-      fetchTracks();
+      setTracks(prev => prev.map(t => t.id === id ? { ...t, is_active: !currentStatus } : t));
     }
   };
 
   const deleteTrack = async (id: string, url: string) => {
-    if (!confirm('Are you sure you want to delete this track?')) return;
+    if (!confirm('정말 이 트랙을 삭제하시겠습니까? 관련 파일도 모두 삭제됩니다.')) return;
 
     try {
-      // Extract file path from URL
       const urlParts = url.split('/');
       const fileName = urlParts[urlParts.length - 1];
-      
-      const { error: storageError } = await supabase.storage
-        .from('audio')
-        .remove([`broadcasts/${fileName}`]);
+      await supabase.storage.from('audio').remove([`broadcasts/${fileName}`]);
 
-      if (storageError) console.error('Error deleting from storage:', storageError);
-
-      const { error: dbError } = await supabase
-        .from('audio_tracks')
-        .delete()
-        .eq('id', id);
-
+      const { error: dbError } = await supabase.from('audio_tracks').delete().eq('id', id);
       if (dbError) throw dbError;
 
-      fetchTracks();
+      setTracks(prev => prev.filter(t => t.id !== id));
+      if (playingId === id) stopAudio();
     } catch (error: any) {
       alert(error.message);
     }
   };
 
+  const togglePlay = (track: AudioTrack) => {
+    if (playingId === track.id) {
+      stopAudio();
+    } else {
+      if (audioInstance.current) {
+        audioInstance.current.pause();
+      }
+      const audio = new window.Audio(track.url);
+      audioInstance.current = audio;
+      audio.play();
+      audio.onended = () => setPlayingId(null);
+      setPlayingId(track.id);
+    }
+  };
+
+  const stopAudio = () => {
+    if (audioInstance.current) {
+      audioInstance.current.pause();
+    }
+    setPlayingId(null);
+  };
+
+  if (loading) return (
+    <div className="flex items-center justify-center h-96">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+    </div>
+  );
+
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Audio Tracks</h2>
+    <div className="max-w-7xl mx-auto space-y-8 font-pretendard">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div>
+          <h2 className="text-3xl font-black text-gray-900 dark:text-white flex items-center gap-3">
+            <Music className="w-8 h-8 text-blue-600" />
+            Audio Tracks
+          </h2>
+          <p className="text-gray-500 font-medium mt-1">방송 음원 및 오디오 라이브러리를 관리합니다.</p>
+        </div>
         <button 
-          onClick={() => setShowUploadModal(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors flex items-center"
+          onClick={openAddModal}
+          className="bg-blue-600 text-white px-6 py-3 rounded-2xl font-black shadow-xl shadow-blue-200 dark:shadow-none hover:bg-blue-700 transition-all flex items-center gap-2"
         >
-          <Plus className="w-4 h-4 mr-2" />
-          Upload New Track
+          <Plus className="w-5 h-5" />
+          신규 트랙 업로드
         </button>
       </div>
 
-      {loading ? (
-        <div className="text-center py-10">Loading tracks...</div>
-      ) : (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead className="bg-gray-50 dark:bg-gray-900">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title (KO / EN)</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created At</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-              {tracks.map((track) => (
-                <tr key={track.id}>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex flex-col">
-                      <div className="text-sm font-medium">{track.title_ko}</div>
-                      <div className="text-xs text-gray-500">{track.title_en}</div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <button
-                      onClick={() => toggleActive(track.id, track.is_active)}
-                      className={`px-2 py-1 text-xs rounded-full ${
-                        track.is_active 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-gray-100 text-gray-800'
-                      }`}
-                    >
-                      {track.is_active ? 'Active' : 'Inactive'}
-                    </button>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(track.created_at).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button 
-                      onClick={() => deleteTrack(track.id, track.url)}
-                      className="text-red-600 hover:text-red-900 ml-4"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      <div className="grid grid-cols-1 gap-4">
+        {tracks.map((track) => (
+          <div 
+            key={track.id} 
+            className={`bg-white dark:bg-gray-900 p-6 rounded-[2rem] border transition-all flex flex-col md:flex-row items-center gap-6 ${
+              track.is_active ? 'border-gray-100 dark:border-gray-800 shadow-sm' : 'border-gray-100 opacity-60 grayscale bg-gray-50'
+            }`}
+          >
+            <button 
+              onClick={() => togglePlay(track)}
+              className={`w-16 h-16 rounded-2xl flex items-center justify-center transition-all ${
+                playingId === track.id 
+                ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' 
+                : 'bg-gray-100 text-gray-400 hover:bg-blue-50 hover:text-blue-600'
+              }`}
+            >
+              {playingId === track.id ? <Pause className="w-8 h-8 fill-current" /> : <Play className="w-8 h-8 fill-current ml-1" />}
+            </button>
 
-      {showUploadModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-8 max-w-md w-full">
-            <h3 className="text-xl font-bold mb-4">Upload New Audio Track</h3>
-            <form onSubmit={handleUpload} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Title (Korean)</label>
-                <input
-                  type="text"
-                  required
-                  value={newTitleKo}
-                  onChange={(e) => setNewTitleKo(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"
-                  placeholder="예: 방송 2024-05-06"
-                />
+            <div className="flex-1 min-w-0 w-full">
+              <div className="flex items-center gap-3 mb-1">
+                <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${track.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-500'}`}>
+                  {track.is_active ? 'Active' : 'Inactive'}
+                </span>
+                <span className="flex items-center gap-1 text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                  <Clock className="w-3 h-3" /> {new Date(track.created_at).toLocaleDateString()}
+                </span>
               </div>
+              <h3 className="text-xl font-black text-gray-900 dark:text-white truncate">{track.title_ko}</h3>
+              <p className="text-gray-400 font-medium text-sm truncate uppercase tracking-tighter">{track.title_en}</p>
+            </div>
+
+            <div className="flex items-center gap-3 shrink-0">
+              <button
+                onClick={() => toggleActive(track.id, track.is_active)}
+                className={`p-3 rounded-xl transition-all ${track.is_active ? 'text-gray-400 hover:text-amber-600 hover:bg-amber-50' : 'text-blue-600 hover:bg-blue-50'}`}
+                title={track.is_active ? '비활성화' : '활성화'}
+              >
+                <CheckCircle2 className="w-5 h-5" />
+              </button>
+              <button
+                onClick={() => openEditModal(track)}
+                className="p-3 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
+                title="정보 수정"
+              >
+                <Edit2 className="w-5 h-5" />
+              </button>
+              <button
+                onClick={() => deleteTrack(track.id, track.url)}
+                className="p-3 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
+                title="삭제"
+              >
+                <Trash2 className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {showModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" onClick={() => !uploading && setShowModal(false)} />
+          <div className="bg-white dark:bg-gray-900 rounded-[3rem] p-10 max-w-lg w-full relative shadow-2xl border border-white/20">
+            <div className="flex items-center justify-between mb-8">
               <div>
-                <label className="block text-sm font-medium mb-1">Title (English)</label>
-                <input
-                  type="text"
-                  required
-                  value={newTitleEn}
-                  onChange={(e) => setNewTitleEn(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"
-                  placeholder="e.g., Broadcast 2024-05-06"
-                />
+                <h3 className="text-2xl font-black text-gray-900 dark:text-white">
+                  {editingId ? '트랙 정보 수정' : '신규 트랙 업로드'}
+                </h3>
+                <p className="text-sm text-gray-500 font-medium mt-1">파일 및 제목을 입력해 주세요.</p>
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Audio File</label>
-                <input
-                  type="file"
-                  required
-                  accept="audio/*"
-                  onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-                  className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                />
+              <button 
+                onClick={() => setShowModal(false)}
+                className="p-3 hover:bg-gray-100 rounded-2xl transition-all"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest px-1 flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-blue-600" /> 한국어 제목
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={titleKo}
+                      onChange={(e) => setTitleKo(e.target.value)}
+                      className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all font-bold"
+                      placeholder="예: 방송 2024-05-13"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest px-1 flex items-center gap-2">
+                      <Globe className="w-3 h-3" /> English Title
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={titleEn}
+                      onChange={(e) => setTitleEn(e.target.value)}
+                      className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all font-bold"
+                      placeholder="e.g., Broadcast May 13, 2024"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest px-1 flex items-center gap-2">
+                    <Upload className="w-3 h-3" /> Audio File
+                  </label>
+                  <label className="block w-full border-4 border-dashed border-gray-100 dark:border-gray-800 rounded-[2rem] p-8 text-center cursor-pointer hover:border-blue-200 transition-all">
+                    <input
+                      type="file"
+                      accept="audio/*"
+                      onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                      className="hidden"
+                    />
+                    {selectedFile ? (
+                      <div className="flex flex-col items-center gap-2">
+                        <CheckCircle2 className="w-10 h-10 text-emerald-500" />
+                        <span className="text-sm font-black text-gray-900 dark:text-white truncate max-w-xs">{selectedFile.name}</span>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center gap-2 text-gray-400">
+                        <Music className="w-10 h-10" />
+                        <span className="text-sm font-bold">{editingId ? '파일을 교체하려면 클릭' : '클릭하여 오디오 파일 선택'}</span>
+                        <span className="text-[10px] font-black uppercase tracking-widest">MP3, WAV, AAC</span>
+                      </div>
+                    )}
+                  </label>
+                  {editingId && !selectedFile && (
+                    <div className="flex items-center gap-2 text-[10px] text-blue-600 font-bold px-1">
+                      <AlertCircle className="w-3 h-3" /> 이미 업로드된 파일이 있습니다.
+                    </div>
+                  )}
+                </div>
               </div>
-              <div className="flex justify-end space-x-3 mt-6">
-                <button
-                  type="button"
-                  onClick={() => setShowUploadModal(false)}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-800"
-                >
-                  Cancel
-                </button>
+
+              <div className="pt-4">
                 <button
                   type="submit"
                   disabled={uploading}
-                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+                  className="w-full bg-gray-900 text-white py-5 rounded-[1.5rem] font-black text-lg shadow-2xl hover:bg-black transition-all flex items-center justify-center gap-3"
                 >
-                  {uploading ? 'Uploading...' : 'Upload'}
+                  {uploading ? (
+                    <>
+                      <div className="w-5 h-5 border-4 border-white/30 border-t-white rounded-full animate-spin" />
+                      처리 중...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-6 h-6" />
+                      {editingId ? '수정 사항 저장' : '트랙 업로드 시작'}
+                    </>
+                  )}
                 </button>
               </div>
             </form>
