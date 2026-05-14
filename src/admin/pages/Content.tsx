@@ -277,6 +277,11 @@ const Content = () => {
     }
   };
 
+  const revertAll = () => {
+    setContent(JSON.parse(JSON.stringify(originalContent)));
+    setModifiedIds(new Set());
+  };
+
   const handleFileUpload = async (id: string, field: 'value_ko' | 'value_en', file: File) => {
     try {
       setUploading({ id, field });
@@ -351,26 +356,25 @@ const Content = () => {
       </div>
 
       {/* Workspace */}
-      <div className="max-w-[1400px] mx-auto px-8 w-full py-12 space-y-16 pb-40">
+      <div className="max-w-[1400px] mx-auto px-8 w-full py-12 space-y-12 pb-40">
         {groupedItems.map((group, index) => (
-            <div key={index} className="space-y-6">
-                <div className="flex items-center gap-4 ml-4">
-                    <div className="w-1 h-6 bg-blue-600 rounded-full" />
-                    <h3 className="text-lg font-black text-gray-900 dark:text-white uppercase tracking-widest">{group.label} 영역</h3>
-                    <span className="text-xs font-bold text-gray-300 bg-gray-50 dark:bg-gray-800 px-2 py-0.5 rounded-lg">{group.items.length}개 항목</span>
+            <div key={index} className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[2.5rem] overflow-hidden shadow-sm">
+                <div className="px-10 py-6 bg-gray-50/50 dark:bg-gray-800/50 border-b border-gray-50 dark:border-gray-800 flex items-center justify-between">
+                    <h3 className="text-lg font-black text-gray-900 dark:text-white uppercase tracking-tight">{group.label}</h3>
+                    <span className="text-[11px] font-black text-gray-400 bg-white dark:bg-gray-900 px-3 py-1 rounded-full shadow-sm">{group.items.length} 항목</span>
                 </div>
 
-                <div className="grid grid-cols-1 gap-6">
+                <div className="p-10 space-y-12">
                     {group.items.map((item) => (
                         <div 
                             key={item.id} 
-                            className={`bg-white dark:bg-gray-900 rounded-[2.5rem] border transition-all ${
+                            className={`transition-all ${
                                 modifiedIds.has(item.id) 
-                                ? 'border-blue-400 ring-4 ring-blue-500/5 shadow-2xl scale-[1.01]' 
-                                : 'border-gray-100 dark:border-gray-800 shadow-sm'
+                                ? 'ring-4 ring-blue-500/5 rounded-3xl p-6 -m-6 bg-blue-50/30 dark:bg-blue-900/10' 
+                                : ''
                             }`}
                         >
-                            <div className="px-8 py-5 border-b border-gray-50 dark:border-gray-800 flex items-center justify-between">
+                            <div className="flex items-center justify-between mb-6">
                                 <div className="flex items-center gap-4">
                                     <div className={`p-2.5 rounded-xl ${isImageUrlKey(item.key) ? 'bg-purple-50 text-purple-600' : 'bg-blue-50 text-blue-600'}`}>
                                         {isImageUrlKey(item.key) ? <ImageIcon size={20} /> : <FileText size={20} />}
@@ -405,7 +409,7 @@ const Content = () => {
                                 </div>
                             </div>
 
-                            <div className="p-8 grid grid-cols-1 lg:grid-cols-2 gap-10">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
                                 {isImageUrlKey(item.key) ? (
                                     <>
                                         <div className="space-y-3">
@@ -451,6 +455,22 @@ const Content = () => {
         <div className="py-40 text-center bg-white dark:bg-gray-900 rounded-[3rem] border-2 border-dashed border-gray-100 dark:border-gray-800">
             <Search className="w-16 h-16 text-gray-100 mx-auto mb-6" />
             <p className="text-gray-400 text-lg font-bold">표시할 항목이 없습니다.</p>
+        </div>
+      )}
+
+      {/* Floating Save Bar */}
+      {modifiedIds.size > 0 && (
+        <div className="fixed bottom-10 left-1/2 -translate-x-1/2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-10 py-5 rounded-[2rem] shadow-2xl flex items-center gap-12 z-50 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="flex flex-col">
+             <span className="text-xs font-black uppercase tracking-widest text-gray-400">UNSAVED CHANGES</span>
+             <span className="text-sm font-bold">{modifiedIds.size}개의 변경사항이 있습니다.</span>
+          </div>
+          <div className="flex gap-4">
+            <button onClick={revertAll} className="px-6 py-2.5 text-sm font-black text-gray-400 hover:text-white dark:hover:text-black transition-colors">되돌리기</button>
+            <button onClick={handleBatchUpdate} disabled={batchSaving} className="px-10 py-3 bg-[#E67E5F] rounded-2xl text-sm font-black hover:bg-[#D46B4E] transition-all shadow-lg shadow-[#E67E5F]/20">
+              {batchSaving ? '저장 중...' : '모두 저장하기'}
+            </button>
+          </div>
         </div>
       )}
     </div>
