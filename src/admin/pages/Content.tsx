@@ -406,37 +406,39 @@ const Content = () => {
                             </div>
 
                             <div className="p-8 grid grid-cols-1 lg:grid-cols-2 gap-10">
-                                <div className="space-y-3">
-                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1 flex items-center gap-2">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-red-500 shadow-sm" /> KOREAN
-                                    </label>
-                                    {isImageUrlKey(item.key) ? (
-                                        <ImageRow value={item.value_ko} onChange={(v: string) => handleChange(item.id, 'value_ko', v)} onUpload={(f: File) => handleFileUpload(item.id, 'value_ko', f)} isUploading={uploading?.id === item.id && uploading?.field === 'value_ko'} />
-                                    ) : (
-                                        <AutoResizeTextarea
-                                            value={item.value_ko || ''} onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleChange(item.id, 'value_ko', e.target.value)}
-                                            className={`w-full p-6 text-base border-2 ${!item.value_ko ? 'border-amber-100 bg-amber-50/10' : 'border-gray-50 dark:border-gray-800'} dark:bg-gray-800 rounded-[1.5rem] focus:bg-white dark:focus:bg-gray-900 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/50 outline-none min-h-[120px] transition-all font-medium leading-relaxed resize-none`}
-                                            placeholder="내용을 입력하세요..."
+                                {isImageUrlKey(item.key) ? (
+                                    <>
+                                        <div className="space-y-3">
+                                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1 flex items-center gap-2">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-red-500 shadow-sm" /> KOREAN
+                                            </label>
+                                            <ImageRow value={item.value_ko} onChange={(v: string) => handleChange(item.id, 'value_ko', v)} onUpload={(f: File) => handleFileUpload(item.id, 'value_ko', f)} isUploading={uploading?.id === item.id && uploading?.field === 'value_ko'} />
+                                        </div>
+                                        <div className="space-y-3">
+                                            <div className="flex justify-between items-center px-1">
+                                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-sm" /> ENGLISH
+                                                </label>
+                                                <button onClick={() => handleChange(item.id, 'value_en', item.value_ko)} className="text-[9px] font-black text-indigo-600 hover:bg-indigo-50 px-2 py-1 rounded-md transition-all uppercase flex items-center gap-1"><Languages size={10} /> Sync from KO</button>
+                                            </div>
+                                            <ImageRow value={item.value_en} onChange={(v: string) => handleChange(item.id, 'value_en', v)} onUpload={(f: File) => handleFileUpload(item.id, 'value_en', f)} isUploading={uploading?.id === item.id && uploading?.field === 'value_en'} />
+                                        </div>
+                                    </>
+                                ) : (
+                                    <>
+                                        <ContentField 
+                                            item={item} 
+                                            lang="ko" 
+                                            onChange={(id: string, val: string) => handleChange(id, 'value_ko', val)} 
                                         />
-                                    )}
-                                </div>
-                                <div className="space-y-3">
-                                    <div className="flex justify-between items-center px-1">
-                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
-                                            <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-sm" /> ENGLISH
-                                        </label>
-                                        <button onClick={() => handleChange(item.id, 'value_en', item.value_ko)} className="text-[9px] font-black text-indigo-600 hover:bg-indigo-50 px-2 py-1 rounded-md transition-all uppercase flex items-center gap-1"><Languages size={10} /> Sync from KO</button>
-                                    </div>
-                                    {isImageUrlKey(item.key) ? (
-                                        <ImageRow value={item.value_en} onChange={(v: string) => handleChange(item.id, 'value_en', v)} onUpload={(f: File) => handleFileUpload(item.id, 'value_en', f)} isUploading={uploading?.id === item.id && uploading?.field === 'value_en'} />
-                                    ) : (
-                                        <textarea
-                                            value={item.value_en || ''} onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleChange(item.id, 'value_en', e.target.value)}
-                                            className={`w-full p-6 text-base border-2 ${!item.value_en ? 'border-amber-100 bg-amber-50/10' : 'border-gray-50 dark:border-gray-800'} dark:bg-gray-800 rounded-[1.5rem] focus:bg-white dark:focus:bg-gray-900 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/50 outline-none min-h-[120px] transition-all font-medium leading-relaxed resize-none`}
-                                            placeholder="Enter translation..."
+                                        <ContentField 
+                                            item={item} 
+                                            lang="en" 
+                                            onChange={(id: string, val: string) => handleChange(id, 'value_en', val)} 
+                                            onSync={() => handleChange(item.id, 'value_en', item.value_ko)}
                                         />
-                                    )}
-                                </div>
+                                    </>
+                                )}
                             </div>
                         </div>
                     ))}
@@ -451,6 +453,47 @@ const Content = () => {
             <p className="text-gray-400 text-lg font-bold">표시할 항목이 없습니다.</p>
         </div>
       )}
+    </div>
+  );
+};
+
+const ContentField = ({ item, lang, onChange, onSync }: any) => {
+  const isLink = item.key.toLowerCase().includes('url') || item.key.toLowerCase().includes('link');
+  const value = lang === 'ko' ? item.value_ko : item.value_en;
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">
+        <span className={`w-1.5 h-1.5 rounded-full ${lang === 'ko' ? 'bg-[#E67E5F]' : 'bg-blue-500'}`} />
+        {lang === 'ko' ? 'KOREAN' : 'ENGLISH'}
+        {lang === 'en' && onSync && (
+          <button onClick={onSync} className="ml-2 text-[9px] font-black text-indigo-600 hover:bg-indigo-50 px-2 py-1 rounded-md transition-all uppercase flex items-center gap-1">
+            <Languages size={10} /> Sync from KO
+          </button>
+        )}
+        <span className="ml-auto text-gray-300 flex items-center gap-1">
+           {isLink ? <Globe size={10} /> : <FileText size={10} />}
+           {isLink ? 'Link' : 'Text'}
+        </span>
+      </div>
+      <div className="relative group">
+        {isLink ? (
+          <input
+            type="text"
+            value={value || ''}
+            onChange={(e) => onChange(item.id, e.target.value)}
+            className="w-full px-5 py-3.5 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl text-sm font-mono focus:ring-2 focus:ring-[#E67E5F]/20 focus:border-[#E67E5F] outline-none transition-all"
+            placeholder={lang === 'ko' ? 'https://... 또는 /path' : 'Enter URL or path...'}
+          />
+        ) : (
+          <AutoResizeTextarea
+            value={value || ''}
+            onChange={(e: any) => onChange(item.id, e.target.value)}
+            className="w-full px-5 py-3.5 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl text-sm focus:ring-2 focus:ring-[#E67E5F]/20 focus:border-[#E67E5F] outline-none transition-all min-h-[100px] resize-none leading-relaxed"
+            placeholder={lang === 'ko' ? '내용을 입력하세요...' : 'Enter content...'}
+          />
+        )}
+      </div>
     </div>
   );
 };
