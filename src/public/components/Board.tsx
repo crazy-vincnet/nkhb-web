@@ -232,7 +232,12 @@ const Board: React.FC<BoardProps> = ({ pageId, lang, titleKo, titleEn, subtitleK
                 <article className="premium-body">
                   <div 
                     className="prose prose-xl dark:prose-invert max-w-none"
-                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(getPostContent(selectedPost)) }}
+                    dangerouslySetInnerHTML={{ 
+                      __html: DOMPurify.sanitize(getPostContent(selectedPost), {
+                        ADD_TAGS: ['iframe', 'style'],
+                        ADD_ATTR: ['allow', 'allowfullscreen', 'frameborder', 'scrolling']
+                      }) 
+                    }}
                   />
                   
                   {/* Bottom Guide */}

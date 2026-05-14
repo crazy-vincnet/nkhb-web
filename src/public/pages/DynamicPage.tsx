@@ -81,7 +81,8 @@ const DynamicPage = () => {
         className={`grapesjs-content-wrapper ${!isVisualDesign ? 'container mx-auto px-4 max-w-4xl pb-20' : ''}`}
         dangerouslySetInnerHTML={{ 
           __html: DOMPurify.sanitize(content || '', {
-            ADD_TAGS: ['style'], 
+            ADD_TAGS: ['style', 'iframe'], 
+            ADD_ATTR: ['allow', 'allowfullscreen', 'frameborder', 'scrolling'],
             FORCE_BODY: true
           }) 
         }}

@@ -2715,6 +2715,34 @@ footer {
     box-shadow: 0 30px 60px rgba(0,0,0,0.1);
 }
 
+.premium-body .prose pre {
+    background: #0f172a;
+    color: #f8fafc;
+    padding: 1.5rem;
+    border-radius: 1rem;
+    overflow-x: auto;
+    margin: 2rem 0;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 0.9rem;
+    line-height: 1.7;
+}
+
+.premium-body .prose code {
+    background: #f1f5f9;
+    color: #0f172a;
+    padding: 0.2rem 0.4rem;
+    border-radius: 0.4rem;
+    font-family: monospace;
+    font-size: 0.9em;
+}
+
+.premium-body .prose pre code {
+    background: transparent;
+    color: inherit;
+    padding: 0;
+    font-size: inherit;
+}
+
 .premium-footer-guide {
     margin-top: 80px;
     padding-top: 40px;
