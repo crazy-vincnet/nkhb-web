@@ -73,29 +73,31 @@ const Audio = () => {
     const newIndex = direction === 'up' ? index - 1 : index + 1;
     if (newIndex < 0 || newIndex >= tracks.length) return;
 
-    const currentTrack = tracks[index];
-    const targetTrack = tracks[newIndex];
-
-    // 1. Create a copy of current state for optimistic UI
+    // 1. Create a copy of current state and swap
     const updatedTracks = [...tracks];
+    [updatedTracks[index], updatedTracks[newIndex]] = [updatedTracks[newIndex], updatedTracks[index]];
     
-    // 2. Swap order values in local state
-    const currentOrder = currentTrack.order;
-    const targetOrder = targetTrack.order;
+    // 2. Assign new sequential order values to ALL tracks to ensure uniqueness
+    const tracksWithNewOrders = updatedTracks.map((track, i) => ({
+      ...track,
+      order: i + 1
+    }));
 
-    updatedTracks[index] = { ...targetTrack, order: currentOrder };
-    updatedTracks[newIndex] = { ...currentTrack, order: targetOrder };
+    // 3. Update local state immediately (Optimistic UI)
+    setTracks(tracksWithNewOrders);
 
-    // 3. Sort local state to reflect new order visually
-    updatedTracks.sort((a, b) => a.order - b.order);
-    setTracks(updatedTracks);
-
-    // 4. Persist to DB using UPSERT (Supabase handles multiple rows in one call)
+    // 4. Persist to DB using UPSERT with full objects to avoid NOT NULL constraint issues
     try {
-        const { error } = await supabase.from('audio_tracks').upsert([
-            { id: currentTrack.id, order: targetOrder },
-            { id: targetTrack.id, order: currentOrder }
-        ]);
+        const { error } = await supabase.from('audio_tracks').upsert(
+          tracksWithNewOrders.map(t => ({
+            id: t.id,
+            title_ko: t.title_ko,
+            title_en: t.title_en,
+            url: t.url,
+            is_active: t.is_active,
+            order: t.order
+          }))
+        );
 
         if (error) throw error;
     } catch (err) {
