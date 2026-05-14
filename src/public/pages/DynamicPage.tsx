@@ -14,6 +14,7 @@ interface PageData {
   content_ko: string;
   content_en: string;
   has_board: boolean;
+  board_type: 'news' | 'audio';
   board_title_ko: string;
   board_title_en: string;
   board_subtitle_ko: string;
@@ -97,6 +98,7 @@ const DynamicPage = () => {
           titleEn={page.board_title_en} 
           subtitleKo={page.board_subtitle_ko}
           subtitleEn={page.board_subtitle_en}
+          mode={page.board_type}
         />
       )}
     </main>

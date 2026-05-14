@@ -30,6 +30,9 @@ const PostEditor = () => {
   const [authorName, setAuthorName] = useState('NKHB 관리자');
   const [contentKo, setContentKo] = useState('');
   const [contentEn, setContentEn] = useState('');
+  const [postType, setPostType] = useState<'news' | 'audio'>('news');
+  const [category, setCategory] = useState('');
+  const [audioUrl, setAudioUrl] = useState('');
   const [createdAt, setCreatedAt] = useState(new Date().toISOString().split('T')[0]);
   const [pageId, setPageId] = useState<string>('');
   const [pages, setPages] = useState<Page[]>([]);
@@ -68,6 +71,9 @@ const PostEditor = () => {
     setAuthorName(data.author_name);
     setContentKo(data.content_ko || data.content || '');
     setContentEn(data.content_en || '');
+    setPostType(data.post_type || 'news');
+    setCategory(data.category || '');
+    setAudioUrl(data.audio_url || '');
     setPageId(data.page_id || '');
     if (data.created_at) {
         setCreatedAt(new Date(data.created_at).toISOString().split('T')[0]);
@@ -92,6 +98,9 @@ const PostEditor = () => {
       content: contentKo, // Backward compatibility
       content_ko: contentKo,
       content_en: contentEn,
+      post_type: postType,
+      category: category,
+      audio_url: audioUrl,
       page_id: pageId || null,
       is_approved: true,
       created_at: new Date(createdAt).toISOString(),
@@ -150,6 +159,24 @@ const PostEditor = () => {
         </div>
 
         <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl mr-2">
+            <button
+              onClick={() => setPostType('news')}
+              className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                postType === 'news' ? 'bg-white dark:bg-gray-700 text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              뉴스 게시글
+            </button>
+            <button
+              onClick={() => setPostType('audio')}
+              className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                postType === 'audio' ? 'bg-white dark:bg-gray-700 text-indigo-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              음원 게시글
+            </button>
+          </div>
           {saveStatus === 'success' && (
             <span className="text-green-600 text-xs font-bold flex items-center gap-1">
               <CheckCircle size={14} /> 저장 완료
@@ -165,6 +192,36 @@ const PostEditor = () => {
           </button>
         </div>
       </div>
+
+      {postType === 'audio' && (
+        <div className="bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-indigo-900/10 dark:to-blue-900/10 p-6 rounded-3xl border border-indigo-100 dark:border-indigo-900/30 space-y-4">
+          <div className="flex items-center gap-2 text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest px-1">
+              🎙️ 음원 게시물 설정
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-gray-500 ml-1">코너/카테고리</label>
+              <input 
+                  type="text"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="w-full px-4 py-3 bg-white dark:bg-gray-900 border dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                  placeholder="예: 희망의 편지, 자유 시리즈 등"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-gray-500 ml-1">오디오 URL (Google Drive, Dropbox 등)</label>
+              <input 
+                  type="text"
+                  value={audioUrl}
+                  onChange={(e) => setAudioUrl(e.target.value)}
+                  className="w-full px-4 py-3 bg-white dark:bg-gray-900 border dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-mono"
+                  placeholder="https://..."
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">

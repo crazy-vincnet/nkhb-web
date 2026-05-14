@@ -2817,3 +2817,32 @@ footer {
     }
 }
 
+/* Audio Board Specialized Styles */
+.item-badge.audio {
+    background: #eef2ff;
+    color: #4338ca;
+    border: 1px solid #e0e7ff;
+}
+
+.custom-audio-player {
+    height: 40px;
+    border-radius: 20px;
+}
+
+.custom-audio-player::-webkit-media-controls-panel {
+    background-color: #f8fafc;
+}
+
+.dark .custom-audio-player::-webkit-media-controls-panel {
+    background-color: #1e293b;
+}
+
+.premium-audio-player-container {
+    animation: slideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+

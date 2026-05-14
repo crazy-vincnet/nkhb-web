@@ -27,6 +27,7 @@ interface Page {
   layout_ko: any;
   layout_en: any;
   has_board: boolean;
+  board_type: 'news' | 'audio';
   board_title_ko: string;
   board_title_en: string;
   board_subtitle_ko: string;
@@ -165,6 +166,7 @@ const PageEditor = () => {
 
       const pageUpdate: any = {
         has_board: page.has_board,
+        board_type: page.board_type,
         board_title_ko: page.board_title_ko,
         board_title_en: page.board_title_en,
         board_subtitle_ko: page.board_subtitle_ko,
@@ -428,6 +430,27 @@ const PageEditor = () => {
 
                   {page?.has_board && (
                     <div className="space-y-8">
+                      {/* Board Type Selection */}
+                      <div className="p-5 bg-white dark:bg-gray-800 rounded-2xl border dark:border-gray-700 space-y-4 shadow-sm">
+                        <div className="flex items-center gap-2 text-[10px] font-black text-blue-600 uppercase tracking-widest px-1">
+                          <Music className="w-3 h-3" /> 게시판 모드 설정
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 p-1 bg-gray-100 dark:bg-gray-900 rounded-xl">
+                          <button
+                            onClick={() => setPage(prev => prev ? ({...prev, board_type: 'news'}) : null)}
+                            className={`py-2 rounded-lg text-[10px] font-black transition-all ${page.board_type === 'news' ? 'bg-white dark:bg-gray-700 text-blue-600 shadow-sm' : 'text-gray-400'}`}
+                          >
+                            뉴스 모드
+                          </button>
+                          <button
+                            onClick={() => setPage(prev => prev ? ({...prev, board_type: 'audio'}) : null)}
+                            className={`py-2 rounded-lg text-[10px] font-black transition-all ${page.board_type === 'audio' ? 'bg-white dark:bg-gray-700 text-indigo-600 shadow-sm' : 'text-gray-400'}`}
+                          >
+                            음원 모드
+                          </button>
+                        </div>
+                      </div>
+
                       {/* Board Title Settings */}
                       <div className="p-5 bg-white dark:bg-gray-800 rounded-2xl border dark:border-gray-700 space-y-4 shadow-sm">
                         <div className="flex items-center gap-2 text-[10px] font-black text-blue-600 uppercase tracking-widest px-1">

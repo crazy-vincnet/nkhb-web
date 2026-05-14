@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { ShieldCheck, X, Calendar, User } from 'lucide-react';
+import { ShieldCheck, X, Calendar, User, Music, PlayCircle, Headset } from 'lucide-react';
 import DOMPurify from 'dompurify';
 
 interface Post {
@@ -12,6 +12,9 @@ interface Post {
   content: string;
   content_ko: string | null;
   content_en: string | null;
+  audio_url: string | null;
+  post_type: 'news' | 'audio';
+  category: string | null;
   created_at: string;
 }
 
@@ -22,12 +25,15 @@ interface BoardProps {
   titleEn?: string;
   subtitleKo?: string;
   subtitleEn?: string;
+  mode?: 'news' | 'audio';
 }
 
-const Board: React.FC<BoardProps> = ({ pageId, lang, titleKo, titleEn, subtitleKo, subtitleEn }) => {
+const Board: React.FC<BoardProps> = ({ pageId, lang, titleKo, titleEn, subtitleKo, subtitleEn, mode = 'news' }) => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const [activeCategory, setActiveCategory] = useState<string>('전체');
+  const [categories, setCategories] = useState<string[]>([]);
 
   useEffect(() => {
     fetchPosts();
@@ -37,8 +43,9 @@ const Board: React.FC<BoardProps> = ({ pageId, lang, titleKo, titleEn, subtitleK
     setLoading(true);
     let query = supabase
       .from('nkhb_posts')
-      .select('id, title, title_ko, title_en, author_name, content, content_ko, content_en, created_at')
-      .eq('is_approved', true);
+      .select('id, title, title_ko, title_en, author_name, content, content_ko, content_en, audio_url, post_type, category, created_at')
+      .eq('is_approved', true)
+      .eq('post_type', mode);
 
     if (pageId) {
       // If pageId is provided, show posts for that page PLUS global posts (page_id IS NULL)
@@ -52,8 +59,29 @@ const Board: React.FC<BoardProps> = ({ pageId, lang, titleKo, titleEn, subtitleK
 
     if (!error && data) {
       setPosts(data);
+      
+      // Extract unique categories
+      const uniqueCats = Array.from(new Set(data.map(p => p.category).filter(Boolean))) as string[];
+      setCategories(uniqueCats);
     }
     setLoading(false);
+  };
+
+  const filteredPosts = activeCategory === '전체' || activeCategory === 'All'
+    ? posts 
+    : posts.filter(p => p.category === activeCategory);
+
+  const getAudioSource = (url: string | null) => {
+    if (!url) return null;
+    
+    // Google Drive direct link conversion
+    if (url.includes('drive.google.com')) {
+      const match = url.match(/\/file\/d\/(.+?)\//) || url.match(/id=(.+?)(&|$)/);
+      if (match && match[1]) {
+        return `https://drive.google.com/uc?export=download&id=${match[1]}`;
+      }
+    }
+    return url;
   };
 
   const getPostTitle = (post: Post) => {
@@ -84,8 +112,10 @@ const Board: React.FC<BoardProps> = ({ pageId, lang, titleKo, titleEn, subtitleK
         <div className="premium-board-header">
           <div className="header-top">
             <div className="category-tag">
-                <ShieldCheck size={12} className="mr-1.5" />
-                COMMUNITY & NEWS
+                {mode === 'audio' ? <Headset size={12} className="mr-1.5" /> : <ShieldCheck size={12} className="mr-1.5" />}
+                {mode === 'audio' 
+                    ? (lang === 'ko' ? 'BROADCAST AUDIO' : 'BROADCAST AUDIO') 
+                    : 'COMMUNITY & NEWS'}
             </div>
             <h2 className="premium-board-title">{boardTitle}</h2>
             <p className="premium-board-subtitle">{boardSubtitle}</p>
@@ -93,14 +123,26 @@ const Board: React.FC<BoardProps> = ({ pageId, lang, titleKo, titleEn, subtitleK
           
           <div className="board-controls">
             <div className="post-count">
-                <span className="count-num">{posts.length}</span>
-                <span className="count-label">{lang === 'ko' ? '개의 소식' : 'Updates'}</span>
+                <span className="count-num">{filteredPosts.length}</span>
+                <span className="count-label">{lang === 'ko' ? '개의 콘텐츠' : 'Items'}</span>
             </div>
-            {/* Filter Pills Simulation */}
+            {/* Dynamic Filter Pills */}
             <div className="filter-pills">
-                <button className="pill active">{lang === 'ko' ? '전체' : 'All'}</button>
-                <button className="pill">{lang === 'ko' ? '공지' : 'Notice'}</button>
-                <button className="pill">{lang === 'ko' ? '소식' : 'News'}</button>
+                <button 
+                    className={`pill ${activeCategory === (lang === 'ko' ? '전체' : 'All') ? 'active' : ''}`}
+                    onClick={() => setActiveCategory(lang === 'ko' ? '전체' : 'All')}
+                >
+                    {lang === 'ko' ? '전체' : 'All'}
+                </button>
+                {categories.map(cat => (
+                    <button 
+                        key={cat}
+                        className={`pill ${activeCategory === cat ? 'active' : ''}`}
+                        onClick={() => setActiveCategory(cat)}
+                    >
+                        {cat}
+                    </button>
+                ))}
             </div>
           </div>
         </div>
@@ -112,21 +154,21 @@ const Board: React.FC<BoardProps> = ({ pageId, lang, titleKo, titleEn, subtitleK
               <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto opacity-50"></div>
               <p className="mt-4 text-gray-400 font-bold text-sm tracking-widest uppercase">Loading Contents...</p>
             </div>
-          ) : posts.length === 0 ? (
+          ) : filteredPosts.length === 0 ? (
             <div className="premium-empty-state">
               <div className="empty-icon">📂</div>
               <p>{lang === 'ko' ? '아직 등록된 소식이 없습니다.' : 'No updates have been posted yet.'}</p>
             </div>
           ) : (
             <div className="premium-feed">
-              {posts.map((post, index) => (
+              {filteredPosts.map((post, index) => (
                 <div 
                   key={post.id} 
                   className="premium-feed-item group"
                   onClick={() => setSelectedPost(post)}
                 >
                   <div className="item-meta">
-                    <div className="item-index">{(posts.length - index).toString().padStart(2, '0')}</div>
+                    <div className="item-index">{(filteredPosts.length - index).toString().padStart(2, '0')}</div>
                     <div className="item-date">
                         {new Date(post.created_at).toLocaleDateString(lang === 'ko' ? 'ko-KR' : 'en-US', {
                           month: 'short',
@@ -137,7 +179,14 @@ const Board: React.FC<BoardProps> = ({ pageId, lang, titleKo, titleEn, subtitleK
 
                   <div className="item-main">
                     <div className="item-header">
-                        <span className="item-badge">{post.author_name === 'NKHB 관리자' ? 'OFFICIAL' : 'ADMIN'}</span>
+                        {mode === 'audio' ? (
+                            <span className="item-badge audio">
+                                <Music size={10} className="mr-1" />
+                                {post.category || 'PROGRAM'}
+                            </span>
+                        ) : (
+                            <span className="item-badge">{post.author_name === 'NKHB 관리자' ? 'OFFICIAL' : 'ADMIN'}</span>
+                        )}
                         <h4 className="item-title">{getPostTitle(post)}</h4>
                     </div>
                     <p className="item-excerpt">
@@ -145,8 +194,8 @@ const Board: React.FC<BoardProps> = ({ pageId, lang, titleKo, titleEn, subtitleK
                     </p>
                     <div className="item-footer">
                         <div className="item-author">
-                            <div className="author-avatar"><User size={10} /></div>
-                            {post.author_name}
+                            <div className="author-avatar">{mode === 'audio' ? <PlayCircle size={10} /> : <User size={10} />}</div>
+                            {mode === 'audio' ? (lang === 'ko' ? '다시 듣기' : 'Listen Now') : post.author_name}
                         </div>
                         <div className="read-more">
                             {lang === 'ko' ? '자세히 보기' : 'Read More'}
@@ -182,14 +231,36 @@ const Board: React.FC<BoardProps> = ({ pageId, lang, titleKo, titleEn, subtitleK
                 <div className="premium-hero-bg"></div>
                 <div className="premium-hero-content">
                   <div className="premium-category-badge">
-                    <ShieldCheck size={12} className="mr-1.5" />
-                    Official News
+                    {mode === 'audio' ? <Music size={12} className="mr-1.5" /> : <ShieldCheck size={12} className="mr-1.5" />}
+                    {mode === 'audio' ? (selectedPost.category || 'Program') : 'Official News'}
                   </div>
                   <h3 className="premium-title">
                     {getPostTitle(selectedPost)}
                   </h3>
                 </div>
               </div>
+
+              {/* Audio Player (If audio post) */}
+              {mode === 'audio' && selectedPost.audio_url && (
+                <div className="premium-audio-player-container px-6 md:px-20 -mt-8 relative z-20">
+                  <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-2xl border border-indigo-100 dark:border-indigo-900 flex flex-col md:flex-row items-center gap-6">
+                    <div className="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-indigo-200">
+                      <PlayCircle size={32} />
+                    </div>
+                    <div className="flex-1 w-full text-center md:text-left">
+                      <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest mb-1">Now Playing</p>
+                      <h4 className="font-bold text-gray-900 dark:text-white truncate max-w-md">{getPostTitle(selectedPost)}</h4>
+                      <audio 
+                        controls 
+                        className="w-full h-10 mt-4 custom-audio-player"
+                        src={getAudioSource(selectedPost.audio_url) || ''}
+                      >
+                        Your browser does not support the audio element.
+                      </audio>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Main Content Layout */}
               <div className="premium-main-layout">

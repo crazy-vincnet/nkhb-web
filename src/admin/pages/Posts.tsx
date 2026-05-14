@@ -22,6 +22,8 @@ interface Post {
   content: string;
   content_ko: string | null;
   content_en: string | null;
+  post_type: 'news' | 'audio';
+  category: string | null;
   created_at: string;
   page_id: string | null;
   is_approved: boolean;
@@ -115,13 +117,21 @@ const Posts = () => {
             >
               <div className="flex items-center gap-4 min-w-0 flex-1">
                 <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center text-blue-600 shrink-0">
-                  <Type className="w-6 h-6" />
+                  {post.post_type === 'audio' ? <MessageSquare className="w-6 h-6 text-indigo-600" /> : <Type className="w-6 h-6" />}
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 mb-1">
+                    {post.post_type === 'audio' && (
+                        <span className="text-[9px] bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded font-black shrink-0">AUDIO</span>
+                    )}
                     <span className="font-bold text-gray-900 dark:text-white truncate">
                         {post.title_ko || post.title || post.title_en || '제목 없음'}
                     </span>
+                    {post.category && (
+                        <span className="text-[10px] text-indigo-500 font-bold px-2 py-0.5 bg-indigo-50 rounded-full shrink-0">
+                            #{post.category}
+                        </span>
+                    )}
                     <span className="text-[10px] text-gray-400 flex items-center gap-1 font-mono shrink-0">
                       <Calendar className="w-3 h-3" />
                       {new Date(post.created_at).toLocaleDateString()}
