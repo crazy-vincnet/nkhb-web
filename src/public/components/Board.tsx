@@ -29,12 +29,20 @@ const Board: React.FC<BoardProps> = ({ pageId, lang, titleKo, titleEn }) => {
 
   const fetchPosts = async () => {
     setLoading(true);
-    const { data, error } = await supabase
+    let query = supabase
       .from('nkhb_posts')
       .select('id, title, author_name, content, created_at')
-      .eq('page_id', pageId)
-      .eq('is_approved', true)
-      .order('created_at', { ascending: false });
+      .eq('is_approved', true);
+
+    if (pageId) {
+      // If pageId is provided, show posts for that page PLUS global posts (page_id IS NULL)
+      query = query.or(`page_id.eq.${pageId},page_id.is.null`);
+    } else {
+      // If no pageId provided, just show global posts
+      query = query.is('page_id', null);
+    }
+
+    const { data, error } = await query.order('created_at', { ascending: false });
 
     if (!error && data) {
       setPosts(data);
