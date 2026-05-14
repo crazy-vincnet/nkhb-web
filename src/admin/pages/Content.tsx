@@ -235,11 +235,11 @@ const Content = () => {
   if (loading) return <div className="flex items-center justify-center h-96"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>;
 
   return (
-    <div className="max-w-[1400px] mx-auto p-4 lg:p-8 font-pretendard">
+    <div className="flex flex-col font-pretendard -m-8">
       
       {/* Header */}
-      <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-800 mb-8 sticky top-4 z-40 overflow-hidden">
-        <div className="p-6 border-b border-gray-50 dark:border-gray-800 flex flex-col xl:flex-row gap-6 justify-between items-center">
+      <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800 sticky top-0 z-40 overflow-hidden">
+        <div className="max-w-[1400px] mx-auto px-8 py-6 flex flex-col xl:flex-row gap-6 justify-between items-center">
             <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-200">
                     <Layers className="w-6 h-6 text-white" />
@@ -274,12 +274,12 @@ const Content = () => {
                 </button>
             </div>
         </div>
-        <div className="flex overflow-x-auto p-3 gap-2 custom-scrollbar bg-gray-50/30 dark:bg-gray-800/20">
+        <div className="max-w-[1400px] mx-auto px-8 flex overflow-x-auto pb-3 gap-2 custom-scrollbar">
             {SECTIONS.map((tab) => (
                 <button
                     key={tab.id}
                     onClick={() => {setActiveTab(tab.id); setSearchQuery('');}}
-                    className={`flex-shrink-0 flex flex-col items-center gap-1 min-w-[100px] p-3 rounded-2xl transition-all ${activeTab === tab.id && !searchQuery ? 'bg-white dark:bg-gray-700 shadow-sm ring-1 ring-gray-100 dark:ring-gray-600' : 'hover:bg-white/50 dark:hover:bg-gray-800/50'}`}
+                    className={`flex-shrink-0 flex flex-col items-center gap-1 min-w-[100px] p-3 rounded-2xl transition-all ${activeTab === tab.id && !searchQuery ? 'bg-gray-100 dark:bg-gray-800 shadow-sm ring-1 ring-gray-200 dark:ring-gray-700' : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'}`}
                 >
                     <tab.icon size={18} className={activeTab === tab.id ? 'text-blue-600' : 'text-gray-300'} />
                     <span className={`text-[11px] font-black uppercase tracking-tighter ${activeTab === tab.id ? 'text-gray-900 dark:text-white' : 'text-gray-400'}`}>{tab.label}</span>
@@ -289,7 +289,7 @@ const Content = () => {
       </div>
 
       {/* Workspace */}
-      <div className="space-y-16 pb-40">
+      <div className="max-w-[1400px] mx-auto px-8 w-full py-12 space-y-16 pb-40">
         {Object.entries(groupedItems).map(([groupKey, items]) => (
             <div key={groupKey} className="space-y-6">
                 <div className="flex items-center gap-4 ml-4">
