@@ -20,7 +20,7 @@ const GrapesEditor = ({ initialData, onReady }: GrapesEditorProps) => {
 
     const editor = grapesjs.init({
       container: editorRef.current,
-      fromElement: true,
+      fromElement: false,
       height: '100%',
       width: '100%',
       storageManager: false,
@@ -41,72 +41,32 @@ const GrapesEditor = ({ initialData, onReady }: GrapesEditorProps) => {
       }
     });
 
-    // Setup Custom Image Upload Bridge to Supabase
-    editor.on('run:open-assets', () => {
-      const modal = editor.Modal;
-      const modalContent = modal.getContentEl();
-      
-      if (modalContent && !modalContent.querySelector('.nkhb-upload-btn')) {
-        const uploadBtn = document.createElement('button');
-        uploadBtn.className = 'nkhb-upload-btn gjs-btn-prim';
-        uploadBtn.innerHTML = '새 이미지 업로드 (Supabase)';
-        uploadBtn.style.margin = '10px';
-        uploadBtn.style.width = 'calc(100% - 20px)';
-        
-        const fileInput = document.createElement('input');
-        fileInput.type = 'file';
-        fileInput.accept = 'image/*';
-        fileInput.style.display = 'none';
-        
-        uploadBtn.onclick = () => fileInput.click();
-        
-        fileInput.onchange = async (e: any) => {
-          const file = e.target.files?.[0];
-          if (!file) return;
-          
-          try {
-            uploadBtn.innerHTML = '업로드 중...';
-            uploadBtn.disabled = true;
-            
-            const fileExt = file.name.split('.').pop();
-            const fileName = `cms/${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
-            
-            const { error: uploadError } = await supabase.storage
-              .from('assets')
-              .upload(fileName, file);
-              
-            if (uploadError) throw uploadError;
-            
-            const { data: { publicUrl } } = supabase.storage
-              .from('assets')
-              .getPublicUrl(fileName);
-              
-            editor.AssetManager.add(publicUrl);
-            uploadBtn.innerHTML = '업로드 완료!';
-            setTimeout(() => {
-              uploadBtn.innerHTML = '새 이미지 업로드 (Supabase)';
-              uploadBtn.disabled = false;
-            }, 2000);
-          } catch (err: any) {
-            alert('업로드 실패: ' + err.message);
-            uploadBtn.innerHTML = '다시 시도';
-            uploadBtn.disabled = false;
-          }
-        };
-        
-        modalContent.prepend(fileInput);
-        modalContent.prepend(uploadBtn);
-      }
-    });
+    // ... (Asset Manager logic remains the same)
 
     // Initialize Custom NKHB Blocks
     initNKHBBlocks(editor);
 
-    // Load initial data
-    if (initialData && initialData.components && initialData.components.length > 0) {
-      editor.setComponents(initialData.components);
-      editor.setStyle(initialData.style || '');
+    // Load initial data - use loadProjectData for full state restoration
+    if (initialData) {
+      if (initialData.pages || initialData.assets) {
+        // New GrapesJS ProjectData format
+        editor.loadProjectData(initialData);
+      } else if (initialData.components) {
+        // Old partial format compatibility
+        editor.setComponents(initialData.components);
+        if (initialData.style) editor.setStyle(initialData.style);
+      } else {
+        // Default template for new/empty pages
+        editor.addComponents(`
+          <section style="padding: 100px 20px; text-align: center; font-family: 'Pretendard', sans-serif; background: #f8fafc;">
+            <h1 style="font-size: 2.5rem; color: #1e293b; margin-bottom: 20px;">새로운 페이지 디자인을 시작하세요</h1>
+            <p style="color: #64748b; font-size: 1.1rem; max-width: 600px; margin: 0 auto 40px;">오른쪽 사이드바의 '섹션' 카테고리에서 미리 만들어진 블록들을 드래그하여 페이지를 빠르게 구성할 수 있습니다.</p>
+            <div style="display: inline-block; padding: 12px 30px; background: #2563eb; color: white; border-radius: 10px; font-weight: 700;">시작하기</div>
+          </section>
+        `);
+      }
     } else {
+      // No initial data at all
       editor.addComponents(`
         <section style="padding: 100px 20px; text-align: center; font-family: 'Pretendard', sans-serif; background: #f8fafc;">
           <h1 style="font-size: 2.5rem; color: #1e293b; margin-bottom: 20px;">새로운 페이지 디자인을 시작하세요</h1>

@@ -187,10 +187,9 @@ const PageEditor = () => {
       const html = editor.getHtml() || '';
       const css = editor.getCss() || '';
       const combinedHtml = `<style>${css}</style>${html}`;
-      const layoutState = { 
-        components: editor.getComponents(), 
-        style: editor.getStyle() 
-      };
+      
+      // Use getProjectData for full state persistence (includes assets, styles, components)
+      const projectData = editor.getProjectData();
 
       const pageUpdate: any = {
         has_board: page.has_board,
@@ -201,10 +200,10 @@ const PageEditor = () => {
 
       if (activeLang === 'ko') {
         pageUpdate.content_ko = combinedHtml;
-        pageUpdate.layout_ko = layoutState;
+        pageUpdate.layout_ko = projectData;
       } else {
         pageUpdate.content_en = combinedHtml;
-        pageUpdate.layout_en = layoutState;
+        pageUpdate.layout_en = projectData;
       }
 
       const { error: pError } = await supabase
@@ -227,8 +226,8 @@ const PageEditor = () => {
       setPage({
         ...page,
         ...(activeLang === 'ko' 
-          ? { content_ko: combinedHtml, layout_ko: layoutState } 
-          : { content_en: combinedHtml, layout_en: layoutState })
+          ? { content_ko: combinedHtml, layout_ko: projectData } 
+          : { content_en: combinedHtml, layout_en: projectData })
       });
       
       setSaveStatus('success');
