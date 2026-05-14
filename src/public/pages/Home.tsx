@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import Hero from '../components/Hero';
 import Background from '../components/Background';
@@ -23,6 +23,10 @@ const Home: React.FC = () => {
     const [isLetterModalOpen, setIsLetterModalOpen] = useState(false);
     const [isSampleModalOpen, setIsSampleModalOpen] = useState(false);
 
+    const handleOpenArticle = useCallback(() => setIsArticleModalOpen(true), []);
+    const handleOpenSample = useCallback(() => setIsSampleModalOpen(true), []);
+    const handleOpenLetter = useCallback(() => setIsLetterModalOpen(true), []);
+
     useEffect(() => {
         // Handle smooth scrolling for hash links whenever location changes
         if (location.hash) {
@@ -46,12 +50,12 @@ const Home: React.FC = () => {
             <SEO slug="home" />
             <main>
                 <Hero />
-                <Background onOpenArticle={() => setIsArticleModalOpen(true)} />
-                <Composition onOpenSample={() => setIsSampleModalOpen(true)} />
+                <Background onOpenArticle={handleOpenArticle} />
+                <Composition onOpenSample={handleOpenSample} />
                 <Effects />
                 <QuoteBanner />
                 <Reach />
-                <Guide onOpenLetter={() => setIsLetterModalOpen(true)} />
+                <Guide onOpenLetter={handleOpenLetter} />
                 
                 {lang === 'ko' ? <Support /> : <SupportEn />}
                 

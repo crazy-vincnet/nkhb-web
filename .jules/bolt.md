@@ -1,0 +1,3 @@
+## 2024-11-20 - [Home Page Component Re-renders]
+**Learning:** Managing modal state (e.g., `isArticleModalOpen`, `isSampleModalOpen`) directly inside the top-level page component (`Home.tsx`) triggers a full-page re-render for all large section components (`Hero`, `Background`, `Composition`, `Effects`, `Guide`, etc.) every time a modal is opened or closed. This is a codebase-specific architectural pattern for the React app in `src/public`.
+**Action:** Always wrap event handler props that open/close modals in page components with `useCallback` and wrap static or largely static child section components in `React.memo` to prevent cascading, unnecessary re-renders across the entire page when simple boolean state changes occur.
