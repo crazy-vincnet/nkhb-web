@@ -27,17 +27,42 @@ interface ContentItem {
 }
 
 const SECTIONS = [
-  { id: 'hero', label: '히어로', icon: Layout, pattern: ['hero_', 'image_hero'] },
-  { id: 'background', label: '방송배경', icon: Info, pattern: ['background_', 'image_background'] },
-  { id: 'composition', label: '방송구성', icon: Radio, pattern: ['composition_', 'sample_', 'track'] },
-  { id: 'effects', label: '기대효과', icon: Heart, pattern: ['effects_'] },
-  { id: 'reach', label: '도달범위', icon: Globe, pattern: ['reach_', 'image_reach'] },
-  { id: 'guide', label: '참여안내', icon: Info, pattern: ['guide_', 'letter_modal'] },
-  { id: 'support', label: '후원하기', icon: Heart, pattern: ['support_'] },
-  { id: 'schedule', label: '방송시간', icon: Settings, pattern: ['schedule_'] },
-  { id: 'nav', label: '공통/메뉴', icon: Globe, pattern: ['nav_', 'footer_', 'page_', 'alt_logo', 'image_logo'] },
-  { id: 'seo', label: 'SEO', icon: Search, pattern: ['meta_'] },
+  { id: 'hero', label: '히어로', icon: Layout, description: '메인 배너 제목, 설명, 버튼, 통계', pattern: ['hero_', 'image_hero'] },
+  { id: 'about', label: '소개', icon: Info, description: '기관 소개 및 미션 섹션', pattern: ['background_', 'image_background'] },
+  { id: 'ministry', label: '사역', icon: Radio, description: '진행 중인 사역 리스트', pattern: ['composition_', 'sample_', 'track', 'effects_'] },
+  { id: 'support', label: '후원', icon: Heart, description: '후원 안내 및 계좌 정보', pattern: ['support_'] },
+  { id: 'nav', label: '공통/메뉴', icon: Globe, description: '내비게이션, 푸터, 로고', pattern: ['nav_', 'footer_', 'page_', 'alt_logo', 'image_logo'] },
+  { id: 'seo', label: 'SEO', icon: Search, description: '검색 엔진 최적화 메타 정보', pattern: ['meta_'] },
 ];
+
+const GROUP_CONFIG: { [sectionId: string]: { label: string; pattern: string }[] } = {
+  hero: [
+    { label: '메인 문구', pattern: 'hero_title' },
+    { label: '설명 및 슬로건', pattern: 'hero_desc' },
+    { label: '메인 버튼', pattern: 'hero_button' },
+    { label: '히어로 이미지', pattern: 'image_hero' },
+  ],
+  support: [
+    { label: '후원 안내', pattern: 'support_title' },
+    { label: '계좌 정보', pattern: 'support_bank' },
+  ],
+  about: [
+    { label: '소개 타이틀', pattern: 'about_title' },
+    { label: '소개 설명', pattern: 'about_desc' },
+  ],
+  ministry: [
+    { label: '사역 타이틀', pattern: 'ministry_title' },
+    { label: '사역 설명', pattern: 'ministry_desc' },
+  ],
+  nav: [
+    { label: '메뉴 항목', pattern: 'nav_' },
+    { label: '푸터 정보', pattern: 'footer_' },
+    { label: '로고 설정', pattern: 'logo' },
+  ],
+  seo: [
+    { label: '메타 태그', pattern: 'meta_' },
+  ]
+};
 
 const KEY_LABELS: { [key: string]: string } = {
   // Hero
