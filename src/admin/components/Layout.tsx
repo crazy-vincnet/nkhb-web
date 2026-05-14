@@ -1,6 +1,7 @@
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { 
+  Home,
   Mail, 
   Music, 
   Calendar, 
@@ -22,6 +23,7 @@ const Layout = () => {
   };
 
   const menuItems = [
+    { path: '/', icon: Home, label: 'Dashboard' },
     { path: '/letters', icon: Mail, label: 'Letters' },
     { path: '/audio', icon: Music, label: 'Audio Tracks' },
     { path: '/schedule', icon: Calendar, label: 'Schedule' },
@@ -40,20 +42,26 @@ const Layout = () => {
           <h1 className="text-2xl font-black text-blue-600 dark:text-blue-400 tracking-tighter">NKHB Studio</h1>
         </div>
         <nav className="mt-2 px-3">
-          {menuItems.map((item) => (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={`flex items-center px-4 py-3 mb-1 rounded-xl font-bold transition-all ${
-                location.pathname.startsWith(item.path) 
-                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-200 dark:shadow-none' 
-                  : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
-              }`}
-            >
-              <item.icon className="w-5 h-5 mr-3" />
-              {item.label}
-            </Link>
-          ))}
+          {menuItems.map((item) => {
+            const isActive = item.path === '/' 
+              ? location.pathname === '/' 
+              : location.pathname.startsWith(item.path);
+              
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`flex items-center px-4 py-3 mb-1 rounded-xl font-bold transition-all ${
+                  isActive 
+                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-200 dark:shadow-none' 
+                    : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                }`}
+              >
+                <item.icon className="w-5 h-5 mr-3" />
+                {item.label}
+              </Link>
+            );
+          })}
         </nav>
         <div className="absolute bottom-0 w-full p-4 border-t border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800">
           <button

@@ -13,6 +13,7 @@ import Pages from './pages/Pages';
 import PageEditor from './pages/PageEditor';
 import Posts from './pages/Posts';
 import PostEditor from './pages/PostEditor';
+import Dashboard from './pages/Dashboard';
 
 function App() {
   const [session, setSession] = useState<any>(null);
@@ -52,7 +53,7 @@ function App() {
           path="/"
           element={session ? <Layout /> : <Navigate to="/login" />}
         >
-          <Route index element={<Navigate to="/letters" />} />
+          <Route index element={<Dashboard />} />
           <Route path="letters" element={<Letters />} />
           <Route path="audio" element={<Audio />} />
           <Route path="schedule" element={<Schedule />} />

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useI18n } from '../lib/i18n';
 import { supabase } from '../lib/supabase';
+import emailjs from '@emailjs/browser';
 
 interface LetterModalProps {
     isOpen: boolean;
@@ -19,19 +20,42 @@ const LetterModal: React.FC<LetterModalProps> = ({ isOpen, onClose }) => {
 
         const formData = new FormData(e.currentTarget);
         const data = {
-            name: formData.get('name'),
-            location: formData.get('location'),
-            reason: formData.get('reason'),
-            email: formData.get('email'),
-            message: formData.get('message')
+            name: formData.get('name') as string,
+            location: formData.get('location') as string,
+            reason: formData.get('reason') as string,
+            email: formData.get('email') as string,
+            message: formData.get('message') as string
         };
 
         try {
-            const { error } = await supabase
+            // 1. Save to Supabase (Database Backup)
+            const { error: dbError } = await supabase
                 .from('letters')
                 .insert([data]);
 
-            if (error) throw error;
+            if (dbError) throw dbError;
+
+            // 2. Send via EmailJS (Real-time Notification)
+            // Note: These IDs should be in your .env file
+            const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+            const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+            const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+
+            if (serviceId && templateId && publicKey) {
+                await emailjs.send(
+                    serviceId,
+                    templateId,
+                    {
+                        from_name: data.name,
+                        from_email: data.email,
+                        location: data.location,
+                        reason: data.reason,
+                        message: data.message,
+                        to_name: "NKHB Admin", // You can customize this
+                    },
+                    publicKey
+                );
+            }
 
             const msg = lang === 'en' ? 'Letter sent successfully.' : '편지가 성공적으로 전송되었습니다.';
             alert(msg);
