@@ -27,6 +27,9 @@ interface StyleProps {
   margin?: string;
   padding?: string;
   fontWeight?: string;
+  borderRadius?: string;
+  borderWidth?: string;
+  borderColor?: string;
   link?: string;
   [key: string]: any;
 }
@@ -293,16 +296,48 @@ const Content = () => {
                     </div>
 
                     <div className="space-y-4">
-                        <label className="text-[11px] font-black text-rose-600 flex items-center gap-2 bg-rose-50 px-3 py-1.5 rounded-full w-fit"><Palette className="w-3.5 h-3.5" /> COLORS</label>
-                        <div className="flex gap-4">
-                            <div className="flex-1 space-y-2">
+                        <label className="text-[11px] font-black text-rose-600 flex items-center gap-2 bg-rose-50 px-3 py-1.5 rounded-full w-fit"><Palette className="w-3.5 h-3.5" /> COLORS & BACKGROUND</label>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
                                 <span className="text-[9px] font-black text-gray-400 ml-1">TEXT COLOR</span>
-                                <div className="flex gap-3">
-                                    <div className="w-12 h-12 rounded-2xl overflow-hidden relative border-4 border-white shadow-xl">
+                                <div className="flex gap-2">
+                                    <div className="w-10 h-10 rounded-xl overflow-hidden relative border-4 border-white shadow-lg">
                                         <input type="color" value={selectedItem.style_props?.color?.startsWith('#') ? selectedItem.style_props.color : (computedStyles?.color?.startsWith('#') ? computedStyles.color : '#000000')} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, color: e.target.value } })} className="absolute inset-[-10px] w-[200%] h-[200%] cursor-pointer" />
                                     </div>
-                                    <input type="text" value={selectedItem.style_props?.color || ''} placeholder={computedStyles?.color} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, color: e.target.value } })} className="flex-1 bg-gray-50 border-none rounded-2xl text-[10px] uppercase font-black text-center shadow-inner" />
+                                    <input type="text" value={selectedItem.style_props?.color || ''} placeholder={computedStyles?.color} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, color: e.target.value } })} className="flex-1 bg-gray-50 border-none rounded-xl text-[10px] uppercase font-black text-center shadow-inner" />
                                 </div>
+                            </div>
+                            <div className="space-y-2">
+                                <span className="text-[9px] font-black text-gray-400 ml-1">BACKGROUND</span>
+                                <div className="flex gap-2">
+                                    <div className="w-10 h-10 rounded-xl overflow-hidden relative border-4 border-white shadow-lg">
+                                        <input type="color" value={selectedItem.style_props?.backgroundColor?.startsWith('#') ? selectedItem.style_props.backgroundColor : (computedStyles?.backgroundColor?.startsWith('#') ? computedStyles.backgroundColor : '#FFFFFF')} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, backgroundColor: e.target.value } })} className="absolute inset-[-10px] w-[200%] h-[200%] cursor-pointer" />
+                                    </div>
+                                    <input type="text" value={selectedItem.style_props?.backgroundColor || ''} placeholder={computedStyles?.backgroundColor || 'Transparent'} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, backgroundColor: e.target.value } })} className="flex-1 bg-gray-50 border-none rounded-xl text-[10px] uppercase font-black text-center shadow-inner" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="space-y-4">
+                        <label className="text-[11px] font-black text-amber-600 flex items-center gap-2 bg-amber-50 px-3 py-1.5 rounded-full w-fit"><Maximize className="w-3.5 h-3.5" /> BORDERS & ROUNDING</label>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <span className="text-[9px] font-black text-gray-400 ml-1">BORDER RADIUS</span>
+                                <input type="text" value={selectedItem.style_props?.borderRadius || ''} placeholder={computedStyles?.borderRadius} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, borderRadius: e.target.value } })} className="w-full p-3 bg-gray-50 border-none rounded-xl text-xs font-bold shadow-inner" />
+                            </div>
+                            <div className="space-y-2">
+                                <span className="text-[9px] font-black text-gray-400 ml-1">BORDER WIDTH</span>
+                                <input type="text" value={selectedItem.style_props?.borderWidth || ''} placeholder={computedStyles?.borderWidth} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, borderWidth: e.target.value } })} className="w-full p-3 bg-gray-50 border-none rounded-xl text-xs font-bold shadow-inner" />
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <span className="text-[9px] font-black text-gray-400 ml-1">BORDER COLOR</span>
+                            <div className="flex gap-2">
+                                <div className="w-10 h-10 rounded-xl overflow-hidden relative border-4 border-white shadow-lg">
+                                    <input type="color" value={selectedItem.style_props?.borderColor?.startsWith('#') ? selectedItem.style_props.borderColor : (computedStyles?.borderColor?.startsWith('#') ? computedStyles.borderColor : '#000000')} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, borderColor: e.target.value } })} className="absolute inset-[-10px] w-[200%] h-[200%] cursor-pointer" />
+                                </div>
+                                <input type="text" value={selectedItem.style_props?.borderColor || ''} placeholder={computedStyles?.borderColor} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, borderColor: e.target.value } })} className="flex-1 bg-gray-50 border-none rounded-xl text-[10px] uppercase font-black text-center shadow-inner" />
                             </div>
                         </div>
                     </div>

@@ -79,7 +79,10 @@ export const Editable: React.FC<EditableProps> = ({ k, children, className = '',
           backgroundColor: style.backgroundColor === 'rgba(0, 0, 0, 0)' ? '' : rgbaToHex(style.backgroundColor),
           margin: style.margin,
           padding: style.padding,
-          fontWeight: style.fontWeight
+          fontWeight: style.fontWeight,
+          borderRadius: style.borderRadius,
+          borderWidth: style.borderWidth,
+          borderColor: rgbaToHex(style.borderColor)
         };
 
         // Deep search for link: check self, then all children
