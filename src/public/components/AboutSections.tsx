@@ -61,7 +61,7 @@ export const AboutIntro: React.FC = () => {
                                 <Editable k="image_about_poster" headless>
                                     {({ link, styles }) => (
                                         <div style={styles}>
-                                            <img src={link} alt="poster" loading="lazy" />
+                                            <img src={link} alt="poster" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                                         </div>
                                     )}
                                 </Editable>

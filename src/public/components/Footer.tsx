@@ -7,8 +7,8 @@ const Footer: React.FC = () => {
             <div className="container">
                 <div className="footer-content">
                     <div className="footer-logo">
-                        <Editable k="logo_url">
-                            {({ link }) => <img src={link} alt="logo" loading="lazy" />}
+                        <Editable k="logo_url" headless>
+                            {({ link, styles }) => <img src={link} alt="logo" loading="lazy" style={styles} />}
                         </Editable>
                     </div>
                     <div className="footer-info">

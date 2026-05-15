@@ -58,7 +58,7 @@ const Background: React.FC<BackgroundProps> = ({ onOpenArticle }) => {
                                 <Editable k="image_background_section" headless>
                                     {({ link, styles }) => (
                                         <div className="image-placeholder" style={styles}>
-                                            <img src={link} alt="background" loading="lazy" />
+                                            <img src={link} alt="background" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                         </div>
                                     )}
                                 </Editable>

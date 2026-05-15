@@ -12,7 +12,7 @@ const Reach: React.FC = () => {
                                 <Editable k="image_reach_map" headless>
                                     {({ link, styles }) => (
                                         <div className="map-container" style={styles}>
-                                            <img src={link} alt="map" className="map-bg" loading="lazy" />
+                                            <img src={link} alt="map" className="map-bg" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                                             <div className="pulse-ring"></div>
                                             <div className="pulse-ring delay-1"></div>
                                             <div className="pulse-ring delay-2"></div>
@@ -20,6 +20,7 @@ const Reach: React.FC = () => {
                                     )}
                                 </Editable>
                             </div>
+
                             <div className="reach-text">
                                 <span className="section-tag">04 — Broadcast Reach</span>
                                 <Editable k="reach_title" headless>
