@@ -29,27 +29,34 @@ export const Editable: React.FC<EditableProps> = ({ k, children, className = '',
       let computedStyles = {};
       let currentLink = data.link;
 
-      // Extract real-time computed styles from DOM
+      // Extract real-time computed styles and link from DOM
       if (elementRef.current) {
         const el = elementRef.current;
-        // If headless, the real content might be inside or the element itself is display: contents
-        // We try to find the actual visible child if possible
         const targetEl = el.firstElementChild || el;
         const style = window.getComputedStyle(targetEl);
         
         computedStyles = {
           fontSize: style.fontSize,
           color: style.color,
-          backgroundColor: style.backgroundColor,
+          backgroundColor: style.backgroundColor === 'rgba(0, 0, 0, 0)' ? '' : style.backgroundColor,
           margin: style.margin,
           padding: style.padding,
           fontWeight: style.fontWeight
         };
 
-        // Try to find link if not explicitly in data
+        // Deep search for link: check self, then all children
         if (!currentLink) {
-            const anchor = el.tagName === 'A' ? el : el.querySelector('a');
-            if (anchor) currentLink = (anchor as HTMLAnchorElement).getAttribute('href') || '';
+            const findLink = (node: HTMLElement): string | null => {
+                if (node.tagName === 'A') return node.getAttribute('href');
+                if (node.tagName === 'BUTTON' && node.onclick) return 'JS_ACTION'; // Mark as action if not a standard link
+                
+                for (let child of Array.from(node.children)) {
+                    const found = findLink(child as HTMLElement);
+                    if (found) return found;
+                }
+                return null;
+            };
+            currentLink = findLink(el) || '';
         }
       }
 

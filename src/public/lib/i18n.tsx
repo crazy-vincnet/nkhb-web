@@ -234,10 +234,14 @@ export const I18nProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const baseText = lang === 'ko' ? (item?.value_ko || (staticTranslations as any).ko?.[key]) : (item?.value_en || (staticTranslations as any).en?.[key]);
     const baseStyles = item?.style_props || {};
     
+    // Only fallback to static translations if it looks like a URL or a known link key
+    const staticLink = (staticTranslations as any).en?.[key] || (staticTranslations as any).ko?.[key];
+    const isUrl = typeof staticLink === 'string' && (staticLink.startsWith('http') || staticLink.startsWith('/') || staticLink.startsWith('#'));
+
     return {
       text: (live?.text ?? baseText) || key,
       styles: { ...baseStyles, ...live?.styles },
-      link: live?.link ?? baseStyles.link ?? item?.link_url ?? (staticTranslations as any).en?.[key] ?? (staticTranslations as any).ko?.[key]
+      link: live?.link ?? baseStyles.link ?? item?.link_url ?? (isUrl ? staticLink : undefined)
     };
   }, [dbContent, liveChanges, lang]);
 
