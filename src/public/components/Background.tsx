@@ -1,53 +1,74 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useI18n } from '../lib/i18n';
+import { Editable } from './Editable';
 
 interface BackgroundProps {
     onOpenArticle: () => void;
 }
 
 const Background: React.FC<BackgroundProps> = ({ onOpenArticle }) => {
-    const { t } = useI18n();
-
     return (
         <section className="section background" id="background">
             <div className="container">
                 <div className="content-grid">
                     <div className="text-content">
                         <span className="section-tag">01 — Background</span>
-                        <h2>{t('background_title')}</h2>
-                        <p className="description">{t('background_desc1')}</p>
+                        
+                        <Editable k="background_title">
+                            {({ text, styles }) => <h2 style={styles}>{text}</h2>}
+                        </Editable>
+
+                        <Editable k="background_desc1">
+                            {({ text, styles }) => <p className="description" style={styles}>{text}</p>}
+                        </Editable>
 
                         <div className="founder-story">
-                            <p className="quote" dangerouslySetInnerHTML={{ __html: t('background_quote') }}></p>
+                            <Editable k="background_quote">
+                                {({ text, styles }) => <p className="quote" style={styles} dangerouslySetInnerHTML={{ __html: text }}></p>}
+                            </Editable>
                         </div>
 
-                        <p className="description">{t('background_desc2')}</p>
+                        <Editable k="background_desc2">
+                            {({ text, styles }) => <p className="description" style={styles}>{text}</p>}
+                        </Editable>
 
-                        <p className="description sub-desc">{t('background_desc3')}</p>
+                        <Editable k="background_desc3">
+                            {({ text, styles }) => <p className="description sub-desc" style={styles}>{text}</p>}
+                        </Editable>
 
                         <div className="action-area">
-                            <Link to="/about" className="btn-hero btn-outline">{t('background_about_nkfi')}</Link>
-                            <button 
-                                id="open-article-modal" 
-                                className="btn-hero btn-outline"
-                                onClick={onOpenArticle}
-                            >
-                                {t('background_read_more')}
-                            </button>
+                            <Editable k="background_about_nkfi" className="inline-block">
+                                {({ text, styles, link }) => (
+                                    <Link to={link || "/about"} className="btn-hero btn-outline" style={styles}>{text}</Link>
+                                )}
+                            </Editable>
+                            
+                            <Editable k="background_read_more" className="inline-block ml-4">
+                                {({ text, styles }) => (
+                                    <button className="btn-hero btn-outline" style={styles} onClick={onOpenArticle}>
+                                        {text}
+                                    </button>
+                                )}
+                            </Editable>
                         </div>
                     </div>
+                    
                     <div className="image-content">
-                        <div className="image-placeholder">
-                            <img 
-                                src={t('image_background_section')} 
-                                alt={t('alt_background')} 
-                                loading="lazy" 
-                            />
-                        </div>
+                        <Editable k="image_background_section">
+                            {({ link, styles }) => (
+                                <div className="image-placeholder" style={styles}>
+                                    <img src={link} alt="background" loading="lazy" />
+                                </div>
+                            )}
+                        </Editable>
+                        
                         <div className="testimonial-box">
-                            <span className="testimonial-tag">{t('background_testimonial_tag')}</span>
-                            <p className="testimonial-text">{t('background_testimonial_text')}</p>
+                            <Editable k="background_testimonial_tag">
+                                {({ text, styles }) => <span className="testimonial-tag" style={styles}>{text}</span>}
+                            </Editable>
+                            <Editable k="background_testimonial_text">
+                                {({ text, styles }) => <p className="testimonial-text" style={styles}>{text}</p>}
+                            </Editable>
                         </div>
                     </div>
                 </div>
