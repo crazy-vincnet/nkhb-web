@@ -56,6 +56,7 @@ const Content = () => {
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const [previewMode, setPreviewMode] = useState<'desktop' | 'mobile'>('desktop');
   const [currentPage, setCurrentPage] = useState<string>('/');
+  const [editorLang, setEditorLang] = useState<'ko' | 'en'>('ko');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState<boolean | string>(false);
@@ -145,7 +146,7 @@ const Content = () => {
             type: 'NKHB_LIVE_UPDATE',
             key: item.key,
             data: {
-              text: item.value_ko || item.value_en,
+              text: editorLang === 'ko' ? item.value_ko : item.value_en,
               styles: item.style_props,
               link: item.style_props?.link
             }
@@ -221,34 +222,40 @@ const Content = () => {
     
     const handleMessage = (event: MessageEvent) => {
       if (event.data?.type === 'NKHB_ELEMENT_SELECTED') {
-        const { key, computedStyles: cs, link } = event.data;
+        const { key, computedStyles: cs, link, innerText } = event.data;
         
-        // 1. Check if item exists in local state
-        let item = items.find(i => i.key === key);
+        // Use itemsRef to avoid stale closure
+        let item = itemsRef.current.find(i => i.key === key);
         
         if (!item) {
-            // 2. If not, create a virtual item so it can be edited
+            // 2. If not, create a virtual item
             const newItem: ContentItem = {
                 id: `new-${key}-${Date.now()}`,
                 key: key,
-                value_ko: link || '',
-                value_en: link || '',
+                // If it's an image-like key, use link as value, otherwise use innerText
+                value_ko: isImageKey ? (link || '') : (editorLang === 'ko' ? innerText : ''),
+                value_en: isImageKey ? (link || '') : (editorLang === 'en' ? innerText : ''),
                 style_props: { ...cs, link: link || '' }
             };
             setItems(prev => [...prev, newItem]);
             setSelectedKey(key);
             setModifiedIds(prev => new Set(prev).add(key));
         } else {
-            // 3. If exists, ensure link/image is shown in fields if currently empty
-            if (link) {
+            // 3. If exists, ensure current language field is filled if empty
+            if (innerText || link) {
                 setItems(prev => prev.map(i => {
                     if (i.key === key) {
-                        return {
-                            ...i,
-                            value_ko: i.value_ko || link,
-                            value_en: i.value_en || link,
-                            style_props: { ...i.style_props, link: i.style_props?.link || link }
-                        };
+                        const isImg = key.includes('image') || key.includes('logo') || key.includes('bg');
+                        const updates: any = {};
+                        
+                        if (editorLang === 'ko' && !i.value_ko) updates.value_ko = isImg ? link : innerText;
+                        if (editorLang === 'en' && !i.value_en) updates.value_en = isImg ? link : innerText;
+                        
+                        if (link && !i.style_props?.link) {
+                            updates.style_props = { ...i.style_props, link };
+                        }
+                        
+                        return Object.keys(updates).length > 0 ? { ...i, ...updates } : i;
                     }
                     return i;
                 }));
@@ -333,12 +340,12 @@ const Content = () => {
         type: 'NKHB_LIVE_UPDATE',
         key,
         data: {
-            text: nextItem.value_ko || nextItem.value_en,
+            // CRITICAL: Send text based on the editor's current language setting
+            text: editorLang === 'ko' ? nextItem.value_ko : nextItem.value_en,
             styles: nextItem.style_props,
-            // For images, detect which value to send based on current preview state if possible,
-            // but usually we want to reflect what the user just changed.
+            // For images, prioritize the direct values over style_props.link
             link: isImg 
-                ? (updates.value_ko || updates.value_en || nextItem.value_ko || nextItem.value_en)
+                ? (editorLang === 'en' ? nextItem.value_en : nextItem.value_ko)
                 : (nextItem.style_props?.link || nextItem.value_ko || nextItem.value_en)
         }
       }, '*');
@@ -453,6 +460,21 @@ const Content = () => {
             </div>
 
             <div className="flex bg-gray-100 p-1 rounded-xl gap-1">
+                <button 
+                    onClick={() => setEditorLang('ko')} 
+                    className={`px-4 py-1.5 rounded-lg text-[10px] font-black transition-all flex items-center gap-2 ${editorLang === 'ko' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+                >
+                    <span className="w-2 h-2 rounded-full bg-red-400" /> KO
+                </button>
+                <button 
+                    onClick={() => setEditorLang('en')} 
+                    className={`px-4 py-1.5 rounded-lg text-[10px] font-black transition-all flex items-center gap-2 ${editorLang === 'en' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+                >
+                    <span className="w-2 h-2 rounded-full bg-blue-400" /> EN
+                </button>
+            </div>
+
+            <div className="flex bg-gray-100 p-1 rounded-xl gap-1">
                 <button onClick={() => setPreviewMode('desktop')} className={`px-4 py-1.5 rounded-lg text-[10px] font-black transition-all flex items-center gap-2 ${previewMode === 'desktop' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}><Monitor className="w-3.5 h-3.5" /> DESKTOP</button>
                 <button onClick={() => setPreviewMode('mobile')} className={`px-4 py-1.5 rounded-lg text-[10px] font-black transition-all flex items-center gap-2 ${previewMode === 'mobile' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}><Smartphone className="w-3.5 h-3.5" /> MOBILE</button>
             </div>
@@ -468,7 +490,12 @@ const Content = () => {
 
         <main className="flex-1 overflow-hidden relative flex items-center justify-center p-0">
             <div className={`transition-all duration-700 ease-in-out shadow-2xl bg-white ${previewMode === 'desktop' ? 'w-full h-full' : 'w-[375px] h-[667px] my-8 rounded-[2rem] border-[8px] border-gray-900 overflow-hidden'}`}>
-                <iframe ref={iframeRef} src={currentPage} className="w-full h-full border-none" title="Site Preview" />
+                <iframe 
+                    ref={iframeRef} 
+                    src={`${currentPage}${currentPage.includes('?') ? '&' : '?'}lang=${editorLang}&t=${Date.now()}`} 
+                    className="w-full h-full border-none" 
+                    title="Site Preview" 
+                />
             </div>
             {!sidebarOpen && <button onClick={() => setSidebarOpen(true)} className="absolute right-6 top-20 w-12 h-12 bg-blue-600 text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-all z-30"><Palette className="w-6 h-6" /></button>}
         </main>

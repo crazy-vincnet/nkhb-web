@@ -120,14 +120,15 @@ export const Editable: React.FC<EditableProps> = ({ k, children, className = '',
             const foundUrl = findAsset(targetEl);
             if (foundUrl) currentLink = foundUrl;
         }
-      }
 
-      window.parent.postMessage({ 
-        type: 'NKHB_ELEMENT_SELECTED', 
-        key: k,
-        computedStyles,
-        link: currentLink
-      }, '*');
+        window.parent.postMessage({ 
+            type: 'NKHB_ELEMENT_SELECTED', 
+            key: k,
+            computedStyles,
+            link: currentLink,
+            innerText: targetEl.innerText || ''
+        }, '*');
+      }
     }
   };
 
