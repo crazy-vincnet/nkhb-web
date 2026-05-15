@@ -7,42 +7,46 @@ interface CompositionProps {
 
 const Composition: React.FC<CompositionProps> = ({ onOpenSample }) => {
     return (
-        <section className="section composition" id="composition">
-            <div className="container">
-                <div className="section-header">
-                    <span className="section-tag">02 — Program Structure</span>
-                    <Editable k="composition_title">
-                        {({ text, styles }) => <h2 style={styles}>{text}</h2>}
-                    </Editable>
-                    <Editable k="composition_desc">
-                        {({ text, styles }) => <p className="description" style={styles}>{text}</p>}
-                    </Editable>
-                </div>
-
-                <div className="theme-grid">
-                    {[1, 2, 3, 4].map(num => (
-                        <div className="theme-card" key={num}>
-                            <div className="card-num">{num}</div>
-                            <Editable k={`composition_card${num}_title`}>
-                                {({ text, styles }) => <h3 style={styles}>{text}</h3>}
+        <Editable k="section_composition" headless>
+            {({ styles: sectionStyles }) => (
+                <section className="section composition" id="composition" style={sectionStyles}>
+                    <div className="container">
+                        <div className="section-header">
+                            <span className="section-tag">02 — Program Structure</span>
+                            <Editable k="composition_title" headless>
+                                {({ text, styles }) => <h2 style={styles} dangerouslySetInnerHTML={{ __html: text }}></h2>}
                             </Editable>
-                            <Editable k={`composition_card${num}_desc`}>
-                                {({ text, styles }) => <p style={styles}>{text}</p>}
+                            <Editable k="composition_desc" headless>
+                                {({ text, styles }) => <p className="description" style={styles} dangerouslySetInnerHTML={{ __html: text }}></p>}
                             </Editable>
                         </div>
-                    ))}
-                </div>
 
-                <div className="composition-action">
-                    <Editable k="composition_button_sample" headless>
-                        {({ text, styles }) => (
-                            <button className="btn-sample-wide" style={styles} onClick={onOpenSample} dangerouslySetInnerHTML={{ __html: text }}>
-                            </button>
-                        )}
-                    </Editable>
-                </div>
-            </div>
-        </section>
+                        <div className="theme-grid">
+                            {[1, 2, 3, 4].map(num => (
+                                <div className="theme-card" key={num}>
+                                    <div className="card-num">{num}</div>
+                                    <Editable k={`composition_card${num}_title`} headless>
+                                        {({ text, styles }) => <h3 style={styles} dangerouslySetInnerHTML={{ __html: text }}></h3>}
+                                    </Editable>
+                                    <Editable k={`composition_card${num}_desc`} headless>
+                                        {({ text, styles }) => <p style={styles} dangerouslySetInnerHTML={{ __html: text }}></p>}
+                                    </Editable>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="composition-action">
+                            <Editable k="composition_button_sample" headless>
+                                {({ text, styles }) => (
+                                    <button className="btn-sample-wide" style={styles} onClick={onOpenSample} dangerouslySetInnerHTML={{ __html: text }}>
+                                    </button>
+                                )}
+                            </Editable>
+                        </div>
+                    </div>
+                </section>
+            )}
+        </Editable>
     );
 };
 

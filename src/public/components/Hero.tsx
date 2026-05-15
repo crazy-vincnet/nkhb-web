@@ -4,14 +4,14 @@ import { Editable } from './Editable';
 
 const Hero: React.FC = () => {
     return (
-        <Editable k="image_hero_bg" headless>
-            {({ styles, link }) => (
+        <Editable k="section_hero" headless>
+            {({ styles: sMain, link: lMain }) => (
                 <section 
                     className="hero" 
                     id="hero"
                     style={{ 
-                        background: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.5)), url('${link}') center/cover no-repeat`,
-                        ...styles 
+                        background: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.5)), url('${lMain || '/images/main-hero.png'}') center/cover no-repeat`,
+                        ...sMain 
                     }}
                 >
                     <div className="container">

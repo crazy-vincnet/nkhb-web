@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useI18n } from '../lib/i18n';
 import { supabase } from '../lib/supabase';
 import { ChevronDown } from 'lucide-react';
+import { Editable } from './Editable';
 
 interface MenuItem {
     id: string;
@@ -15,7 +16,7 @@ interface MenuItem {
 }
 
 const Header: React.FC = () => {
-    const { lang, setLang, t } = useI18n();
+    const { lang, setLang } = useI18n();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
     const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
@@ -67,9 +68,13 @@ const Header: React.FC = () => {
         <header>
             <nav>
                 <div className="logo">
-                    <Link to="/">
-                        <img src={t('image_logo')} alt={t('alt_logo')} />
-                    </Link>
+                    <Editable k="image_logo" headless>
+                        {({ link }) => (
+                            <Link to="/">
+                                <img src={link} alt="logo" />
+                            </Link>
+                        )}
+                    </Editable>
                 </div>
 
                 <div className={`nav-container ${isMenuOpen ? 'active' : ''}`}>

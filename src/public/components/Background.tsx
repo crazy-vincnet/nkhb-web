@@ -8,71 +8,75 @@ interface BackgroundProps {
 
 const Background: React.FC<BackgroundProps> = ({ onOpenArticle }) => {
     return (
-        <section className="section background" id="background">
-            <div className="container">
-                <div className="content-grid">
-                    <div className="text-content">
-                        <span className="section-tag">01 — Background</span>
-                        
-                        <Editable k="background_title">
-                            {({ text, styles }) => <h2 style={styles} dangerouslySetInnerHTML={{ __html: text }}></h2>}
-                        </Editable>
+        <Editable k="section_background" headless>
+            {({ styles: sectionStyles }) => (
+                <section className="section background" id="background" style={sectionStyles}>
+                    <div className="container">
+                        <div className="content-grid">
+                            <div className="text-content">
+                                <span className="section-tag">01 — Background</span>
+                                
+                                <Editable k="background_title" headless>
+                                    {({ text, styles }) => <h2 style={styles} dangerouslySetInnerHTML={{ __html: text }}></h2>}
+                                </Editable>
 
-                        <Editable k="background_desc1">
-                            {({ text, styles }) => <p className="description" style={styles} dangerouslySetInnerHTML={{ __html: text }}></p>}
-                        </Editable>
+                                <Editable k="background_desc1" headless>
+                                    {({ text, styles }) => <p className="description" style={styles} dangerouslySetInnerHTML={{ __html: text }}></p>}
+                                </Editable>
 
-                        <div className="founder-story">
-                            <Editable k="background_quote">
-                                {({ text, styles }) => <p className="quote" style={styles} dangerouslySetInnerHTML={{ __html: text }}></p>}
-                            </Editable>
-                        </div>
-
-                        <Editable k="background_desc2">
-                            {({ text, styles }) => <p className="description" style={styles} dangerouslySetInnerHTML={{ __html: text }}></p>}
-                        </Editable>
-
-                        <Editable k="background_desc3">
-                            {({ text, styles }) => <p className="description sub-desc" style={styles} dangerouslySetInnerHTML={{ __html: text }}></p>}
-                        </Editable>
-
-                        <div className="action-area">
-                            <Editable k="background_about_nkfi" headless>
-                                {({ text, styles, link }) => (
-                                    <Link to={link || "/about"} className="btn-hero btn-outline" style={styles} dangerouslySetInnerHTML={{ __html: text }}></Link>
-                                )}
-                            </Editable>
-                            
-                            <Editable k="background_read_more" headless>
-                                {({ text, styles }) => (
-                                    <button className="btn-hero btn-outline" style={styles} onClick={onOpenArticle} dangerouslySetInnerHTML={{ __html: text }}>
-                                    </button>
-                                )}
-                            </Editable>
-                        </div>
-                    </div>
-                    
-                    <div className="image-content">
-                        <Editable k="image_background_section">
-                            {({ link, styles }) => (
-                                <div className="image-placeholder" style={styles}>
-                                    <img src={link} alt="background" loading="lazy" />
+                                <div className="founder-story">
+                                    <Editable k="background_quote" headless>
+                                        {({ text, styles }) => <p className="quote" style={styles} dangerouslySetInnerHTML={{ __html: text }}></p>}
+                                    </Editable>
                                 </div>
-                            )}
-                        </Editable>
-                        
-                        <div className="testimonial-box">
-                            <Editable k="background_testimonial_tag">
-                                {({ text, styles }) => <span className="testimonial-tag" style={styles} dangerouslySetInnerHTML={{ __html: text }}></span>}
-                            </Editable>
-                            <Editable k="background_testimonial_text">
-                                {({ text, styles }) => <p className="testimonial-text" style={styles} dangerouslySetInnerHTML={{ __html: text }}></p>}
-                            </Editable>
+
+                                <Editable k="background_desc2" headless>
+                                    {({ text, styles }) => <p className="description" style={styles} dangerouslySetInnerHTML={{ __html: text }}></p>}
+                                </Editable>
+
+                                <Editable k="background_desc3" headless>
+                                    {({ text, styles }) => <p className="description sub-desc" style={styles} dangerouslySetInnerHTML={{ __html: text }}></p>}
+                                </Editable>
+
+                                <div className="action-area">
+                                    <Editable k="background_about_nkfi" headless>
+                                        {({ text, styles, link }) => (
+                                            <Link to={link || "/about"} className="btn-hero btn-outline" style={styles} dangerouslySetInnerHTML={{ __html: text }}></Link>
+                                        )}
+                                    </Editable>
+                                    
+                                    <Editable k="background_read_more" headless>
+                                        {({ text, styles }) => (
+                                            <button className="btn-hero btn-outline" style={styles} onClick={onOpenArticle} dangerouslySetInnerHTML={{ __html: text }}>
+                                            </button>
+                                        )}
+                                    </Editable>
+                                </div>
+                            </div>
+                            
+                            <div className="image-content">
+                                <Editable k="image_background_section" headless>
+                                    {({ link, styles }) => (
+                                        <div className="image-placeholder" style={styles}>
+                                            <img src={link} alt="background" loading="lazy" />
+                                        </div>
+                                    )}
+                                </Editable>
+                                
+                                <div className="testimonial-box">
+                                    <Editable k="background_testimonial_tag" headless>
+                                        {({ text, styles }) => <span className="testimonial-tag" style={styles} dangerouslySetInnerHTML={{ __html: text }}></span>}
+                                    </Editable>
+                                    <Editable k="background_testimonial_text" headless>
+                                        {({ text, styles }) => <p className="testimonial-text" style={styles} dangerouslySetInnerHTML={{ __html: text }}></p>}
+                                    </Editable>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
-        </section>
+                </section>
+            )}
+        </Editable>
     );
 };
 
