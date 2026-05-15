@@ -1,19 +1,21 @@
 import React from 'react';
-import { useI18n } from '../lib/i18n';
 import { Link } from 'react-router-dom';
 import SEO from '../components/SEO';
+import { Editable } from '../components/Editable';
 
 const About: React.FC = () => {
-    const { t } = useI18n();
-
     return (
         <div className="about-page">
             <SEO slug="about" />
             <section className="about-hero">
                 <div className="container">
                     <div className="about-hero-content">
-                        <h1>{t('about_hero_title')}</h1>
-                        <p className="subtitle">{t('about_hero_subtitle')}</p>
+                        <Editable k="about_hero_title">
+                            {({ text, styles }) => <h1 style={styles}>{text}</h1>}
+                        </Editable>
+                        <Editable k="about_hero_subtitle">
+                            {({ text, styles }) => <p className="subtitle" style={styles}>{text}</p>}
+                        </Editable>
                     </div>
                 </div>
             </section>
@@ -22,21 +24,41 @@ const About: React.FC = () => {
                 <section className="section about-intro">
                     <div className="container">
                         <div className="intro-top-banner">
-                            <p className="intro-top-text">{t('about_intro_top')}</p>
+                            <Editable k="about_intro_top">
+                                {({ text, styles }) => <p className="intro-top-text" style={styles}>{text}</p>}
+                            </Editable>
                         </div>
                         <div className="about-intro-grid">
                             <div className="text-content">
-                                <h2>{t('about_intro_title')}</h2>
-                                <p className="description">{t('about_intro_p1')}</p>
-                                <p className="description">{t('about_intro_p2')}</p>
+                                <Editable k="about_intro_title">
+                                    {({ text, styles }) => <h2 style={styles}>{text}</h2>}
+                                </Editable>
+                                <Editable k="about_intro_p1">
+                                    {({ text, styles }) => <p className="description" style={styles}>{text}</p>}
+                                </Editable>
+                                <Editable k="about_intro_p2">
+                                    {({ text, styles }) => <p className="description" style={styles}>{text}</p>}
+                                </Editable>
                                 <ul className="info-list">
-                                    <li>{t('about_intro_info1')}</li>
-                                    <li>{t('about_intro_info2')}</li>
-                                    <li>{t('about_intro_info3')}</li>
+                                    <Editable k="about_intro_info1" as="li">
+                                        {({ text, styles }) => <span style={styles}>{text}</span>}
+                                    </Editable>
+                                    <Editable k="about_intro_info2" as="li">
+                                        {({ text, styles }) => <span style={styles}>{text}</span>}
+                                    </Editable>
+                                    <Editable k="about_intro_info3" as="li">
+                                        {({ text, styles }) => <span style={styles}>{text}</span>}
+                                    </Editable>
                                 </ul>
                             </div>
                             <div className="image-content poster-image">
-                                <img src={t('image_about_poster')} alt={t('alt_poster')} loading="lazy" />
+                                <Editable k="image_about_poster">
+                                    {({ link, styles }) => (
+                                        <div style={styles}>
+                                            <img src={link} alt="poster" loading="lazy" />
+                                        </div>
+                                    )}
+                                </Editable>
                             </div>
                         </div>
                     </div>
@@ -45,20 +67,27 @@ const About: React.FC = () => {
                 <section className="section about-vision bg-alt">
                     <div className="container">
                         <div className="vision-box">
-                            <h3>{t('about_vision_title')}</h3>
-                            <p>{t('about_vision_desc')}</p>
+                            <Editable k="about_vision_title">
+                                {({ text, styles }) => <h3 style={styles}>{text}</h3>}
+                            </Editable>
+                            <Editable k="about_vision_desc">
+                                {({ text, styles }) => <p style={styles}>{text}</p>}
+                            </Editable>
                         </div>
                         
                         <div className="mission-box">
-                            <h3 className="section-title text-center">{t('about_mission_title')}</h3>
-                            <p className="mission-desc text-center">{t('about_mission_desc')}</p>
+                            <Editable k="about_mission_title">
+                                {({ text, styles }) => <h3 className="section-title text-center" style={styles}>{text}</h3>}
+                            </Editable>
+                            <Editable k="about_mission_desc">
+                                {({ text, styles }) => <p className="mission-desc text-center" style={styles}>{text}</p>}
+                            </Editable>
                             <div className="mission-grid">
-                                <div className="mission-item">{t('about_mission_li1')}</div>
-                                <div className="mission-item">{t('about_mission_li2')}</div>
-                                <div className="mission-item">{t('about_mission_li3')}</div>
-                                <div className="mission-item">{t('about_mission_li4')}</div>
-                                <div className="mission-item">{t('about_mission_li5')}</div>
-                                <div className="mission-item">{t('about_mission_li6')}</div>
+                                {[1, 2, 3, 4, 5, 6].map((i) => (
+                                    <Editable k={`about_mission_li${i}`} key={i} className="mission-item">
+                                        {({ text, styles }) => <span style={styles}>{text}</span>}
+                                    </Editable>
+                                ))}
                             </div>
                         </div>
                     </div>
@@ -66,28 +95,23 @@ const About: React.FC = () => {
 
                 <section className="section about-ministry">
                     <div className="container">
-                        <h2 className="section-title text-center">{t('about_ministry_title')}</h2>
+                        <Editable k="about_ministry_title">
+                            {({ text, styles }) => <h2 className="section-title text-center" style={styles}>{text}</h2>}
+                        </Editable>
                         <div className="ministry-grid">
-                            <div className="ministry-card">
-                                <div className="card-icon-svg">📢</div>
-                                <h4>{t('about_ministry_card1_title')}</h4>
-                                <p>{t('about_ministry_card1_desc')}</p>
-                            </div>
-                            <div className="ministry-card">
-                                <div className="card-icon-svg">📖</div>
-                                <h4>{t('about_ministry_card2_title')}</h4>
-                                <p>{t('about_ministry_card2_desc')}</p>
-                            </div>
-                            <div className="ministry-card">
-                                <div className="card-icon-svg">🤝</div>
-                                <h4>{t('about_ministry_card3_title')}</h4>
-                                <p>{t('about_ministry_card3_desc')}</p>
-                            </div>
-                            <div className="ministry-card">
-                                <div className="card-icon-svg">🆘</div>
-                                <h4>{t('about_ministry_card4_title')}</h4>
-                                <p>{t('about_ministry_card4_desc')}</p>
-                            </div>
+                            {[1, 2, 3, 4].map((i) => (
+                                <div className="ministry-card" key={i}>
+                                    <div className="card-icon-svg">
+                                        {i === 1 ? '📢' : i === 2 ? '📖' : i === 3 ? '🤝' : '🆘'}
+                                    </div>
+                                    <Editable k={`about_ministry_card${i}_title`}>
+                                        {({ text, styles }) => <h4 style={styles}>{text}</h4>}
+                                    </Editable>
+                                    <Editable k={`about_ministry_card${i}_desc`}>
+                                        {({ text, styles }) => <p style={styles}>{text}</p>}
+                                    </Editable>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 </section>
@@ -96,21 +120,32 @@ const About: React.FC = () => {
                     <div className="container">
                         <div className="founder-grid">
                             <div className="founder-image">
-                                <img src={t('image_about_kenneth')} alt={t('alt_kenneth')} loading="lazy" />
+                                <Editable k="image_about_kenneth">
+                                    {({ link, styles }) => (
+                                        <div style={styles}>
+                                            <img src={link} alt="Kenneth Bae" loading="lazy" />
+                                        </div>
+                                    )}
+                                </Editable>
                                 <p className="caption">Kenneth Bae | NKFI 대표</p>
                             </div>
                             <div className="founder-info">
-                                <h2>{t('about_founder_title')}</h2>
-                                <h3 className="highlight-title">{t('about_founder_desc_title')}</h3>
+                                <Editable k="about_founder_title">
+                                    {({ text, styles }) => <h2 style={styles}>{text}</h2>}
+                                </Editable>
+                                <Editable k="about_founder_desc_title">
+                                    {({ text, styles }) => <h3 className="highlight-title" style={styles}>{text}</h3>}
+                                </Editable>
                                 <ul className="profile-list">
-                                    <li>{t('about_founder_profile1')}</li>
-                                    <li>{t('about_founder_profile2')}</li>
-                                    <li>{t('about_founder_profile3')}</li>
-                                    <li>{t('about_founder_profile4')}</li>
-                                    <li>{t('about_founder_profile5')}</li>
-                                    <li>{t('about_founder_profile6')}</li>
+                                    {[1, 2, 3, 4, 5, 6].map((i) => (
+                                        <Editable k={`about_founder_profile${i}`} key={i} as="li">
+                                            {({ text, styles }) => <span style={styles}>{text}</span>}
+                                        </Editable>
+                                    ))}
                                 </ul>
-                                <p className="book-info">{t('about_founder_book')}</p>
+                                <Editable k="about_founder_book">
+                                    {({ text, styles }) => <p className="book-info" style={styles}>{text}</p>}
+                                </Editable>
                             </div>
                         </div>
                     </div>
@@ -119,14 +154,24 @@ const About: React.FC = () => {
                 <section className="section about-cta">
                     <div className="container">
                         <div className="cta-box text-center">
-                            <h2>{t('about_cta_title')}</h2>
+                            <Editable k="about_cta_title">
+                                {({ text, styles }) => <h2 style={styles}>{text}</h2>}
+                            </Editable>
                             <div className="cta-buttons">
-                                <a href="https://nkfi.org" target="_blank" rel="noopener noreferrer" className="btn-hero btn-fill-accent">
-                                    {t('about_cta_website')}
-                                </a>
-                                <Link to="/" className="btn-outline-dark">
-                                    {t('about_cta_home')}
-                                </Link>
+                                <Editable k="about_cta_website" className="inline-block">
+                                    {({ text, styles, link }) => (
+                                        <a href={link || "https://nkfi.org"} target="_blank" rel="noopener noreferrer" className="btn-hero btn-fill-accent" style={styles}>
+                                            {text}
+                                        </a>
+                                    )}
+                                </Editable>
+                                <Editable k="about_cta_home" className="inline-block ml-4">
+                                    {({ text, styles, link }) => (
+                                        <Link to={link || "/"} className="btn-outline-dark" style={styles}>
+                                            {text}
+                                        </Link>
+                                    )}
+                                </Editable>
                             </div>
                         </div>
                     </div>
