@@ -27,9 +27,16 @@ const App: React.FC = () => {
                 <div className={`app-container ${lang}`}>
                     <Header />
                     <Routes>
+                        {/* Standard Routes */}
                         <Route path="/" element={<Home />} />
                         <Route path="/about" element={<About />} />
                         <Route path="/p/:slug" element={<DynamicPage />} />
+
+                        {/* English Routes (/en) */}
+                        <Route path="/en" element={<Home />} />
+                        <Route path="/en/about" element={<About />} />
+                        <Route path="/en/p/:slug" element={<DynamicPage />} />
+
                         <Route path="*" element={<Navigate to="/" replace />} />
                     </Routes>
                     <Footer />

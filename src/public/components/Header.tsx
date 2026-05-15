@@ -68,7 +68,7 @@ const Header: React.FC = () => {
         <header>
             <nav>
                 <div className="logo">
-                    <Editable k="image_logo" headless>
+                    <Editable k="logo_url" headless>
                         {({ link }) => (
                             <Link to="/">
                                 <img src={link} alt="logo" />
