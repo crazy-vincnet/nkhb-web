@@ -35,6 +35,8 @@ interface StyleProps {
   borderRadius?: string;
   borderWidth?: string;
   borderColor?: string;
+  width?: string;
+  height?: string;
   link?: string;
   [key: string]: any;
 }
@@ -587,6 +589,18 @@ const Content = () => {
                                     <span className="text-[9px] font-black text-gray-400 ml-1">MARGIN</span>
                                     <input type="text" value={selectedItem.style_props?.margin || ''} placeholder={computedStyles?.margin} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, margin: e.target.value } })} className="w-full p-3 bg-gray-50 border-none rounded-xl text-xs font-bold shadow-inner" onBlur={handlePushHistory} />
                                 </div>
+                                {isImageKey && (
+                                    <>
+                                        <div className="space-y-2">
+                                            <span className="text-[9px] font-black text-gray-400 ml-1 uppercase">Width</span>
+                                            <input type="text" value={selectedItem.style_props?.width || ''} placeholder={computedStyles?.width || 'auto'} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, width: e.target.value } })} className="w-full p-3 bg-gray-50 border-none rounded-xl text-xs font-bold shadow-inner" onBlur={handlePushHistory} />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <span className="text-[9px] font-black text-gray-400 ml-1 uppercase">Height</span>
+                                            <input type="text" value={selectedItem.style_props?.height || ''} placeholder={computedStyles?.height || 'auto'} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, height: e.target.value } })} className="w-full p-3 bg-gray-50 border-none rounded-xl text-xs font-bold shadow-inner" onBlur={handlePushHistory} />
+                                        </div>
+                                    </>
+                                )}
                             </div>
                         </div>
 
