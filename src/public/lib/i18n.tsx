@@ -232,20 +232,26 @@ export const I18nProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     // 3. Third Priority: Stored Preference
     const savedLang = localStorage.getItem('lang') as Language;
     
+    let targetLang: Language | null = null;
+
     if (langParam === 'en' || isEnPath) {
-      if (lang !== 'en') {
-        setLangState('en');
-        localStorage.setItem('lang', 'en');
-      }
+        targetLang = 'en';
     } else if (langParam === 'ko') {
-      if (lang !== 'ko') {
-        setLangState('ko');
-        localStorage.setItem('lang', 'ko');
-      }
-    } else if (savedLang && lang !== savedLang) {
-      setLangState(savedLang);
+        targetLang = 'ko';
+    } else if (savedLang) {
+        targetLang = savedLang;
     }
-  }, [lang]);
+
+    if (targetLang) {
+        setLangState(current => {
+            if (current !== targetLang) {
+                localStorage.setItem('lang', targetLang!);
+                return targetLang!;
+            }
+            return current;
+        });
+    }
+  }, []);
 
   useEffect(() => {
     detectLanguage();

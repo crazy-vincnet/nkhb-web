@@ -492,7 +492,7 @@ const Content = () => {
             <div className={`transition-all duration-700 ease-in-out shadow-2xl bg-white ${previewMode === 'desktop' ? 'w-full h-full' : 'w-[375px] h-[667px] my-8 rounded-[2rem] border-[8px] border-gray-900 overflow-hidden'}`}>
                 <iframe 
                     ref={iframeRef} 
-                    src={`${currentPage}${currentPage.includes('?') ? '&' : '?'}lang=${editorLang}&t=${Date.now()}`} 
+                    src={`${currentPage}${currentPage.includes('?') ? '&' : '?'}lang=${editorLang}`} 
                     className="w-full h-full border-none" 
                     title="Site Preview" 
                 />
