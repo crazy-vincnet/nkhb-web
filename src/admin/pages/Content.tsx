@@ -223,7 +223,7 @@ const Content = () => {
     if (iframeRef.current?.contentWindow) {
       iframeRef.current.contentWindow.postMessage({
         type: 'NKHB_LIVE_THEME_UPDATE',
-        data: newSettings
+        theme: newSettings
       }, '*');
     }
   };
