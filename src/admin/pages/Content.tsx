@@ -14,7 +14,6 @@ import {
   ChevronLeft,
   X,
   ExternalLink,
-  Upload,
   ImageIcon,
   Layout as LayoutIcon,
   Info
@@ -119,14 +118,14 @@ const Content = () => {
     }
   };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLanguageFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: 'value_ko' | 'value_en') => {
     const file = e.target.files?.[0];
     if (!file || !selectedKey) return;
 
     setUploading(true);
     try {
         const fileExt = file.name.split('.').pop();
-        const fileName = `${selectedKey}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+        const fileName = `${selectedKey}-${field}-${Math.random().toString(36).substring(2)}.${fileExt}`;
         const filePath = `site-assets/${fileName}`;
 
         const { error: uploadError } = await supabase.storage
@@ -139,11 +138,8 @@ const Content = () => {
             .from('images')
             .getPublicUrl(filePath);
 
-        updateItem(selectedKey, { 
-            style_props: { ...selectedItem?.style_props, link: publicUrl } 
-        });
-        
-        alert('이미지가 업로드되었습니다.');
+        updateItem(selectedKey, { [field]: publicUrl });
+        alert(`${field === 'value_ko' ? '한국어' : '영어'} 이미지가 업로드되었습니다.`);
     } catch (err: any) {
         alert('업로드 실패: ' + err.message);
     } finally {
@@ -258,20 +254,35 @@ const Content = () => {
                     </div>
 
                     <div className="space-y-4">
-                        <label className="text-[11px] font-black text-indigo-600 flex items-center gap-2 bg-indigo-50 px-3 py-1.5 rounded-full w-fit">{isImageKey ? <ImageIcon className="w-3.5 h-3.5" /> : <LinkIcon className="w-3.5 h-3.5" />} {isImageKey ? 'IMAGE ASSET' : 'LINK / URL'}</label>
+                        <label className="text-[11px] font-black text-indigo-600 flex items-center gap-2 bg-indigo-50 px-3 py-1.5 rounded-full w-fit">{isImageKey ? <ImageIcon className="w-3.5 h-3.5" /> : <LinkIcon className="w-3.5 h-3.5" />} {isImageKey ? 'BILINGUAL IMAGE ASSETS' : 'LINK / URL'}</label>
                         {isImageKey ? (
-                            <div className="space-y-4">
-                                {selectedItem.style_props?.link && (
-                                    <div className="w-full aspect-video bg-gray-50 rounded-2xl overflow-hidden border border-gray-100 flex items-center justify-center">
-                                        <img src={selectedItem.style_props.link} alt="Preview" className="max-h-full max-w-full object-contain" />
+                            <div className="grid grid-cols-1 gap-6">
+                                {/* Korean Image */}
+                                <div className="space-y-3">
+                                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">KOREAN LOGO / IMAGE</span>
+                                    <div className="w-full aspect-video bg-gray-50 rounded-2xl overflow-hidden border border-gray-100 flex items-center justify-center relative group/img">
+                                        {selectedItem.value_ko ? <img src={selectedItem.value_ko} alt="KO Preview" className="max-h-full max-w-full object-contain" /> : <ImageIcon className="text-gray-200 w-12 h-12" />}
+                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
+                                            <label className={`bg-white text-gray-900 px-4 py-2 rounded-xl text-[10px] font-black cursor-pointer shadow-xl transform translate-y-2 group-hover/img:translate-y-0 transition-transform flex items-center gap-2 ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                                                {uploading ? <Loader2 className="w-3 h-3 animate-spin" /> : 'CHANGE KO IMAGE'}
+                                                <input type="file" className="hidden" accept="image/*" onChange={(e) => handleLanguageFileUpload(e, 'value_ko')} />
+                                            </label>
+                                        </div>
                                     </div>
-                                )}
-                                <label className={`flex items-center justify-center gap-2 w-full p-4 bg-gray-900 text-white rounded-2xl text-sm font-black cursor-pointer hover:bg-gray-800 transition-all ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
-                                    {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-                                    이미지 업로드
-                                    <input type="file" className="hidden" accept="image/*" onChange={handleFileUpload} />
-                                </label>
-                                <p className="text-[9px] text-gray-400 text-center uppercase font-bold tracking-widest">Recommended: PNG, JPG (Max 5MB)</p>
+                                </div>
+                                {/* English Image */}
+                                <div className="space-y-3">
+                                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">ENGLISH LOGO / IMAGE</span>
+                                    <div className="w-full aspect-video bg-gray-50 rounded-2xl overflow-hidden border border-gray-100 flex items-center justify-center relative group/img">
+                                        {selectedItem.value_en ? <img src={selectedItem.value_en} alt="EN Preview" className="max-h-full max-w-full object-contain" /> : <ImageIcon className="text-gray-200 w-12 h-12" />}
+                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
+                                            <label className={`bg-white text-gray-900 px-4 py-2 rounded-xl text-[10px] font-black cursor-pointer shadow-xl transform translate-y-2 group-hover/img:translate-y-0 transition-transform flex items-center gap-2 ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                                                {uploading ? <Loader2 className="w-3 h-3 animate-spin" /> : 'CHANGE EN IMAGE'}
+                                                <input type="file" className="hidden" accept="image/*" onChange={(e) => handleLanguageFileUpload(e, 'value_en')} />
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         ) : (
                             <div className="relative group">

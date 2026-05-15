@@ -234,6 +234,9 @@ export const I18nProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const baseText = lang === 'ko' ? (item?.value_ko || (staticTranslations as any).ko?.[key]) : (item?.value_en || (staticTranslations as any).en?.[key]);
     const baseStyles = item?.style_props || {};
     
+    // Support bilingual links (e.g. logo_ko.png and logo_en.png)
+    const baseLink = lang === 'ko' ? item?.value_ko : item?.value_en;
+
     // Only fallback to static translations if it looks like a URL or a known link key
     const staticLink = (staticTranslations as any).en?.[key] || (staticTranslations as any).ko?.[key];
     const isUrl = typeof staticLink === 'string' && (staticLink.startsWith('http') || staticLink.startsWith('/') || staticLink.startsWith('#'));
@@ -241,7 +244,7 @@ export const I18nProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return {
       text: (live?.text ?? baseText) || key,
       styles: { ...baseStyles, ...live?.styles },
-      link: live?.link ?? baseStyles.link ?? item?.link_url ?? (isUrl ? staticLink : undefined)
+      link: live?.link ?? baseStyles.link ?? (isUrl && !item?.value_ko ? staticLink : baseLink)
     };
   }, [dbContent, liveChanges, lang]);
 
