@@ -317,17 +317,27 @@ const Content = () => {
     setItems(prev => prev.map(i => i.key === key ? { ...i, ...updates } : i));
     setModifiedIds(prev => new Set(prev).add(key));
 
-    const item = items.find(i => i.key === key);
-    if (!item) return;
+    // Use ref to get the absolute latest state to avoid race conditions with functional updates
+    const currentItem = itemsRef.current.find(i => i.key === key);
+    if (!currentItem) return;
+
+    const isImg = isImageKey;
 
     if (iframeRef.current?.contentWindow) {
+      // Merge current state with new updates for the message payload
+      const nextItem = { ...currentItem, ...updates };
+      
       iframeRef.current.contentWindow.postMessage({
         type: 'NKHB_LIVE_UPDATE',
         key,
         data: {
-            text: updates.value_ko ?? updates.value_en ?? (item.value_ko || item.value_en),
-            styles: updates.style_props || item.style_props,
-            link: (updates.style_props || item.style_props)?.link
+            text: nextItem.value_ko || nextItem.value_en,
+            styles: nextItem.style_props,
+            // For images, detect which value to send based on current preview state if possible,
+            // but usually we want to reflect what the user just changed.
+            link: isImg 
+                ? (updates.value_ko || updates.value_en || nextItem.value_ko || nextItem.value_en)
+                : (nextItem.style_props?.link || nextItem.value_ko || nextItem.value_en)
         }
       }, '*');
     }
