@@ -221,20 +221,27 @@ export const I18nProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [loading, setLoading] = useState(true);
 
   const detectLanguage = useCallback(() => {
-    // 1. Detect from URL path (e.g., /en, /en/about)
+    // 1. Highest Priority: Query Parameter (explicit intent)
+    const urlParams = new URLSearchParams(window.location.search);
+    const langParam = urlParams.get('lang')?.toLowerCase();
+    
+    // 2. Second Priority: URL Path (/en)
     const path = window.location.pathname.toLowerCase();
     const isEnPath = path === '/en' || path.startsWith('/en/');
     
-    // 2. Detect from Query Parameter (e.g., ?lang=en)
-    const urlParams = new URLSearchParams(window.location.search);
-    const langParam = urlParams.get('lang')?.toLowerCase();
-    const isEnParam = langParam === 'en';
-    
-    // 3. Fallback to saved preference
+    // 3. Third Priority: Stored Preference
     const savedLang = localStorage.getItem('lang') as Language;
     
-    if (isEnPath || isEnParam) {
-      if (lang !== 'en') setLangState('en');
+    if (langParam === 'en' || isEnPath) {
+      if (lang !== 'en') {
+        setLangState('en');
+        localStorage.setItem('lang', 'en');
+      }
+    } else if (langParam === 'ko') {
+      if (lang !== 'ko') {
+        setLangState('ko');
+        localStorage.setItem('lang', 'ko');
+      }
     } else if (savedLang && lang !== savedLang) {
       setLangState(savedLang);
     }
@@ -244,11 +251,11 @@ export const I18nProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     detectLanguage();
     fetchContent();
 
-    // Listen for path changes (SPA or manual)
+    // Listen for all possible navigation events
     window.addEventListener('popstate', detectLanguage);
+    window.addEventListener('hashchange', detectLanguage);
     
     const handleMessage = (event: MessageEvent) => {
-      // ... same message handler logic
       if (event.data?.type === 'NKHB_LIVE_UPDATE') {
         const { key, data } = event.data;
         setLiveChanges(prev => ({
@@ -264,8 +271,12 @@ export const I18nProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
     };
     window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
-  }, []);
+    return () => {
+        window.removeEventListener('popstate', detectLanguage);
+        window.removeEventListener('hashchange', detectLanguage);
+        window.removeEventListener('message', handleMessage);
+    };
+  }, [detectLanguage]);
 
   useEffect(() => {
     if (liveChanges['global_theme_settings']?.styles) {
@@ -290,10 +301,14 @@ export const I18nProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const item = dbContent.find(i => i.key === key);
     const live = liveChanges[key];
 
-    const baseText = lang === 'ko' ? (item?.value_ko || (staticTranslations as any).ko?.[key]) : (item?.value_en || (staticTranslations as any).en?.[key]);
+    // Priority 1: Current language value from database
+    const dbValue = lang === 'ko' ? item?.value_ko : item?.value_en;
     
-    // CRITICAL: Only apply styles that are explicitly set in DB or Live Changes.
-    // Do NOT include default computed styles here to avoid overriding CSS classes.
+    // Priority 2: Static fallback from code
+    const staticValue = lang === 'ko' ? (staticTranslations as any).ko?.[key] : (staticTranslations as any).en?.[key];
+    
+    const baseText = dbValue || staticValue || key;
+    
     const dbStyles = item?.style_props || {};
     const liveStyles = live?.styles || {};
     
@@ -304,29 +319,24 @@ export const I18nProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (activeStyles[k] && k !== 'link') (styles as any)[k] = activeStyles[k];
     });
 
-    // Support bilingual links and assets (e.g. logo_ko.png and logo_en.png)
-    const baseLink = lang === 'ko' ? item?.value_ko : item?.value_en;
-    const hasDbAsset = !!baseLink;
-
-    // Only fallback to static translations if it looks like a URL or a known link key
-    const staticLink = (staticTranslations as any).en?.[key] || (staticTranslations as any).ko?.[key];
-    const isUrl = typeof staticLink === 'string' && (staticLink.startsWith('http') || staticLink.startsWith('/') || staticLink.startsWith('#'));
-
-    // Priority for links/assets:
-    // 1. Live unsaved changes (live.link)
-    // 2. Explicit DB asset for current language (baseLink)
-    // 3. Fallback link in style_props.link
-    // 4. Static fallback if key is a URL
+    // Special Priority for Links/Assets (like logo_url)
+    // 1. Live unsaved change in editor (live.link)
+    // 2. Direct language-specific DB value (dbValue)
+    // 3. Fallback link in style_props (activeStyles.link)
+    // 4. Static fallback
     let finalLink = live?.link;
     if (!finalLink) {
-        if (hasDbAsset) finalLink = baseLink;
-        else if (dbStyles.link) finalLink = dbStyles.link;
-        else if (isUrl) finalLink = staticLink;
-        else finalLink = baseLink; // last resort
+        if (dbValue && (dbValue.startsWith('http') || dbValue.startsWith('/') || dbValue.startsWith('#'))) {
+            finalLink = dbValue;
+        } else if (activeStyles.link) {
+            finalLink = activeStyles.link;
+        } else if (staticValue && (staticValue.startsWith('http') || staticValue.startsWith('/') || staticValue.startsWith('#'))) {
+            finalLink = staticValue;
+        }
     }
 
     return {
-      text: (live?.text ?? baseText) || key,
+      text: (live?.text ?? baseText),
       styles,
       link: finalLink
     };
