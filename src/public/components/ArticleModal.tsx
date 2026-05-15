@@ -1,5 +1,5 @@
 import React from 'react';
-import { useI18n } from '../lib/i18n';
+import { Editable } from './Editable';
 
 interface ArticleModalProps {
     isOpen: boolean;
@@ -7,39 +7,39 @@ interface ArticleModalProps {
 }
 
 const ArticleModal: React.FC<ArticleModalProps> = ({ isOpen, onClose }) => {
-    const { t } = useI18n();
-
     if (!isOpen) return null;
 
     return (
         <div className="modal active" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
             <div className="modal-content wide">
                 <div className="modal-header">
-                    <h3>{t('article_modal_title')}</h3>
-                    <button className="close-modal-article" aria-label={t('alt_close')} onClick={onClose}>&times;</button>
+                    <Editable k="article_modal_title">
+                        {({ text, styles }) => <h3 style={styles}>{text}</h3>}
+                    </Editable>
+                    <button className="close-modal-article" onClick={onClose}>&times;</button>
                 </div>
                 <div className="modal-body-article">
                     <div className="article-content-inner">
-                        <p>{t('article_p1')}</p>
-                        <p>{t('article_p2')}</p>
+                        <Editable k="article_p1">{({ text, styles }) => <p style={styles}>{text}</p>}</Editable>
+                        <Editable k="article_p2">{({ text, styles }) => <p style={styles}>{text}</p>}</Editable>
 
                         <div className="article-quote-box">
-                            <p>{t('article_quote1')}</p>
+                            <Editable k="article_quote1">{({ text, styles }) => <p style={styles}>{text}</p>}</Editable>
                         </div>
 
-                        <p>{t('article_p3')}</p>
-                        <p>{t('article_p4')}</p>
-                        <p>{t('article_p5')}</p>
+                        <Editable k="article_p3">{({ text, styles }) => <p style={styles}>{text}</p>}</Editable>
+                        <Editable k="article_p4">{({ text, styles }) => <p style={styles}>{text}</p>}</Editable>
+                        <Editable k="article_p5">{({ text, styles }) => <p style={styles}>{text}</p>}</Editable>
 
                         <div className="article-quote-box">
-                            <p>{t('article_quote2')}</p>
+                            <Editable k="article_quote2">{({ text, styles }) => <p style={styles}>{text}</p>}</Editable>
                         </div>
 
-                        <p>{t('article_p6')}</p>
-                        <p>{t('article_p7')}</p>
-                        <p>{t('article_p8')}</p>
+                        <Editable k="article_p6">{({ text, styles }) => <p style={styles}>{text}</p>}</Editable>
+                        <Editable k="article_p7">{({ text, styles }) => <p style={styles}>{text}</p>}</Editable>
+                        <Editable k="article_p8">{({ text, styles }) => <p style={styles}>{text}</p>}</Editable>
 
-                        <p dangerouslySetInnerHTML={{ __html: t('article_p9') }}></p>
+                        <Editable k="article_p9">{({ text, styles }) => <p style={styles} dangerouslySetInnerHTML={{ __html: text }}></p>}</Editable>
                     </div>
                 </div>
             </div>

@@ -1,22 +1,28 @@
 import React from 'react';
-import { useI18n } from '../lib/i18n';
+import { Editable } from './Editable';
 
 const Footer: React.FC = () => {
-    const { t } = useI18n();
-
     return (
         <footer className="footer">
             <div className="container">
                 <div className="footer-content">
                     <div className="footer-logo">
-                        <img src={t('image_logo')} alt={t('alt_logo')} loading="lazy" />
+                        <Editable k="image_logo">
+                            {({ link }) => <img src={link} alt="logo" loading="lazy" />}
+                        </Editable>
                     </div>
                     <div className="footer-info">
-                        <p>{t('footer_contact')}</p>
-                        <p>{t('footer_schedule')}</p>
+                        <Editable k="footer_contact">
+                            {({ text, styles }) => <p style={styles}>{text}</p>}
+                        </Editable>
+                        <Editable k="footer_schedule">
+                            {({ text, styles }) => <p style={styles}>{text}</p>}
+                        </Editable>
                     </div>
                     <div className="footer-bottom">
-                        <p dangerouslySetInnerHTML={{ __html: t('footer_copyright') }}></p>
+                        <Editable k="footer_copyright">
+                            {({ text, styles }) => <p style={styles} dangerouslySetInnerHTML={{ __html: text }}></p>}
+                        </Editable>
                     </div>
                 </div>
             </div>

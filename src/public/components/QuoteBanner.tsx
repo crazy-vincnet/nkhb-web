@@ -1,14 +1,14 @@
 import React from 'react';
-import { useI18n } from '../lib/i18n';
+import { Editable } from './Editable';
 
 const QuoteBanner: React.FC = () => {
-    const { t } = useI18n();
-
     return (
         <div className="quote-banner">
             <div className="banner-overlay"></div>
             <div className="banner-text">
-                <p dangerouslySetInnerHTML={{ __html: t('quote_banner_text') }}></p>
+                <Editable k="quote_banner_text">
+                    {({ text, styles }) => <p style={styles} dangerouslySetInnerHTML={{ __html: text }}></p>}
+                </Editable>
             </div>
         </div>
     );

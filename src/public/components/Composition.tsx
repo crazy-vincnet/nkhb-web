@@ -1,53 +1,46 @@
 import React from 'react';
-import { useI18n } from '../lib/i18n';
+import { Editable } from './Editable';
 
 interface CompositionProps {
     onOpenSample: () => void;
 }
 
 const Composition: React.FC<CompositionProps> = ({ onOpenSample }) => {
-    const { t } = useI18n();
-
     return (
         <section className="section composition" id="composition">
             <div className="container">
                 <div className="section-header">
                     <span className="section-tag">02 — Program Structure</span>
-                    <h2>{t('composition_title')}</h2>
-                    <p className="description">{t('composition_desc')}</p>
+                    <Editable k="composition_title">
+                        {({ text, styles }) => <h2 style={styles}>{text}</h2>}
+                    </Editable>
+                    <Editable k="composition_desc">
+                        {({ text, styles }) => <p className="description" style={styles}>{text}</p>}
+                    </Editable>
                 </div>
 
                 <div className="theme-grid">
-                    <div className="theme-card">
-                        <div className="card-num">1</div>
-                        <h3>{t('composition_card1_title')}</h3>
-                        <p>{t('composition_card1_desc')}</p>
-                    </div>
-                    <div className="theme-card">
-                        <div className="card-num">2</div>
-                        <h3>{t('composition_card2_title')}</h3>
-                        <p>{t('composition_card2_desc')}</p>
-                    </div>
-                    <div className="theme-card">
-                        <div className="card-num">3</div>
-                        <h3>{t('composition_card3_title')}</h3>
-                        <p>{t('composition_card3_desc')}</p>
-                    </div>
-                    <div className="theme-card">
-                        <div className="card-num">4</div>
-                        <h3>{t('composition_card4_title')}</h3>
-                        <p>{t('composition_card4_desc')}</p>
-                    </div>
+                    {[1, 2, 3, 4].map(num => (
+                        <div className="theme-card" key={num}>
+                            <div className="card-num">{num}</div>
+                            <Editable k={`composition_card${num}_title`}>
+                                {({ text, styles }) => <h3 style={styles}>{text}</h3>}
+                            </Editable>
+                            <Editable k={`composition_card${num}_desc`}>
+                                {({ text, styles }) => <p style={styles}>{text}</p>}
+                            </Editable>
+                        </div>
+                    ))}
                 </div>
 
                 <div className="composition-action">
-                    <button 
-                        id="open-sample-modal" 
-                        className="btn-sample-wide"
-                        onClick={onOpenSample}
-                    >
-                        {t('composition_button_sample')}
-                    </button>
+                    <Editable k="composition_button_sample">
+                        {({ text, styles }) => (
+                            <button className="btn-sample-wide" style={styles} onClick={onOpenSample}>
+                                {text}
+                            </button>
+                        )}
+                    </Editable>
                 </div>
             </div>
         </section>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useI18n } from '../lib/i18n';
 import { supabase } from '../lib/supabase';
+import { Editable } from './Editable';
 
 interface LetterModalProps {
     isOpen: boolean;
@@ -8,7 +9,7 @@ interface LetterModalProps {
 }
 
 const LetterModal: React.FC<LetterModalProps> = ({ isOpen, onClose }) => {
-    const { t, lang } = useI18n();
+    const { lang } = useI18n();
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     if (!isOpen) return null;
@@ -27,14 +28,12 @@ const LetterModal: React.FC<LetterModalProps> = ({ isOpen, onClose }) => {
         };
 
         try {
-            // 1. Save to Supabase (Database Backup)
             const { error: dbError } = await supabase
                 .from('letters')
                 .insert([data]);
 
             if (dbError) throw dbError;
 
-            // 2. Send via Server API (Real-time Notification)
             const response = await fetch('/api/send-email', {
                 method: 'POST',
                 headers: {
@@ -64,38 +63,62 @@ const LetterModal: React.FC<LetterModalProps> = ({ isOpen, onClose }) => {
         <div className="modal active" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
             <div className="modal-content">
                 <div className="modal-header">
-                    <h3>{t('letter_modal_title')}</h3>
-                    <button className="close-modal" aria-label={t('alt_close')} onClick={onClose}>&times;</button>
+                    <Editable k="letter_modal_title">
+                        {({ text, styles }) => <h3 style={styles}>{text}</h3>}
+                    </Editable>
+                    <button className="close-modal" onClick={onClose}>&times;</button>
                 </div>
                 <form id="letter-form" onSubmit={handleSubmit}>
                     <div className="form-group-row">
                         <div className="form-group">
-                            <label htmlFor="user-name">{t('letter_modal_label_name')}</label>
-                            <input type="text" id="user-name" name="name" placeholder={t('letter_modal_placeholder_name')} required />
+                            <Editable k="letter_modal_label_name">
+                                {({ text, styles }) => <label style={styles}>{text}</label>}
+                            </Editable>
+                            <Editable k="letter_modal_placeholder_name">
+                                {({ text }) => <input type="text" name="name" placeholder={text} required />}
+                            </Editable>
                         </div>
                         <div className="form-group">
-                            <label htmlFor="user-location">{t('letter_modal_label_location')}</label>
-                            <input type="text" id="user-location" name="location" placeholder={t('letter_modal_placeholder_location')} required />
+                            <Editable k="letter_modal_label_location">
+                                {({ text, styles }) => <label style={styles}>{text}</label>}
+                            </Editable>
+                            <Editable k="letter_modal_placeholder_location">
+                                {({ text }) => <input type="text" name="location" placeholder={text} required />}
+                            </Editable>
                         </div>
                     </div>
                     <div className="form-group">
-                        <label htmlFor="user-reason">{t('letter_modal_label_reason')}</label>
-                        <input type="text" id="user-reason" name="reason" placeholder={t('letter_modal_placeholder_reason')} required />
+                        <Editable k="letter_modal_label_reason">
+                            {({ text, styles }) => <label style={styles}>{text}</label>}
+                        </Editable>
+                        <Editable k="letter_modal_placeholder_reason">
+                            {({ text }) => <input type="text" name="reason" placeholder={text} required />}
+                        </Editable>
                     </div>
                     <div className="form-group">
-                        <label htmlFor="user-email">{t('letter_modal_label_email')}</label>
-                        <input type="email" id="user-email" name="email" placeholder="답변을 받으실 이메일 주소를 입력해주세요" required />
+                        <Editable k="letter_modal_label_email">
+                            {({ text, styles }) => <label style={styles}>{text}</label>}
+                        </Editable>
+                        <input type="email" name="email" placeholder="답변을 받으실 이메일 주소를 입력해주세요" required />
                     </div>
                     <div className="form-group">
-                        <label htmlFor="user-message">{t('letter_modal_label_message')}</label>
-                        <textarea id="user-message" name="message" rows={8}
-                            placeholder={t('letter_modal_placeholder_message')}
-                            required></textarea>
+                        <Editable k="letter_modal_label_message">
+                            {({ text, styles }) => <label style={styles}>{text}</label>}
+                        </Editable>
+                        <Editable k="letter_modal_placeholder_message">
+                            {({ text }) => <textarea name="message" rows={8} placeholder={text} required></textarea>}
+                        </Editable>
                     </div>
                     <div className="form-footer">
-                        <p className="form-note">{t('letter_modal_footer_note')}</p>
+                        <Editable k="letter_modal_footer_note">
+                            {({ text, styles }) => <p className="form-note" style={styles}>{text}</p>}
+                        </Editable>
                         <button type="submit" className="btn-submit" disabled={isSubmitting}>
-                            {isSubmitting ? (lang === 'en' ? 'Sending...' : '전송 중...') : t('letter_modal_button_submit')}
+                            {isSubmitting ? (lang === 'en' ? 'Sending...' : '전송 중...') : (
+                                <Editable k="letter_modal_button_submit">
+                                    {({ text, styles }) => <span style={styles}>{text}</span>}
+                                </Editable>
+                            )}
                         </button>
                     </div>
                 </form>
