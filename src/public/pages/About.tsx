@@ -95,19 +95,19 @@ const About: React.FC = () => {
 
                 <section className="section about-ministry">
                     <div className="container">
-                        <Editable k="about_ministry_title">
+                        <Editable k="about_ministry_title" headless>
                             {({ text, styles }) => <h2 className="section-title text-center" style={styles} dangerouslySetInnerHTML={{ __html: text }}></h2>}
                         </Editable>
                         <div className="ministry-grid">
                             {[1, 2, 3, 4].map((i) => (
                                 <div className="ministry-card" key={i}>
-                                    <div className="card-icon-svg">
+                                    <div className="card-icon-svg" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto 20px' }}>
                                         {i === 1 ? '📢' : i === 2 ? '📖' : i === 3 ? '🤝' : '🆘'}
                                     </div>
-                                    <Editable k={`about_ministry_card${i}_title`}>
+                                    <Editable k={`about_ministry_card${i}_title`} headless>
                                         {({ text, styles }) => <h4 style={styles} dangerouslySetInnerHTML={{ __html: text }}></h4>}
                                     </Editable>
-                                    <Editable k={`about_ministry_card${i}_desc`}>
+                                    <Editable k={`about_ministry_card${i}_desc`} headless>
                                         {({ text, styles }) => <p style={styles} dangerouslySetInnerHTML={{ __html: text }}></p>}
                                     </Editable>
                                 </div>
