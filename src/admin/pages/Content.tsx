@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { SECTION_LABELS, HOME_DEFAULT_LAYOUT, ABOUT_DEFAULT_LAYOUT } from '../../public/lib/registry';
 import { useHistory } from '../lib/useHistory';
+import { optimizeImage } from '../lib/imageOptimizer';
 
 interface StyleProps {
   fontSize?: string;
@@ -55,7 +56,7 @@ const Content = () => {
   const [currentPage, setCurrentPage] = useState<string>('/');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState(false);
+  const [uploading, setUploading] = useState<boolean | string>(false);
   const [modifiedKeys, setModifiedIds] = useState<Set<string>>(new Set());
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeTab, setActiveTab] = useState<'properties' | 'structure' | 'theme'>('properties');
@@ -336,15 +337,22 @@ const Content = () => {
     const file = e.target.files?.[0];
     if (!file || !selectedKey) return;
 
-    setUploading(true);
+    setUploading('OPTIMIZING...');
     try {
-        const fileExt = file.name.split('.').pop();
+        const result = await optimizeImage(file);
+        
+        setUploading('UPLOADING...');
+        const isOptimized = result.type === 'image/webp';
+        const fileExt = isOptimized ? 'webp' : file.name.split('.').pop();
         const fileName = `${selectedKey}-${field}-${Math.random().toString(36).substring(2)}.${fileExt}`;
         const filePath = `site-assets/${fileName}`;
 
         const { error: uploadError } = await supabase.storage
             .from('images')
-            .upload(filePath, file);
+            .upload(filePath, result, {
+                contentType: result.type,
+                upsert: true
+            });
 
         if (uploadError) throw uploadError;
 
@@ -509,7 +517,12 @@ const Content = () => {
                                             {selectedItem.value_ko ? <img src={selectedItem.value_ko} alt="KO Preview" className="max-h-full max-w-full object-contain" /> : <ImageIcon className="text-gray-200 w-12 h-12" />}
                                             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
                                                 <label className={`bg-white text-gray-900 px-4 py-2 rounded-xl text-[10px] font-black cursor-pointer shadow-xl transform translate-y-2 group-hover/img:translate-y-0 transition-transform flex items-center gap-2 ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
-                                                    {uploading ? <Loader2 className="w-3 h-3 animate-spin" /> : 'CHANGE KO IMAGE'}
+                                                    {uploading ? (
+                                                        <>
+                                                            <Loader2 className="w-3 h-3 animate-spin" />
+                                                            {typeof uploading === 'string' ? uploading : 'UPLOADING...'}
+                                                        </>
+                                                    ) : 'CHANGE KO IMAGE'}
                                                     <input type="file" className="hidden" accept="image/*" onChange={(e) => handleLanguageFileUpload(e, 'value_ko')} />
                                                 </label>
                                             </div>
@@ -522,7 +535,12 @@ const Content = () => {
                                             {selectedItem.value_en ? <img src={selectedItem.value_en} alt="EN Preview" className="max-h-full max-w-full object-contain" /> : <ImageIcon className="text-gray-200 w-12 h-12" />}
                                             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
                                                 <label className={`bg-white text-gray-900 px-4 py-2 rounded-xl text-[10px] font-black cursor-pointer shadow-xl transform translate-y-2 group-hover/img:translate-y-0 transition-transform flex items-center gap-2 ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
-                                                    {uploading ? <Loader2 className="w-3 h-3 animate-spin" /> : 'CHANGE EN IMAGE'}
+                                                    {uploading ? (
+                                                        <>
+                                                            <Loader2 className="w-3 h-3 animate-spin" />
+                                                            {typeof uploading === 'string' ? uploading : 'UPLOADING...'}
+                                                        </>
+                                                    ) : 'CHANGE EN IMAGE'}
                                                     <input type="file" className="hidden" accept="image/*" onChange={(e) => handleLanguageFileUpload(e, 'value_en')} />
                                                 </label>
                                             </div>
