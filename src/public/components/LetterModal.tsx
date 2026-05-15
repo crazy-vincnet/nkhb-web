@@ -64,7 +64,7 @@ const LetterModal: React.FC<LetterModalProps> = ({ isOpen, onClose }) => {
             <div className="modal-content">
                 <div className="modal-header">
                     <Editable k="letter_modal_title">
-                        {({ text, styles }) => <h3 style={styles}>{text}</h3>}
+                        {({ text, styles }) => <h3 style={styles} dangerouslySetInnerHTML={{ __html: text }}></h3>}
                     </Editable>
                     <button className="close-modal" onClick={onClose}>&times;</button>
                 </div>
@@ -72,7 +72,7 @@ const LetterModal: React.FC<LetterModalProps> = ({ isOpen, onClose }) => {
                     <div className="form-group-row">
                         <div className="form-group">
                             <Editable k="letter_modal_label_name">
-                                {({ text, styles }) => <label style={styles}>{text}</label>}
+                                {({ text, styles }) => <label style={styles} dangerouslySetInnerHTML={{ __html: text }}></label>}
                             </Editable>
                             <Editable k="letter_modal_placeholder_name">
                                 {({ text }) => <input type="text" name="name" placeholder={text} required />}
@@ -80,7 +80,7 @@ const LetterModal: React.FC<LetterModalProps> = ({ isOpen, onClose }) => {
                         </div>
                         <div className="form-group">
                             <Editable k="letter_modal_label_location">
-                                {({ text, styles }) => <label style={styles}>{text}</label>}
+                                {({ text, styles }) => <label style={styles} dangerouslySetInnerHTML={{ __html: text }}></label>}
                             </Editable>
                             <Editable k="letter_modal_placeholder_location">
                                 {({ text }) => <input type="text" name="location" placeholder={text} required />}
@@ -89,7 +89,7 @@ const LetterModal: React.FC<LetterModalProps> = ({ isOpen, onClose }) => {
                     </div>
                     <div className="form-group">
                         <Editable k="letter_modal_label_reason">
-                            {({ text, styles }) => <label style={styles}>{text}</label>}
+                            {({ text, styles }) => <label style={styles} dangerouslySetInnerHTML={{ __html: text }}></label>}
                         </Editable>
                         <Editable k="letter_modal_placeholder_reason">
                             {({ text }) => <input type="text" name="reason" placeholder={text} required />}
@@ -97,13 +97,13 @@ const LetterModal: React.FC<LetterModalProps> = ({ isOpen, onClose }) => {
                     </div>
                     <div className="form-group">
                         <Editable k="letter_modal_label_email">
-                            {({ text, styles }) => <label style={styles}>{text}</label>}
+                            {({ text, styles }) => <label style={styles} dangerouslySetInnerHTML={{ __html: text }}></label>}
                         </Editable>
                         <input type="email" name="email" placeholder="답변을 받으실 이메일 주소를 입력해주세요" required />
                     </div>
                     <div className="form-group">
                         <Editable k="letter_modal_label_message">
-                            {({ text, styles }) => <label style={styles}>{text}</label>}
+                            {({ text, styles }) => <label style={styles} dangerouslySetInnerHTML={{ __html: text }}></label>}
                         </Editable>
                         <Editable k="letter_modal_placeholder_message">
                             {({ text }) => <textarea name="message" rows={8} placeholder={text} required></textarea>}
@@ -111,12 +111,12 @@ const LetterModal: React.FC<LetterModalProps> = ({ isOpen, onClose }) => {
                     </div>
                     <div className="form-footer">
                         <Editable k="letter_modal_footer_note">
-                            {({ text, styles }) => <p className="form-note" style={styles}>{text}</p>}
+                            {({ text, styles }) => <p className="form-note" style={styles} dangerouslySetInnerHTML={{ __html: text }}></p>}
                         </Editable>
                         <button type="submit" className="btn-submit" disabled={isSubmitting}>
                             {isSubmitting ? (lang === 'en' ? 'Sending...' : '전송 중...') : (
                                 <Editable k="letter_modal_button_submit">
-                                    {({ text, styles }) => <span style={styles}>{text}</span>}
+                                    {({ text, styles }) => <span style={styles} dangerouslySetInnerHTML={{ __html: text }}></span>}
                                 </Editable>
                             )}
                         </button>
