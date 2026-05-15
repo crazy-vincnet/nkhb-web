@@ -225,10 +225,15 @@ export const I18nProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const path = window.location.pathname.toLowerCase();
     const isEnPath = path === '/en' || path.startsWith('/en/');
     
-    // 2. Fallback to saved preference
+    // 2. Detect from Query Parameter (e.g., ?lang=en)
+    const urlParams = new URLSearchParams(window.location.search);
+    const langParam = urlParams.get('lang')?.toLowerCase();
+    const isEnParam = langParam === 'en';
+    
+    // 3. Fallback to saved preference
     const savedLang = localStorage.getItem('lang') as Language;
     
-    if (isEnPath) {
+    if (isEnPath || isEnParam) {
       if (lang !== 'en') setLangState('en');
     } else if (savedLang && lang !== savedLang) {
       setLangState(savedLang);
