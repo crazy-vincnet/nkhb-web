@@ -16,6 +16,7 @@ interface I18nContextType {
   getContent: (key: string) => ContentData;
   updateLiveStyle: (key: string, data: Partial<ContentData>) => void;
   loading: boolean;
+  isMobile: boolean;
 }
 
 const staticTranslations = {
@@ -192,19 +193,23 @@ const staticTranslations = {
     }
 };
 
-const applyTheme = (theme: any) => {
+const applyTheme = (theme: any, isMobile: boolean) => {
   const root = document.documentElement;
   if (!theme) return;
   
+  // Merge mobile overrides for global theme if on mobile
+  const activeTheme = isMobile ? { ...theme, ...theme.mobile } : theme;
+  
   const mapping: Record<string, string> = {
-    '--accent-color': theme.colors?.accent,
-    '--accent-light': theme.colors?.accentLight,
-    '--primary-color': theme.colors?.primary,
-    '--secondary-color': theme.colors?.secondary,
-    '--text-main': theme.colors?.textMain,
-    '--section-padding': theme.ui?.sectionPadding,
-    '--border-radius-lg': theme.ui?.borderRadius,
-    '--max-width': theme.ui?.maxWidth
+    '--accent-color': activeTheme.colors?.accent,
+    '--accent-dark': activeTheme.colors?.accentDark,
+    '--accent-light': activeTheme.colors?.accentLight,
+    '--primary-color': activeTheme.colors?.primary,
+    '--secondary-color': activeTheme.colors?.secondary,
+    '--text-main': activeTheme.colors?.textMain,
+    '--section-padding': activeTheme.ui?.sectionPadding,
+    '--border-radius-lg': activeTheme.ui?.borderRadius,
+    '--max-width': activeTheme.ui?.maxWidth
   };
 
   Object.entries(mapping).forEach(([key, value]) => {
@@ -219,28 +224,19 @@ export const I18nProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [dbContent, setDbContent] = useState<any[]>([]);
   const [liveChanges, setLiveChanges] = useState<Record<string, Partial<ContentData>>>({});
   const [loading, setLoading] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
 
   const detectLanguage = useCallback(() => {
-    // 1. Highest Priority: Query Parameter (explicit intent)
     const urlParams = new URLSearchParams(window.location.search);
     const langParam = urlParams.get('lang')?.toLowerCase();
-    
-    // 2. Second Priority: URL Path (/en)
     const path = window.location.pathname.toLowerCase();
     const isEnPath = path === '/en' || path.startsWith('/en/');
-    
-    // 3. Third Priority: Stored Preference
     const savedLang = localStorage.getItem('lang') as Language;
     
     let targetLang: Language | null = null;
-
-    if (langParam === 'en' || isEnPath) {
-        targetLang = 'en';
-    } else if (langParam === 'ko') {
-        targetLang = 'ko';
-    } else if (savedLang) {
-        targetLang = savedLang;
-    }
+    if (langParam === 'en' || isEnPath) targetLang = 'en';
+    else if (langParam === 'ko') targetLang = 'ko';
+    else if (savedLang) targetLang = savedLang;
 
     if (targetLang) {
         setLangState(current => {
@@ -253,103 +249,84 @@ export const I18nProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }, []);
 
-  useEffect(() => {
-    detectLanguage();
-    fetchContent();
-
-    // Listen for all possible navigation events
-    window.addEventListener('popstate', detectLanguage);
-    window.addEventListener('hashchange', detectLanguage);
-    
-    const handleMessage = (event: MessageEvent) => {
-      if (event.data?.type === 'NKHB_LIVE_UPDATE') {
-        const { key, data } = event.data;
-        setLiveChanges(prev => ({
-          ...prev,
-          [key]: { ...prev[key], ...data }
-        }));
-      } else if (event.data?.type === 'NKHB_LIVE_THEME_UPDATE') {
-        const { theme } = event.data;
-        setLiveChanges(prev => ({
-          ...prev,
-          'global_theme_settings': { styles: theme }
-        }));
-      }
-    };
-    window.addEventListener('message', handleMessage);
-    return () => {
-        window.removeEventListener('popstate', detectLanguage);
-        window.removeEventListener('hashchange', detectLanguage);
-        window.removeEventListener('message', handleMessage);
-    };
-  }, [detectLanguage]);
-
-  useEffect(() => {
-    if (liveChanges['global_theme_settings']?.styles) {
-      applyTheme(liveChanges['global_theme_settings'].styles);
-    }
-  }, [liveChanges]);
-
-  const fetchContent = async () => {
+  const fetchContent = useCallback(async () => {
     try {
       const { data } = await supabase.from('content').select('*');
       if (data) {
         setDbContent(data);
         const themeItem = data.find(i => i.key === 'global_theme_settings');
-        if (themeItem?.style_props) applyTheme(themeItem.style_props);
+        if (themeItem?.style_props) applyTheme(themeItem.style_props, isMobile);
       }
     } finally {
       setLoading(false);
     }
-  };
+  }, [isMobile]);
+
+  useEffect(() => {
+    detectLanguage();
+    fetchContent();
+
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    handleResize();
+
+    window.addEventListener('popstate', detectLanguage);
+    window.addEventListener('hashchange', detectLanguage);
+    window.addEventListener('resize', handleResize);
+    
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'NKHB_LIVE_UPDATE') {
+        const { key, data } = event.data;
+        setLiveChanges(prev => ({ ...prev, [key]: { ...prev[key], ...data } }));
+      } else if (event.data?.type === 'NKHB_LIVE_THEME_UPDATE') {
+        const { theme } = event.data;
+        setLiveChanges(prev => ({ ...prev, 'global_theme_settings': { styles: theme } }));
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => {
+        window.removeEventListener('popstate', detectLanguage);
+        window.removeEventListener('hashchange', detectLanguage);
+        window.removeEventListener('resize', handleResize);
+        window.removeEventListener('message', handleMessage);
+    };
+  }, [detectLanguage, fetchContent]);
+
+  useEffect(() => {
+    if (liveChanges['global_theme_settings']?.styles) {
+      applyTheme(liveChanges['global_theme_settings'].styles, isMobile);
+    }
+  }, [liveChanges, isMobile]);
 
   const getContent = useCallback((key: string): ContentData => {
     const item = dbContent.find(i => i.key === key);
     const live = liveChanges[key];
-
-    // Priority 1: Current language value from database
     const dbValue = lang === 'ko' ? item?.value_ko : item?.value_en;
-    
-    // Priority 2: Static fallback from code
     const staticValue = lang === 'ko' ? (staticTranslations as any).ko?.[key] : (staticTranslations as any).en?.[key];
-    
     const baseText = dbValue || staticValue || key;
     
     const dbStyles = item?.style_props || {};
     const liveStyles = live?.styles || {};
-    
-    // Filter out empty strings/nulls to let CSS classes take over
     const activeStyles = { ...dbStyles, ...liveStyles };
+
+    const mobileOverrides = activeStyles.mobile || {};
+    const resolvedStyles = isMobile ? { ...activeStyles, ...mobileOverrides } : activeStyles;
+    
     const styles: React.CSSProperties = {};
-    Object.keys(activeStyles).forEach(k => {
-        const value = activeStyles[k];
-        if (value && k !== 'link') {
-            (styles as any)[k] = value;
-        }
+    Object.keys(resolvedStyles).forEach(k => {
+        const value = resolvedStyles[k];
+        if (value && k !== 'link' && k !== 'mobile') (styles as any)[k] = value;
     });
 
-    // Special Priority for Links/Assets (like logo_url)
-    // 1. Live unsaved change in editor (live.link)
-    // 2. Direct language-specific DB value (dbValue)
-    // 3. Fallback link in style_props (activeStyles.link)
-    // 4. Static fallback
     let finalLink = live?.link;
     if (!finalLink) {
-        if (dbValue && (dbValue.startsWith('http') || dbValue.startsWith('/') || dbValue.startsWith('#'))) {
-            finalLink = dbValue;
-        } else if (activeStyles.link) {
-            finalLink = activeStyles.link;
-        } else if (staticValue && (staticValue.startsWith('http') || staticValue.startsWith('/') || staticValue.startsWith('#'))) {
-            finalLink = staticValue;
-        }
+        if (dbValue && (dbValue.startsWith('http') || dbValue.startsWith('/') || dbValue.startsWith('#'))) finalLink = dbValue;
+        else if (activeStyles.link) finalLink = activeStyles.link;
+        else if (staticValue && (staticValue.startsWith('http') || staticValue.startsWith('/') || staticValue.startsWith('#'))) finalLink = staticValue;
     }
 
-    return {
-      text: (live?.text ?? baseText),
-      styles,
-      link: finalLink
-    };
-  }, [dbContent, liveChanges, lang]);
+    return { text: (live?.text ?? baseText), styles, link: finalLink };
+  }, [dbContent, liveChanges, lang, isMobile]);
 
   const t = (key: string): string => getContent(key).text;
 
@@ -363,7 +340,7 @@ export const I18nProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   return (
-    <I18nContext.Provider value={{ lang, setLang, t, getContent, updateLiveStyle, loading }}>
+    <I18nContext.Provider value={{ lang, setLang, t, getContent, updateLiveStyle, loading, isMobile }}>
       {children}
     </I18nContext.Provider>
   );

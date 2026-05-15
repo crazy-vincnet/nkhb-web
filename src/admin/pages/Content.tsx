@@ -323,27 +323,47 @@ const Content = () => {
   };
 
   const updateItem = (key: string, updates: Partial<ContentItem>) => {
-    setItems(prev => prev.map(i => i.key === key ? { ...i, ...updates } : i));
+    // METICULOUS MOBILE OPTIMIZATION: 
+    // If we are in mobile preview, move style updates into the .mobile sub-object
+    const finalUpdates = { ...updates };
+    if (previewMode === 'mobile' && updates.style_props) {
+        const currentItem = itemsRef.current.find(i => i.key === key);
+        const currentMobileStyles = currentItem?.style_props?.mobile || {};
+        
+        // Extract what was actually changed in this update
+        const changedStyles: any = {};
+        Object.keys(updates.style_props).forEach(k => {
+            if (k !== 'mobile' && k !== 'link') {
+                changedStyles[k] = updates.style_props![k];
+            }
+        });
+
+        finalUpdates.style_props = {
+            ...currentItem?.style_props,
+            mobile: {
+                ...currentMobileStyles,
+                ...changedStyles
+            }
+        };
+    }
+
+    setItems(prev => prev.map(i => i.key === key ? { ...i, ...finalUpdates } : i));
     setModifiedIds(prev => new Set(prev).add(key));
 
-    // Use ref to get the absolute latest state to avoid race conditions with functional updates
-    const currentItem = itemsRef.current.find(i => i.key === key);
-    if (!currentItem) return;
+    const currentItemAfter = itemsRef.current.find(i => i.key === key);
+    if (!currentItemAfter) return;
 
     const isImg = isImageKey;
 
     if (iframeRef.current?.contentWindow) {
-      // Merge current state with new updates for the message payload
-      const nextItem = { ...currentItem, ...updates };
+      const nextItem = { ...currentItemAfter, ...finalUpdates };
       
       iframeRef.current.contentWindow.postMessage({
         type: 'NKHB_LIVE_UPDATE',
         key,
         data: {
-            // CRITICAL: Send text based on the editor's current language setting
             text: editorLang === 'ko' ? nextItem.value_ko : nextItem.value_en,
             styles: nextItem.style_props,
-            // For images, prioritize the direct values over style_props.link
             link: isImg 
                 ? (editorLang === 'en' ? nextItem.value_en : nextItem.value_ko)
                 : (nextItem.style_props?.link || nextItem.value_ko || nextItem.value_en)
@@ -542,6 +562,22 @@ const Content = () => {
             {activeTab === 'properties' ? (
                 selectedItem ? (
                     <div className="space-y-10 animate-in fade-in slide-in-from-right-4 duration-300">
+                        {/* Responsive Mode Indicator */}
+                        <div className={`p-4 rounded-2xl flex items-center justify-between border-2 ${previewMode === 'mobile' ? 'bg-orange-50 border-orange-100' : 'bg-blue-50 border-blue-100'}`}>
+                            <div className="flex items-center gap-3">
+                                {previewMode === 'mobile' ? <Smartphone className="w-5 h-5 text-orange-600" /> : <Monitor className="w-5 h-5 text-blue-600" />}
+                                <div>
+                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-tighter leading-none">Editing Mode</p>
+                                    <p className={`text-xs font-black uppercase ${previewMode === 'mobile' ? 'text-orange-700' : 'text-blue-700'}`}>
+                                        {previewMode === 'mobile' ? 'Mobile Specific' : 'Desktop Standard'}
+                                    </p>
+                                </div>
+                            </div>
+                            {previewMode === 'mobile' && (
+                                <span className="px-2 py-1 bg-orange-600 text-white text-[8px] font-black rounded-lg animate-pulse">OVERRIDE</span>
+                            )}
+                        </div>
+
                         <div className="space-y-6">
                             <label className="text-[11px] font-black text-blue-600 flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-full w-fit"><Type className="w-3.5 h-3.5" /> TEXT CONTENT</label>
                             <div className="space-y-5">
@@ -610,21 +646,49 @@ const Content = () => {
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <span className="text-[9px] font-black text-gray-400 ml-1">FONT SIZE</span>
-                                    <input type="text" value={selectedItem.style_props?.fontSize || ''} placeholder={computedStyles?.fontSize} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, fontSize: e.target.value } })} className="w-full p-3 bg-gray-50 border-none rounded-xl text-xs font-bold shadow-inner" onBlur={handlePushHistory} />
+                                    <input 
+                                        type="text" 
+                                        value={(previewMode === 'mobile' ? selectedItem.style_props?.mobile?.fontSize : selectedItem.style_props?.fontSize) || ''} 
+                                        placeholder={computedStyles?.fontSize} 
+                                        onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, fontSize: e.target.value } })} 
+                                        className="w-full p-3 bg-gray-50 border-none rounded-xl text-xs font-bold shadow-inner" 
+                                        onBlur={handlePushHistory} 
+                                    />
                                 </div>
                                 <div className="space-y-2">
                                     <span className="text-[9px] font-black text-gray-400 ml-1">MARGIN</span>
-                                    <input type="text" value={selectedItem.style_props?.margin || ''} placeholder={computedStyles?.margin} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, margin: e.target.value } })} className="w-full p-3 bg-gray-50 border-none rounded-xl text-xs font-bold shadow-inner" onBlur={handlePushHistory} />
+                                    <input 
+                                        type="text" 
+                                        value={(previewMode === 'mobile' ? selectedItem.style_props?.mobile?.margin : selectedItem.style_props?.margin) || ''} 
+                                        placeholder={computedStyles?.margin} 
+                                        onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, margin: e.target.value } })} 
+                                        className="w-full p-3 bg-gray-50 border-none rounded-xl text-xs font-bold shadow-inner" 
+                                        onBlur={handlePushHistory} 
+                                    />
                                 </div>
                                 {isImageKey && (
                                     <>
                                         <div className="space-y-2">
                                             <span className="text-[9px] font-black text-gray-400 ml-1 uppercase">Width</span>
-                                            <input type="text" value={selectedItem.style_props?.width || ''} placeholder={computedStyles?.width || 'auto'} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, width: e.target.value } })} className="w-full p-3 bg-gray-50 border-none rounded-xl text-xs font-bold shadow-inner" onBlur={handlePushHistory} />
+                                            <input 
+                                                type="text" 
+                                                value={(previewMode === 'mobile' ? selectedItem.style_props?.mobile?.width : selectedItem.style_props?.width) || ''} 
+                                                placeholder={computedStyles?.width || 'auto'} 
+                                                onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, width: e.target.value } })} 
+                                                className="w-full p-3 bg-gray-50 border-none rounded-xl text-xs font-bold shadow-inner" 
+                                                onBlur={handlePushHistory} 
+                                            />
                                         </div>
                                         <div className="space-y-2">
                                             <span className="text-[9px] font-black text-gray-400 ml-1 uppercase">Height</span>
-                                            <input type="text" value={selectedItem.style_props?.height || ''} placeholder={computedStyles?.height || 'auto'} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, height: e.target.value } })} className="w-full p-3 bg-gray-50 border-none rounded-xl text-xs font-bold shadow-inner" onBlur={handlePushHistory} />
+                                            <input 
+                                                type="text" 
+                                                value={(previewMode === 'mobile' ? selectedItem.style_props?.mobile?.height : selectedItem.style_props?.height) || ''} 
+                                                placeholder={computedStyles?.height || 'auto'} 
+                                                onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, height: e.target.value } })} 
+                                                className="w-full p-3 bg-gray-50 border-none rounded-xl text-xs font-bold shadow-inner" 
+                                                onBlur={handlePushHistory} 
+                                            />
                                         </div>
                                     </>
                                 )}
@@ -638,18 +702,44 @@ const Content = () => {
                                     <span className="text-[9px] font-black text-gray-400 ml-1">TEXT COLOR</span>
                                     <div className="flex gap-2">
                                         <div className="w-10 h-10 rounded-xl overflow-hidden relative border-4 border-white shadow-lg">
-                                            <input type="color" value={selectedItem.style_props?.color?.startsWith('#') ? selectedItem.style_props.color : (computedStyles?.color?.startsWith('#') ? computedStyles.color : '#000000')} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, color: e.target.value } })} className="absolute inset-[-10px] w-[200%] h-[200%] cursor-pointer" onBlur={handlePushHistory} />
+                                            <input 
+                                                type="color" 
+                                                value={(previewMode === 'mobile' ? (selectedItem.style_props?.mobile?.color || computedStyles?.color) : (selectedItem.style_props?.color || computedStyles?.color))?.startsWith('#') ? (previewMode === 'mobile' ? (selectedItem.style_props?.mobile?.color || computedStyles?.color) : (selectedItem.style_props?.color || computedStyles?.color)) : '#000000'} 
+                                                onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, color: e.target.value } })} 
+                                                className="absolute inset-[-10px] w-[200%] h-[200%] cursor-pointer" 
+                                                onBlur={handlePushHistory} 
+                                            />
                                         </div>
-                                        <input type="text" value={selectedItem.style_props?.color || ''} placeholder={computedStyles?.color} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, color: e.target.value } })} className="flex-1 bg-gray-50 border-none rounded-xl text-[10px] uppercase font-black text-center shadow-inner" onBlur={handlePushHistory} />
+                                        <input 
+                                            type="text" 
+                                            value={(previewMode === 'mobile' ? selectedItem.style_props?.mobile?.color : selectedItem.style_props?.color) || ''} 
+                                            placeholder={computedStyles?.color} 
+                                            onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, color: e.target.value } })} 
+                                            className="flex-1 bg-gray-50 border-none rounded-xl text-[10px] uppercase font-black text-center shadow-inner" 
+                                            onBlur={handlePushHistory} 
+                                        />
                                     </div>
                                 </div>
                                 <div className="space-y-2">
                                     <span className="text-[9px] font-black text-gray-400 ml-1">BACKGROUND</span>
                                     <div className="flex gap-2">
                                         <div className="w-10 h-10 rounded-xl overflow-hidden relative border-4 border-white shadow-lg">
-                                            <input type="color" value={selectedItem.style_props?.backgroundColor?.startsWith('#') ? selectedItem.style_props.backgroundColor : (computedStyles?.backgroundColor?.startsWith('#') ? computedStyles.backgroundColor : '#FFFFFF')} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, backgroundColor: e.target.value } })} className="absolute inset-[-10px] w-[200%] h-[200%] cursor-pointer" onBlur={handlePushHistory} />
+                                            <input 
+                                                type="color" 
+                                                value={(previewMode === 'mobile' ? (selectedItem.style_props?.mobile?.backgroundColor || computedStyles?.backgroundColor) : (selectedItem.style_props?.backgroundColor || computedStyles?.backgroundColor))?.startsWith('#') ? (previewMode === 'mobile' ? (selectedItem.style_props?.mobile?.backgroundColor || computedStyles?.backgroundColor) : (selectedItem.style_props?.backgroundColor || computedStyles?.backgroundColor)) : '#FFFFFF'} 
+                                                onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, backgroundColor: e.target.value } })} 
+                                                className="absolute inset-[-10px] w-[200%] h-[200%] cursor-pointer" 
+                                                onBlur={handlePushHistory} 
+                                            />
                                         </div>
-                                        <input type="text" value={selectedItem.style_props?.backgroundColor || ''} placeholder={computedStyles?.backgroundColor || 'Transparent'} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, backgroundColor: e.target.value } })} className="flex-1 bg-gray-50 border-none rounded-xl text-[10px] uppercase font-black text-center shadow-inner" onBlur={handlePushHistory} />
+                                        <input 
+                                            type="text" 
+                                            value={(previewMode === 'mobile' ? selectedItem.style_props?.mobile?.backgroundColor : selectedItem.style_props?.backgroundColor) || ''} 
+                                            placeholder={computedStyles?.backgroundColor || 'Transparent'} 
+                                            onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, backgroundColor: e.target.value } })} 
+                                            className="flex-1 bg-gray-50 border-none rounded-xl text-[10px] uppercase font-black text-center shadow-inner" 
+                                            onBlur={handlePushHistory} 
+                                        />
                                     </div>
                                 </div>
                             </div>
