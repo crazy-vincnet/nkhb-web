@@ -192,6 +192,26 @@ const staticTranslations = {
     }
 };
 
+const applyTheme = (theme: any) => {
+  const root = document.documentElement;
+  if (!theme) return;
+  
+  const mapping: Record<string, string> = {
+    '--accent-color': theme.colors?.accent,
+    '--accent-light': theme.colors?.accentLight,
+    '--primary-color': theme.colors?.primary,
+    '--secondary-color': theme.colors?.secondary,
+    '--text-main': theme.colors?.textMain,
+    '--section-padding': theme.ui?.sectionPadding,
+    '--border-radius-lg': theme.ui?.borderRadius,
+    '--max-width': theme.ui?.maxWidth
+  };
+
+  Object.entries(mapping).forEach(([key, value]) => {
+    if (value) root.style.setProperty(key, value);
+  });
+};
+
 const I18nContext = createContext<I18nContextType | undefined>(undefined);
 
 export const I18nProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -223,16 +243,32 @@ export const I18nProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           ...prev,
           [key]: { ...prev[key], ...data }
         }));
+      } else if (event.data?.type === 'NKHB_LIVE_THEME_UPDATE') {
+        const { theme } = event.data;
+        setLiveChanges(prev => ({
+          ...prev,
+          'global_theme_settings': { styles: theme }
+        }));
       }
     };
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
   }, []);
 
+  useEffect(() => {
+    if (liveChanges['global_theme_settings']?.styles) {
+      applyTheme(liveChanges['global_theme_settings'].styles);
+    }
+  }, [liveChanges]);
+
   const fetchContent = async () => {
     try {
       const { data } = await supabase.from('content').select('*');
-      if (data) setDbContent(data);
+      if (data) {
+        setDbContent(data);
+        const themeItem = data.find(i => i.key === 'global_theme_settings');
+        if (themeItem?.style_props) applyTheme(themeItem.style_props);
+      }
     } finally {
       setLoading(false);
     }
