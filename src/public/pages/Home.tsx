@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, memo } from 'react';
 import { useLocation } from 'react-router-dom';
 import ArticleModal from '../components/ArticleModal';
 import LetterModal from '../components/LetterModal';
@@ -6,6 +6,10 @@ import SampleModal from '../components/SampleModal';
 import SEO from '../components/SEO';
 import { useI18n } from '../lib/i18n';
 import { HOME_SECTION_MAP, HOME_DEFAULT_LAYOUT } from '../lib/registry';
+
+const MemoizedSection = memo(({ Component, id, ...props }: { Component: React.FC<any>, id: string, [key: string]: any }) => {
+    return <Component {...props} />;
+});
 
 const Home: React.FC = () => {
     const { getContent, lang } = useI18n();
@@ -19,6 +23,12 @@ const Home: React.FC = () => {
         ? (layoutData.styles as any).order 
         : HOME_DEFAULT_LAYOUT;
 
+    const handleOpenArticle = useCallback(() => setIsArticleModalOpen(true), []);
+    const handleCloseArticle = useCallback(() => setIsArticleModalOpen(false), []);
+    const handleOpenLetter = useCallback(() => setIsLetterModalOpen(true), []);
+    const handleCloseLetter = useCallback(() => setIsLetterModalOpen(false), []);
+    const handleOpenSample = useCallback(() => setIsSampleModalOpen(true), []);
+    const handleCloseSample = useCallback(() => setIsSampleModalOpen(false), []);
 
     useEffect(() => {
         // Handle smooth scrolling for hash links whenever location changes
@@ -48,25 +58,25 @@ const Home: React.FC = () => {
                     if (!Component) return null;
 
                     const props: any = {};
-                    if (key === 'background') props.onOpenArticle = () => setIsArticleModalOpen(true);
-                    if (key === 'composition') props.onOpenSample = () => setIsSampleModalOpen(true);
-                    if (key === 'guide') props.onOpenLetter = () => setIsLetterModalOpen(true);
+                    if (key === 'background') props.onOpenArticle = handleOpenArticle;
+                    if (key === 'composition') props.onOpenSample = handleOpenSample;
+                    if (key === 'guide') props.onOpenLetter = handleOpenLetter;
 
-                    return <Component key={key} {...props} />;
+                    return <MemoizedSection key={key} Component={Component} id={id} {...props} />;
                 })}
             </main>
 
             <ArticleModal 
                 isOpen={isArticleModalOpen} 
-                onClose={() => setIsArticleModalOpen(false)} 
+                onClose={handleCloseArticle}
             />
             <LetterModal 
                 isOpen={isLetterModalOpen} 
-                onClose={() => setIsLetterModalOpen(false)} 
+                onClose={handleCloseLetter}
             />
             <SampleModal 
                 isOpen={isSampleModalOpen} 
-                onClose={() => setIsSampleModalOpen(false)} 
+                onClose={handleCloseSample}
             />
         </>
     );
