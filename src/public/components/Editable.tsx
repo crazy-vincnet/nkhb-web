@@ -111,12 +111,18 @@ export const Editable: React.FC<EditableProps> = ({ k, children, className = '',
 
   if (isPreview) {
     editProps.onClick = handleClick;
-    editProps.className = `${className} cursor-pointer hover:outline hover:outline-2 hover:outline-blue-500 hover:outline-offset-[-2px] transition-all`;
-    // Ensure large containers have pointer events even if children cover them
+    editProps.className = `${className} cursor-pointer hover:outline hover:outline-2 hover:outline-blue-500 hover:outline-offset-[-4px] transition-all relative`;
+
+    // Ensure large containers have higher priority for empty-space clicks
     if (k.startsWith('section')) {
-        editProps.style = { cursor: 'cell' };
+        editProps.style = { 
+            cursor: 'cell',
+            position: 'relative',
+            zIndex: 1 // Ensure the section can receive clicks on its own background
+        };
     }
-  } else {
+  }
+ else {
     editProps.className = className;
   }
 

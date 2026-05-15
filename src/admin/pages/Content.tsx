@@ -62,14 +62,33 @@ const Content = () => {
     const handleMessage = (event: MessageEvent) => {
       if (event.data?.type === 'NKHB_ELEMENT_SELECTED') {
         const { key, computedStyles: cs, link } = event.data;
-        setSelectedKey(key);
+        
+        // 1. Check if item exists in local state
+        let item = items.find(i => i.key === key);
+        
+        if (!item) {
+            // 2. If not, create a virtual item so it can be edited
+            const newItem: ContentItem = {
+                id: `new-${key}-${Date.now()}`,
+                key: key,
+                value_ko: '',
+                value_en: '',
+                style_props: { ...cs, link: link || '' }
+            };
+            setItems(prev => [...prev, newItem]);
+            setSelectedKey(key);
+            setModifiedIds(prev => new Set(prev).add(key));
+        } else {
+            setSelectedKey(key);
+        }
+
         setComputedStyles(cs);
         setSidebarOpen(true);
         
-        // If the item doesn't have a link yet, we can suggest the one found in DOM
-        if (link) {
+        // If the item exists but doesn't have a link yet, suggest the one found in DOM
+        if (item && link && !item.style_props?.link) {
             setItems(prev => prev.map(i => {
-                if (i.key === key && !i.style_props?.link) {
+                if (i.key === key) {
                     return {
                         ...i,
                         style_props: { ...i.style_props, link }
