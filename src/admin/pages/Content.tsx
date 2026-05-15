@@ -18,8 +18,8 @@ import {
   Layout as LayoutIcon,
   Info,
   GripVertical,
-  Undo2,
-  Redo2
+  RotateCcw,
+  RotateCw
 } from 'lucide-react';
 import { SECTION_LABELS, HOME_DEFAULT_LAYOUT, ABOUT_DEFAULT_LAYOUT } from '../../public/lib/registry';
 import { useHistory } from '../lib/useHistory';
@@ -97,15 +97,34 @@ const Content = () => {
 
   const [isHistoryAction, setHistoryAction] = useState(false);
 
-  const handleUndo = () => {
+  const handleUndo = useCallback(() => {
     undo();
     setHistoryAction(true);
-  };
+  }, [undo]);
 
-  const handleRedo = () => {
+  const handleRedo = useCallback(() => {
     redo();
     setHistoryAction(true);
-  };
+  }, [redo]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z') {
+        e.preventDefault();
+        if (e.shiftKey) {
+          if (canRedo) handleRedo();
+        } else {
+          if (canUndo) handleUndo();
+        }
+      } else if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'y') {
+        e.preventDefault();
+        if (canRedo) handleRedo();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [canUndo, canRedo, handleUndo, handleRedo]);
 
   useEffect(() => {
     if (isHistoryAction && historyState) {
@@ -409,8 +428,8 @@ const Content = () => {
 
             <div className="flex items-center gap-4">
                 <div className="flex items-center gap-1 bg-gray-100 p-1 rounded-xl">
-                    <button onClick={handleUndo} disabled={!canUndo} className={`p-1.5 rounded-lg transition-all ${canUndo ? 'text-gray-600 hover:bg-white hover:shadow-sm' : 'text-gray-300 cursor-not-allowed'}`} title="Undo"><Undo2 className="w-4 h-4" /></button>
-                    <button onClick={handleRedo} disabled={!canRedo} className={`p-1.5 rounded-lg transition-all ${canRedo ? 'text-gray-600 hover:bg-white hover:shadow-sm' : 'text-gray-300 cursor-not-allowed'}`} title="Redo"><Redo2 className="w-4 h-4" /></button>
+                    <button onClick={handleUndo} disabled={!canUndo} className={`p-1.5 rounded-lg transition-all ${canUndo ? 'text-gray-600 hover:bg-white hover:shadow-sm active:scale-95' : 'text-gray-300 cursor-not-allowed opacity-50'}`} title="실행 취소 (Cmd+Z)"><RotateCcw className="w-4 h-4" /></button>
+                    <button onClick={handleRedo} disabled={!canRedo} className={`p-1.5 rounded-lg transition-all ${canRedo ? 'text-gray-600 hover:bg-white hover:shadow-sm active:scale-95' : 'text-gray-300 cursor-not-allowed opacity-50'}`} title="다시 실행 (Cmd+Shift+Z)"><RotateCw className="w-4 h-4" /></button>
                 </div>
                 <button onClick={() => window.open('/', '_blank')} className="p-2 hover:bg-gray-100 rounded-xl text-gray-400 transition-all"><ExternalLink className="w-5 h-5" /></button>
             </div>
