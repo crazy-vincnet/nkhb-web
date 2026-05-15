@@ -10,6 +10,21 @@ interface EditableProps {
 }
 
 /**
+ * Helper to convert rgb(a) color to hex
+ */
+const rgbaToHex = (rgba: string) => {
+  const match = rgba.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)$/);
+  if (!match) return rgba;
+  
+  const r = parseInt(match[1]);
+  const g = parseInt(match[2]);
+  const b = parseInt(match[3]);
+  
+  const hex = "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
+  return hex;
+};
+
+/**
  * A wrapper component that makes an element selectable in the Admin Visual Editor.
  * Now extracts computed styles and link values to send to the Property Editor.
  */
@@ -37,8 +52,8 @@ export const Editable: React.FC<EditableProps> = ({ k, children, className = '',
         
         computedStyles = {
           fontSize: style.fontSize,
-          color: style.color,
-          backgroundColor: style.backgroundColor === 'rgba(0, 0, 0, 0)' ? '' : style.backgroundColor,
+          color: rgbaToHex(style.color),
+          backgroundColor: style.backgroundColor === 'rgba(0, 0, 0, 0)' ? '' : rgbaToHex(style.backgroundColor),
           margin: style.margin,
           padding: style.padding,
           fontWeight: style.fontWeight
