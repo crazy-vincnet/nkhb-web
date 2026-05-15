@@ -372,16 +372,27 @@ const Content = () => {
 
   const handleSave = async () => {
     setSaving(true);
-    const updates = items.filter(i => modifiedKeys.has(i.key));
+    
+    // Deduplicate updates by key to prevent "ON CONFLICT DO UPDATE cannot affect row a second time"
+    const updatesMap = new Map<string, any>();
+    items.filter(i => modifiedKeys.has(i.key)).forEach(i => {
+        updatesMap.set(i.key, {
+            key: i.key,
+            value_ko: i.value_ko,
+            value_en: i.value_en,
+            style_props: i.style_props
+        });
+    });
+
+    const updates = Array.from(updatesMap.values());
+    if (updates.length === 0) {
+        setSaving(false);
+        return;
+    }
     
     try {
         const { error } = await supabase.from('content').upsert(
-            updates.map(i => ({
-                key: i.key,
-                value_ko: i.value_ko,
-                value_en: i.value_en,
-                style_props: i.style_props
-            })),
+            updates,
             { onConflict: 'key' }
         );
         if (error) throw error;
