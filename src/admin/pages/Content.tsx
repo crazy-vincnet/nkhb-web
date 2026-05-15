@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { 
@@ -17,9 +17,12 @@ import {
   ImageIcon,
   Layout as LayoutIcon,
   Info,
-  GripVertical
+  GripVertical,
+  Undo2,
+  Redo2
 } from 'lucide-react';
 import { SECTION_LABELS, HOME_DEFAULT_LAYOUT, ABOUT_DEFAULT_LAYOUT } from '../../public/lib/registry';
+import { useHistory } from '../lib/useHistory';
 
 interface StyleProps {
   fontSize?: string;
@@ -70,7 +73,67 @@ const Content = () => {
     }
   });
   
+  
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const itemsRef = useRef(items);
+  const themeSettingsRef = useRef(themeSettings);
+
+  useEffect(() => {
+    itemsRef.current = items;
+    themeSettingsRef.current = themeSettings;
+  }, [items, themeSettings]);
+
+  const { state: historyState, push: pushHistory, undo, redo, canUndo, canRedo, reset: resetHistory } = useHistory({ 
+    items: [] as ContentItem[], 
+    themeSettings: {
+      colors: { accent: '#2563eb', primary: '#1e293b', secondary: '#64748b' },
+      ui: { sectionPadding: '5rem', maxWidth: '1280px', borderRadius: '1rem' }
+    } 
+  });
+
+  const handlePushHistory = useCallback(() => {
+    pushHistory({ items: itemsRef.current, themeSettings: themeSettingsRef.current });
+  }, [pushHistory]);
+
+  const [isHistoryAction, setHistoryAction] = useState(false);
+
+  const handleUndo = () => {
+    undo();
+    setHistoryAction(true);
+  };
+
+  const handleRedo = () => {
+    redo();
+    setHistoryAction(true);
+  };
+
+  useEffect(() => {
+    if (isHistoryAction && historyState) {
+      setItems(historyState.items);
+      setThemeSettings(historyState.themeSettings);
+      
+      if (iframeRef.current?.contentWindow) {
+        iframeRef.current.contentWindow.postMessage({
+          type: 'NKHB_LIVE_THEME_UPDATE',
+          theme: historyState.themeSettings
+        }, '*');
+        
+        historyState.items.forEach(item => {
+          iframeRef.current?.contentWindow?.postMessage({
+            type: 'NKHB_LIVE_UPDATE',
+            key: item.key,
+            data: {
+              text: item.value_ko || item.value_en,
+              styles: item.style_props,
+              link: item.style_props?.link
+            }
+          }, '*');
+        });
+      }
+      setHistoryAction(false);
+    }
+  }, [historyState, isHistoryAction]);
+
 
   const getLayoutKey = () => currentPage === '/' ? 'page_layout_home' : 'page_layout_about';
   const getDefaultLayout = () => currentPage === '/' ? HOME_DEFAULT_LAYOUT : ABOUT_DEFAULT_LAYOUT;
@@ -97,6 +160,7 @@ const Content = () => {
 
   const handleDragEnd = () => {
     setDraggedIndex(null);
+    setTimeout(handlePushHistory, 0);
   };
 
   const updateLayout = (newOrder: string[]) => {
@@ -189,10 +253,11 @@ const Content = () => {
 
         const themeItem = normalized.find(i => i.key === 'global_theme_settings');
         if (themeItem && themeItem.style_props) {
-            setThemeSettings(prev => ({
-                ...prev,
-                ...themeItem.style_props
-            }));
+            const newThemeSettings = { ...themeSettings, ...themeItem.style_props };
+            setThemeSettings(newThemeSettings);
+            resetHistory({ items: normalized, themeSettings: newThemeSettings });
+        } else {
+            resetHistory({ items: normalized, themeSettings });
         }
     }
     setLoading(false);
@@ -269,6 +334,7 @@ const Content = () => {
             .getPublicUrl(filePath);
 
         updateItem(selectedKey, { [field]: publicUrl });
+        setTimeout(handlePushHistory, 0);
         alert(`${field === 'value_ko' ? '한국어' : '영어'} 이미지가 업로드되었습니다.`);
     } catch (err: any) {
         alert('업로드 실패: ' + err.message);
@@ -342,6 +408,10 @@ const Content = () => {
             </div>
 
             <div className="flex items-center gap-4">
+                <div className="flex items-center gap-1 bg-gray-100 p-1 rounded-xl">
+                    <button onClick={handleUndo} disabled={!canUndo} className={`p-1.5 rounded-lg transition-all ${canUndo ? 'text-gray-600 hover:bg-white hover:shadow-sm' : 'text-gray-300 cursor-not-allowed'}`} title="Undo"><Undo2 className="w-4 h-4" /></button>
+                    <button onClick={handleRedo} disabled={!canRedo} className={`p-1.5 rounded-lg transition-all ${canRedo ? 'text-gray-600 hover:bg-white hover:shadow-sm' : 'text-gray-300 cursor-not-allowed'}`} title="Redo"><Redo2 className="w-4 h-4" /></button>
+                </div>
                 <button onClick={() => window.open('/', '_blank')} className="p-2 hover:bg-gray-100 rounded-xl text-gray-400 transition-all"><ExternalLink className="w-5 h-5" /></button>
             </div>
         </header>
@@ -400,11 +470,11 @@ const Content = () => {
                             <div className="space-y-5">
                                 <div className="space-y-2">
                                     <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">KOREAN</span>
-                                    <textarea value={selectedItem.value_ko} onChange={(e) => updateItem(selectedKey!, { value_ko: e.target.value })} className="w-full p-4 bg-gray-50 border-none rounded-2xl text-sm focus:ring-2 focus:ring-blue-500 min-h-[120px] resize-none leading-relaxed shadow-inner" />
+                                    <textarea value={selectedItem.value_ko} onChange={(e) => updateItem(selectedKey!, { value_ko: e.target.value })} className="w-full p-4 bg-gray-50 border-none rounded-2xl text-sm focus:ring-2 focus:ring-blue-500 min-h-[120px] resize-none leading-relaxed shadow-inner" onBlur={handlePushHistory} />
                                 </div>
                                 <div className="space-y-2">
                                     <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">ENGLISH</span>
-                                    <textarea value={selectedItem.value_en} onChange={(e) => updateItem(selectedKey!, { value_en: e.target.value })} className="w-full p-4 bg-gray-50 border-none rounded-2xl text-sm focus:ring-2 focus:ring-blue-500 min-h-[120px] resize-none leading-relaxed shadow-inner" />
+                                    <textarea value={selectedItem.value_en} onChange={(e) => updateItem(selectedKey!, { value_en: e.target.value })} className="w-full p-4 bg-gray-50 border-none rounded-2xl text-sm focus:ring-2 focus:ring-blue-500 min-h-[120px] resize-none leading-relaxed shadow-inner" onBlur={handlePushHistory} />
                                 </div>
                             </div>
                         </div>
@@ -442,7 +512,7 @@ const Content = () => {
                                 </div>
                             ) : (
                                 <div className="relative group">
-                                    <input type="text" value={selectedItem.style_props?.link || ''} placeholder="https://... 또는 /path" onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, link: e.target.value } })} className="w-full p-4 bg-gray-50 border-none rounded-2xl text-xs font-mono focus:ring-2 focus:ring-indigo-500 shadow-inner" />
+                                    <input type="text" value={selectedItem.style_props?.link || ''} placeholder="https://... 또는 /path" onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, link: e.target.value } })} className="w-full p-4 bg-gray-50 border-none rounded-2xl text-xs font-mono focus:ring-2 focus:ring-indigo-500 shadow-inner" onBlur={handlePushHistory} />
                                     <Globe className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 group-focus-within:text-indigo-500" />
                                 </div>
                             )}
@@ -453,11 +523,11 @@ const Content = () => {
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <span className="text-[9px] font-black text-gray-400 ml-1">FONT SIZE</span>
-                                    <input type="text" value={selectedItem.style_props?.fontSize || ''} placeholder={computedStyles?.fontSize} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, fontSize: e.target.value } })} className="w-full p-3 bg-gray-50 border-none rounded-xl text-xs font-bold shadow-inner" />
+                                    <input type="text" value={selectedItem.style_props?.fontSize || ''} placeholder={computedStyles?.fontSize} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, fontSize: e.target.value } })} className="w-full p-3 bg-gray-50 border-none rounded-xl text-xs font-bold shadow-inner" onBlur={handlePushHistory} />
                                 </div>
                                 <div className="space-y-2">
                                     <span className="text-[9px] font-black text-gray-400 ml-1">MARGIN</span>
-                                    <input type="text" value={selectedItem.style_props?.margin || ''} placeholder={computedStyles?.margin} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, margin: e.target.value } })} className="w-full p-3 bg-gray-50 border-none rounded-xl text-xs font-bold shadow-inner" />
+                                    <input type="text" value={selectedItem.style_props?.margin || ''} placeholder={computedStyles?.margin} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, margin: e.target.value } })} className="w-full p-3 bg-gray-50 border-none rounded-xl text-xs font-bold shadow-inner" onBlur={handlePushHistory} />
                                 </div>
                             </div>
                         </div>
@@ -469,18 +539,18 @@ const Content = () => {
                                     <span className="text-[9px] font-black text-gray-400 ml-1">TEXT COLOR</span>
                                     <div className="flex gap-2">
                                         <div className="w-10 h-10 rounded-xl overflow-hidden relative border-4 border-white shadow-lg">
-                                            <input type="color" value={selectedItem.style_props?.color?.startsWith('#') ? selectedItem.style_props.color : (computedStyles?.color?.startsWith('#') ? computedStyles.color : '#000000')} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, color: e.target.value } })} className="absolute inset-[-10px] w-[200%] h-[200%] cursor-pointer" />
+                                            <input type="color" value={selectedItem.style_props?.color?.startsWith('#') ? selectedItem.style_props.color : (computedStyles?.color?.startsWith('#') ? computedStyles.color : '#000000')} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, color: e.target.value } })} className="absolute inset-[-10px] w-[200%] h-[200%] cursor-pointer" onBlur={handlePushHistory} />
                                         </div>
-                                        <input type="text" value={selectedItem.style_props?.color || ''} placeholder={computedStyles?.color} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, color: e.target.value } })} className="flex-1 bg-gray-50 border-none rounded-xl text-[10px] uppercase font-black text-center shadow-inner" />
+                                        <input type="text" value={selectedItem.style_props?.color || ''} placeholder={computedStyles?.color} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, color: e.target.value } })} className="flex-1 bg-gray-50 border-none rounded-xl text-[10px] uppercase font-black text-center shadow-inner" onBlur={handlePushHistory} />
                                     </div>
                                 </div>
                                 <div className="space-y-2">
                                     <span className="text-[9px] font-black text-gray-400 ml-1">BACKGROUND</span>
                                     <div className="flex gap-2">
                                         <div className="w-10 h-10 rounded-xl overflow-hidden relative border-4 border-white shadow-lg">
-                                            <input type="color" value={selectedItem.style_props?.backgroundColor?.startsWith('#') ? selectedItem.style_props.backgroundColor : (computedStyles?.backgroundColor?.startsWith('#') ? computedStyles.backgroundColor : '#FFFFFF')} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, backgroundColor: e.target.value } })} className="absolute inset-[-10px] w-[200%] h-[200%] cursor-pointer" />
+                                            <input type="color" value={selectedItem.style_props?.backgroundColor?.startsWith('#') ? selectedItem.style_props.backgroundColor : (computedStyles?.backgroundColor?.startsWith('#') ? computedStyles.backgroundColor : '#FFFFFF')} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, backgroundColor: e.target.value } })} className="absolute inset-[-10px] w-[200%] h-[200%] cursor-pointer" onBlur={handlePushHistory} />
                                         </div>
-                                        <input type="text" value={selectedItem.style_props?.backgroundColor || ''} placeholder={computedStyles?.backgroundColor || 'Transparent'} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, backgroundColor: e.target.value } })} className="flex-1 bg-gray-50 border-none rounded-xl text-[10px] uppercase font-black text-center shadow-inner" />
+                                        <input type="text" value={selectedItem.style_props?.backgroundColor || ''} placeholder={computedStyles?.backgroundColor || 'Transparent'} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, backgroundColor: e.target.value } })} className="flex-1 bg-gray-50 border-none rounded-xl text-[10px] uppercase font-black text-center shadow-inner" onBlur={handlePushHistory} />
                                     </div>
                                 </div>
                             </div>
@@ -491,20 +561,20 @@ const Content = () => {
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <span className="text-[9px] font-black text-gray-400 ml-1">BORDER RADIUS</span>
-                                    <input type="text" value={selectedItem.style_props?.borderRadius || ''} placeholder={computedStyles?.borderRadius} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, borderRadius: e.target.value } })} className="w-full p-3 bg-gray-50 border-none rounded-xl text-xs font-bold shadow-inner" />
+                                    <input type="text" value={selectedItem.style_props?.borderRadius || ''} placeholder={computedStyles?.borderRadius} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, borderRadius: e.target.value } })} className="w-full p-3 bg-gray-50 border-none rounded-xl text-xs font-bold shadow-inner" onBlur={handlePushHistory} />
                                 </div>
                                 <div className="space-y-2">
                                     <span className="text-[9px] font-black text-gray-400 ml-1">BORDER WIDTH</span>
-                                    <input type="text" value={selectedItem.style_props?.borderWidth || ''} placeholder={computedStyles?.borderWidth} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, borderWidth: e.target.value } })} className="w-full p-3 bg-gray-50 border-none rounded-xl text-xs font-bold shadow-inner" />
+                                    <input type="text" value={selectedItem.style_props?.borderWidth || ''} placeholder={computedStyles?.borderWidth} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, borderWidth: e.target.value } })} className="w-full p-3 bg-gray-50 border-none rounded-xl text-xs font-bold shadow-inner" onBlur={handlePushHistory} />
                                 </div>
                             </div>
                             <div className="space-y-2">
                                 <span className="text-[9px] font-black text-gray-400 ml-1">BORDER COLOR</span>
                                 <div className="flex gap-2">
                                     <div className="w-10 h-10 rounded-xl overflow-hidden relative border-4 border-white shadow-lg">
-                                        <input type="color" value={selectedItem.style_props?.borderColor?.startsWith('#') ? selectedItem.style_props.borderColor : (computedStyles?.borderColor?.startsWith('#') ? computedStyles.borderColor : '#000000')} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, borderColor: e.target.value } })} className="absolute inset-[-10px] w-[200%] h-[200%] cursor-pointer" />
+                                        <input type="color" value={selectedItem.style_props?.borderColor?.startsWith('#') ? selectedItem.style_props.borderColor : (computedStyles?.borderColor?.startsWith('#') ? computedStyles.borderColor : '#000000')} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, borderColor: e.target.value } })} className="absolute inset-[-10px] w-[200%] h-[200%] cursor-pointer" onBlur={handlePushHistory} />
                                     </div>
-                                    <input type="text" value={selectedItem.style_props?.borderColor || ''} placeholder={computedStyles?.borderColor} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, borderColor: e.target.value } })} className="flex-1 bg-gray-50 border-none rounded-xl text-[10px] uppercase font-black text-center shadow-inner" />
+                                    <input type="text" value={selectedItem.style_props?.borderColor || ''} placeholder={computedStyles?.borderColor} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, borderColor: e.target.value } })} className="flex-1 bg-gray-50 border-none rounded-xl text-[10px] uppercase font-black text-center shadow-inner" onBlur={handlePushHistory} />
                                 </div>
                             </div>
                         </div>
@@ -545,27 +615,27 @@ const Content = () => {
                                 <span className="text-[9px] font-black text-gray-400 ml-1 uppercase tracking-widest">Accent Color</span>
                                 <div className="flex gap-2">
                                     <div className="w-10 h-10 rounded-xl overflow-hidden relative border-4 border-white shadow-lg">
-                                        <input type="color" value={themeSettings.colors.accent} onChange={(e) => updateTheme({ ...themeSettings, colors: { ...themeSettings.colors, accent: e.target.value } })} className="absolute inset-[-10px] w-[200%] h-[200%] cursor-pointer" />
+                                        <input type="color" value={themeSettings.colors.accent} onChange={(e) => updateTheme({ ...themeSettings, colors: { ...themeSettings.colors, accent: e.target.value } })} className="absolute inset-[-10px] w-[200%] h-[200%] cursor-pointer" onBlur={handlePushHistory} />
                                     </div>
-                                    <input type="text" value={themeSettings.colors.accent} onChange={(e) => updateTheme({ ...themeSettings, colors: { ...themeSettings.colors, accent: e.target.value } })} className="flex-1 bg-gray-50 border-none rounded-xl text-[10px] uppercase font-black text-center shadow-inner" />
+                                    <input type="text" value={themeSettings.colors.accent} onChange={(e) => updateTheme({ ...themeSettings, colors: { ...themeSettings.colors, accent: e.target.value } })} className="flex-1 bg-gray-50 border-none rounded-xl text-[10px] uppercase font-black text-center shadow-inner" onBlur={handlePushHistory} />
                                 </div>
                             </div>
                             <div className="space-y-2">
                                 <span className="text-[9px] font-black text-gray-400 ml-1 uppercase tracking-widest">Primary Color</span>
                                 <div className="flex gap-2">
                                     <div className="w-10 h-10 rounded-xl overflow-hidden relative border-4 border-white shadow-lg">
-                                        <input type="color" value={themeSettings.colors.primary} onChange={(e) => updateTheme({ ...themeSettings, colors: { ...themeSettings.colors, primary: e.target.value } })} className="absolute inset-[-10px] w-[200%] h-[200%] cursor-pointer" />
+                                        <input type="color" value={themeSettings.colors.primary} onChange={(e) => updateTheme({ ...themeSettings, colors: { ...themeSettings.colors, primary: e.target.value } })} className="absolute inset-[-10px] w-[200%] h-[200%] cursor-pointer" onBlur={handlePushHistory} />
                                     </div>
-                                    <input type="text" value={themeSettings.colors.primary} onChange={(e) => updateTheme({ ...themeSettings, colors: { ...themeSettings.colors, primary: e.target.value } })} className="flex-1 bg-gray-50 border-none rounded-xl text-[10px] uppercase font-black text-center shadow-inner" />
+                                    <input type="text" value={themeSettings.colors.primary} onChange={(e) => updateTheme({ ...themeSettings, colors: { ...themeSettings.colors, primary: e.target.value } })} className="flex-1 bg-gray-50 border-none rounded-xl text-[10px] uppercase font-black text-center shadow-inner" onBlur={handlePushHistory} />
                                 </div>
                             </div>
                             <div className="space-y-2">
                                 <span className="text-[9px] font-black text-gray-400 ml-1 uppercase tracking-widest">Secondary Color</span>
                                 <div className="flex gap-2">
                                     <div className="w-10 h-10 rounded-xl overflow-hidden relative border-4 border-white shadow-lg">
-                                        <input type="color" value={themeSettings.colors.secondary} onChange={(e) => updateTheme({ ...themeSettings, colors: { ...themeSettings.colors, secondary: e.target.value } })} className="absolute inset-[-10px] w-[200%] h-[200%] cursor-pointer" />
+                                        <input type="color" value={themeSettings.colors.secondary} onChange={(e) => updateTheme({ ...themeSettings, colors: { ...themeSettings.colors, secondary: e.target.value } })} className="absolute inset-[-10px] w-[200%] h-[200%] cursor-pointer" onBlur={handlePushHistory} />
                                     </div>
-                                    <input type="text" value={themeSettings.colors.secondary} onChange={(e) => updateTheme({ ...themeSettings, colors: { ...themeSettings.colors, secondary: e.target.value } })} className="flex-1 bg-gray-50 border-none rounded-xl text-[10px] uppercase font-black text-center shadow-inner" />
+                                    <input type="text" value={themeSettings.colors.secondary} onChange={(e) => updateTheme({ ...themeSettings, colors: { ...themeSettings.colors, secondary: e.target.value } })} className="flex-1 bg-gray-50 border-none rounded-xl text-[10px] uppercase font-black text-center shadow-inner" onBlur={handlePushHistory} />
                                 </div>
                             </div>
                         </div>
@@ -576,11 +646,11 @@ const Content = () => {
                         <div className="space-y-4">
                             <div className="space-y-2">
                                 <span className="text-[9px] font-black text-gray-400 ml-1 uppercase tracking-widest">Section Padding</span>
-                                <input type="text" value={themeSettings.ui.sectionPadding} onChange={(e) => updateTheme({ ...themeSettings, ui: { ...themeSettings.ui, sectionPadding: e.target.value } })} className="w-full p-3 bg-gray-50 border-none rounded-xl text-xs font-bold shadow-inner" />
+                                <input type="text" value={themeSettings.ui.sectionPadding} onChange={(e) => updateTheme({ ...themeSettings, ui: { ...themeSettings.ui, sectionPadding: e.target.value } })} className="w-full p-3 bg-gray-50 border-none rounded-xl text-xs font-bold shadow-inner" onBlur={handlePushHistory} />
                             </div>
                             <div className="space-y-2">
                                 <span className="text-[9px] font-black text-gray-400 ml-1 uppercase tracking-widest">Max Width</span>
-                                <input type="text" value={themeSettings.ui.maxWidth} onChange={(e) => updateTheme({ ...themeSettings, ui: { ...themeSettings.ui, maxWidth: e.target.value } })} className="w-full p-3 bg-gray-50 border-none rounded-xl text-xs font-bold shadow-inner" />
+                                <input type="text" value={themeSettings.ui.maxWidth} onChange={(e) => updateTheme({ ...themeSettings, ui: { ...themeSettings.ui, maxWidth: e.target.value } })} className="w-full p-3 bg-gray-50 border-none rounded-xl text-xs font-bold shadow-inner" onBlur={handlePushHistory} />
                             </div>
                         </div>
                     </div>
@@ -590,7 +660,7 @@ const Content = () => {
                         <div className="space-y-4">
                             <div className="space-y-2">
                                 <span className="text-[9px] font-black text-gray-400 ml-1 uppercase tracking-widest">Global Border Radius</span>
-                                <input type="text" value={themeSettings.ui.borderRadius} onChange={(e) => updateTheme({ ...themeSettings, ui: { ...themeSettings.ui, borderRadius: e.target.value } })} className="w-full p-3 bg-gray-50 border-none rounded-xl text-xs font-bold shadow-inner" />
+                                <input type="text" value={themeSettings.ui.borderRadius} onChange={(e) => updateTheme({ ...themeSettings, ui: { ...themeSettings.ui, borderRadius: e.target.value } })} className="w-full p-3 bg-gray-50 border-none rounded-xl text-xs font-bold shadow-inner" onBlur={handlePushHistory} />
                             </div>
                         </div>
                     </div>
