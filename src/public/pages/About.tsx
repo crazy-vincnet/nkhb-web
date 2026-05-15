@@ -101,7 +101,7 @@ const About: React.FC = () => {
                         <div className="ministry-grid">
                             {[1, 2, 3, 4].map((i) => (
                                 <div className="ministry-card" key={i}>
-                                    <div className="card-icon-svg" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto 20px' }}>
+                                    <div className="card-icon-svg" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto 20px', fontSize: '2.5rem' }}>
                                         {i === 1 ? '📢' : i === 2 ? '📖' : i === 3 ? '🤝' : '🆘'}
                                     </div>
                                     <Editable k={`about_ministry_card${i}_title`} headless>
