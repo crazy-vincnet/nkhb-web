@@ -1,27 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import Hero from '../components/Hero';
-import Background from '../components/Background';
-import Composition from '../components/Composition';
-import Effects from '../components/Effects';
-import QuoteBanner from '../components/QuoteBanner';
-import Reach from '../components/Reach';
-import Guide from '../components/Guide';
-import Support from '../components/Support';
-import SupportEn from '../components/SupportEn';
-import Schedule from '../components/Schedule';
 import ArticleModal from '../components/ArticleModal';
 import LetterModal from '../components/LetterModal';
 import SampleModal from '../components/SampleModal';
 import SEO from '../components/SEO';
 import { useI18n } from '../lib/i18n';
+import { HOME_SECTION_MAP, HOME_DEFAULT_LAYOUT } from '../lib/registry';
 
 const Home: React.FC = () => {
-    const { lang } = useI18n();
+    const { getContent, lang } = useI18n();
     const location = useLocation();
     const [isArticleModalOpen, setIsArticleModalOpen] = useState(false);
     const [isLetterModalOpen, setIsLetterModalOpen] = useState(false);
     const [isSampleModalOpen, setIsSampleModalOpen] = useState(false);
+
+    const layoutData = getContent('page_layout_home');
+    const layout = Array.isArray(layoutData.styles?.order) ? (layoutData.styles.order as string[]) : HOME_DEFAULT_LAYOUT;
 
     useEffect(() => {
         // Handle smooth scrolling for hash links whenever location changes
@@ -45,17 +39,18 @@ const Home: React.FC = () => {
         <>
             <SEO slug="home" />
             <main>
-                <Hero />
-                <Background onOpenArticle={() => setIsArticleModalOpen(true)} />
-                <Composition onOpenSample={() => setIsSampleModalOpen(true)} />
-                <Effects />
-                <QuoteBanner />
-                <Reach />
-                <Guide onOpenLetter={() => setIsLetterModalOpen(true)} />
-                
-                {lang === 'ko' ? <Support /> : <SupportEn />}
-                
-                <Schedule />
+                {layout.map((key: string) => {
+                    const id = key === 'support' && lang === 'en' ? 'support_en' : key;
+                    const Component = HOME_SECTION_MAP[id];
+                    if (!Component) return null;
+
+                    const props: any = {};
+                    if (key === 'background') props.onOpenArticle = () => setIsArticleModalOpen(true);
+                    if (key === 'composition') props.onOpenSample = () => setIsSampleModalOpen(true);
+                    if (key === 'guide') props.onOpenLetter = () => setIsLetterModalOpen(true);
+
+                    return <Component key={key} {...props} />;
+                })}
             </main>
 
             <ArticleModal 
