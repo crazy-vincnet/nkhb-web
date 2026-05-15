@@ -345,10 +345,10 @@ const Content = () => {
         const isOptimized = result.type === 'image/webp';
         const fileExt = isOptimized ? 'webp' : file.name.split('.').pop();
         const fileName = `${selectedKey}-${field}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-        const filePath = `site-assets/${fileName}`;
+        const filePath = `cms/${fileName}`;
 
         const { error: uploadError } = await supabase.storage
-            .from('images')
+            .from('assets')
             .upload(filePath, result, {
                 contentType: result.type,
                 upsert: true
@@ -357,7 +357,7 @@ const Content = () => {
         if (uploadError) throw uploadError;
 
         const { data: { publicUrl } } = supabase.storage
-            .from('images')
+            .from('assets')
             .getPublicUrl(filePath);
 
         updateItem(selectedKey, { [field]: publicUrl });
