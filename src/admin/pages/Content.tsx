@@ -16,8 +16,10 @@ import {
   ExternalLink,
   ImageIcon,
   Layout as LayoutIcon,
-  Info
+  Info,
+  GripVertical
 } from 'lucide-react';
+import { SECTION_LABELS, HOME_DEFAULT_LAYOUT, ABOUT_DEFAULT_LAYOUT } from '../../public/lib/registry';
 
 interface StyleProps {
   fontSize?: string;
@@ -53,8 +55,68 @@ const Content = () => {
   const [uploading, setUploading] = useState(false);
   const [modifiedKeys, setModifiedIds] = useState<Set<string>>(new Set());
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [activeTab, setActiveTab] = useState<'properties' | 'structure'>('properties');
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   
   const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  const getLayoutKey = () => currentPage === '/' ? 'page_layout_home' : 'page_layout_about';
+  const getDefaultLayout = () => currentPage === '/' ? HOME_DEFAULT_LAYOUT : ABOUT_DEFAULT_LAYOUT;
+  
+  const currentLayoutItem = items.find(i => i.key === getLayoutKey());
+  const currentLayout = currentLayoutItem?.style_props?.order || getDefaultLayout();
+
+  const handleDragStart = (index: number) => {
+    setDraggedIndex(index);
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === index) return;
+
+    const newLayout = [...currentLayout];
+    const draggedItem = newLayout[draggedIndex];
+    newLayout.splice(draggedIndex, 1);
+    newLayout.splice(index, 0, draggedItem);
+
+    setDraggedIndex(index);
+    updateLayout(newLayout);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+  };
+
+  const updateLayout = (newOrder: string[]) => {
+    const layoutKey = getLayoutKey();
+    
+    setItems(prev => {
+        const exists = prev.some(i => i.key === layoutKey);
+        if (exists) {
+            return prev.map(i => i.key === layoutKey ? { ...i, style_props: { ...i.style_props, order: newOrder } } : i);
+        } else {
+            const newItem: ContentItem = {
+                id: `new-${layoutKey}-${Date.now()}`,
+                key: layoutKey,
+                value_ko: '',
+                value_en: '',
+                style_props: { order: newOrder }
+            };
+            return [...prev, newItem];
+        }
+    });
+    setModifiedIds(prev => new Set(prev).add(layoutKey));
+
+    if (iframeRef.current?.contentWindow) {
+      iframeRef.current.contentWindow.postMessage({
+        type: 'NKHB_LIVE_UPDATE',
+        key: layoutKey,
+        data: {
+            styles: { order: newOrder }
+        }
+      }, '*');
+    }
+  };
 
   useEffect(() => {
     fetchContent();
@@ -254,132 +316,171 @@ const Content = () => {
       </div>
 
       <aside className={`w-96 bg-white border-l shadow-[-20px_0_50px_rgba(0,0,0,0.05)] transition-all duration-500 z-30 flex flex-col ${sidebarOpen ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0 absolute right-0'}`}>
-        <div className="p-8 border-b flex items-center justify-between">
-            <h2 className="text-lg font-black text-gray-900 uppercase tracking-tight">Property Editor</h2>
-            <button onClick={() => { setSelectedKey(null); setSidebarOpen(false); }} className="p-2 hover:bg-gray-100 rounded-full transition-colors"><X className="w-5 h-5 text-gray-400" /></button>
+        <div className="p-8 border-b flex flex-col gap-6">
+            <div className="flex items-center justify-between">
+                <h2 className="text-lg font-black text-gray-900 uppercase tracking-tight">Visual Editor</h2>
+                <button onClick={() => { setSelectedKey(null); setSidebarOpen(false); }} className="p-2 hover:bg-gray-100 rounded-full transition-colors"><X className="w-5 h-5 text-gray-400" /></button>
+            </div>
+            <div className="flex bg-gray-100 p-1 rounded-xl">
+                <button 
+                    onClick={() => setActiveTab('properties')}
+                    className={`flex-1 py-2 rounded-lg text-[10px] font-black transition-all ${activeTab === 'properties' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+                >
+                    PROPERTIES
+                </button>
+                <button 
+                    onClick={() => setActiveTab('structure')}
+                    className={`flex-1 py-2 rounded-lg text-[10px] font-black transition-all ${activeTab === 'structure' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+                >
+                    STRUCTURE
+                </button>
+            </div>
         </div>
 
         <div className="flex-1 overflow-y-auto p-8 space-y-10 custom-scrollbar">
-            {selectedItem ? (
-                <div className="space-y-10 animate-in fade-in slide-in-from-right-4 duration-300">
-                    <div className="space-y-6">
-                        <label className="text-[11px] font-black text-blue-600 flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-full w-fit"><Type className="w-3.5 h-3.5" /> TEXT CONTENT</label>
-                        <div className="space-y-5">
-                            <div className="space-y-2">
-                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">KOREAN</span>
-                                <textarea value={selectedItem.value_ko} onChange={(e) => updateItem(selectedKey!, { value_ko: e.target.value })} className="w-full p-4 bg-gray-50 border-none rounded-2xl text-sm focus:ring-2 focus:ring-blue-500 min-h-[120px] resize-none leading-relaxed shadow-inner" />
-                            </div>
-                            <div className="space-y-2">
-                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">ENGLISH</span>
-                                <textarea value={selectedItem.value_en} onChange={(e) => updateItem(selectedKey!, { value_en: e.target.value })} className="w-full p-4 bg-gray-50 border-none rounded-2xl text-sm focus:ring-2 focus:ring-blue-500 min-h-[120px] resize-none leading-relaxed shadow-inner" />
+            {activeTab === 'properties' ? (
+                selectedItem ? (
+                    <div className="space-y-10 animate-in fade-in slide-in-from-right-4 duration-300">
+                        <div className="space-y-6">
+                            <label className="text-[11px] font-black text-blue-600 flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-full w-fit"><Type className="w-3.5 h-3.5" /> TEXT CONTENT</label>
+                            <div className="space-y-5">
+                                <div className="space-y-2">
+                                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">KOREAN</span>
+                                    <textarea value={selectedItem.value_ko} onChange={(e) => updateItem(selectedKey!, { value_ko: e.target.value })} className="w-full p-4 bg-gray-50 border-none rounded-2xl text-sm focus:ring-2 focus:ring-blue-500 min-h-[120px] resize-none leading-relaxed shadow-inner" />
+                                </div>
+                                <div className="space-y-2">
+                                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">ENGLISH</span>
+                                    <textarea value={selectedItem.value_en} onChange={(e) => updateItem(selectedKey!, { value_en: e.target.value })} className="w-full p-4 bg-gray-50 border-none rounded-2xl text-sm focus:ring-2 focus:ring-blue-500 min-h-[120px] resize-none leading-relaxed shadow-inner" />
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div className="space-y-4">
-                        <label className="text-[11px] font-black text-indigo-600 flex items-center gap-2 bg-indigo-50 px-3 py-1.5 rounded-full w-fit">{isImageKey ? <ImageIcon className="w-3.5 h-3.5" /> : <LinkIcon className="w-3.5 h-3.5" />} {isImageKey ? 'BILINGUAL IMAGE ASSETS' : 'LINK / URL'}</label>
-                        {isImageKey ? (
-                            <div className="grid grid-cols-1 gap-6">
-                                {/* Korean Image */}
-                                <div className="space-y-3">
-                                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">KOREAN LOGO / IMAGE</span>
-                                    <div className="w-full aspect-video bg-gray-50 rounded-2xl overflow-hidden border border-gray-100 flex items-center justify-center relative group/img">
-                                        {selectedItem.value_ko ? <img src={selectedItem.value_ko} alt="KO Preview" className="max-h-full max-w-full object-contain" /> : <ImageIcon className="text-gray-200 w-12 h-12" />}
-                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
-                                            <label className={`bg-white text-gray-900 px-4 py-2 rounded-xl text-[10px] font-black cursor-pointer shadow-xl transform translate-y-2 group-hover/img:translate-y-0 transition-transform flex items-center gap-2 ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
-                                                {uploading ? <Loader2 className="w-3 h-3 animate-spin" /> : 'CHANGE KO IMAGE'}
-                                                <input type="file" className="hidden" accept="image/*" onChange={(e) => handleLanguageFileUpload(e, 'value_ko')} />
-                                            </label>
+                        <div className="space-y-4">
+                            <label className="text-[11px] font-black text-indigo-600 flex items-center gap-2 bg-indigo-50 px-3 py-1.5 rounded-full w-fit">{isImageKey ? <ImageIcon className="w-3.5 h-3.5" /> : <LinkIcon className="w-3.5 h-3.5" />} {isImageKey ? 'BILINGUAL IMAGE ASSETS' : 'LINK / URL'}</label>
+                            {isImageKey ? (
+                                <div className="grid grid-cols-1 gap-6">
+                                    {/* Korean Image */}
+                                    <div className="space-y-3">
+                                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">KOREAN LOGO / IMAGE</span>
+                                        <div className="w-full aspect-video bg-gray-50 rounded-2xl overflow-hidden border border-gray-100 flex items-center justify-center relative group/img">
+                                            {selectedItem.value_ko ? <img src={selectedItem.value_ko} alt="KO Preview" className="max-h-full max-w-full object-contain" /> : <ImageIcon className="text-gray-200 w-12 h-12" />}
+                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
+                                                <label className={`bg-white text-gray-900 px-4 py-2 rounded-xl text-[10px] font-black cursor-pointer shadow-xl transform translate-y-2 group-hover/img:translate-y-0 transition-transform flex items-center gap-2 ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                                                    {uploading ? <Loader2 className="w-3 h-3 animate-spin" /> : 'CHANGE KO IMAGE'}
+                                                    <input type="file" className="hidden" accept="image/*" onChange={(e) => handleLanguageFileUpload(e, 'value_ko')} />
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {/* English Image */}
+                                    <div className="space-y-3">
+                                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">ENGLISH LOGO / IMAGE</span>
+                                        <div className="w-full aspect-video bg-gray-50 rounded-2xl overflow-hidden border border-gray-100 flex items-center justify-center relative group/img">
+                                            {selectedItem.value_en ? <img src={selectedItem.value_en} alt="EN Preview" className="max-h-full max-w-full object-contain" /> : <ImageIcon className="text-gray-200 w-12 h-12" />}
+                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
+                                                <label className={`bg-white text-gray-900 px-4 py-2 rounded-xl text-[10px] font-black cursor-pointer shadow-xl transform translate-y-2 group-hover/img:translate-y-0 transition-transform flex items-center gap-2 ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                                                    {uploading ? <Loader2 className="w-3 h-3 animate-spin" /> : 'CHANGE EN IMAGE'}
+                                                    <input type="file" className="hidden" accept="image/*" onChange={(e) => handleLanguageFileUpload(e, 'value_en')} />
+                                                </label>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                                {/* English Image */}
-                                <div className="space-y-3">
-                                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">ENGLISH LOGO / IMAGE</span>
-                                    <div className="w-full aspect-video bg-gray-50 rounded-2xl overflow-hidden border border-gray-100 flex items-center justify-center relative group/img">
-                                        {selectedItem.value_en ? <img src={selectedItem.value_en} alt="EN Preview" className="max-h-full max-w-full object-contain" /> : <ImageIcon className="text-gray-200 w-12 h-12" />}
-                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
-                                            <label className={`bg-white text-gray-900 px-4 py-2 rounded-xl text-[10px] font-black cursor-pointer shadow-xl transform translate-y-2 group-hover/img:translate-y-0 transition-transform flex items-center gap-2 ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
-                                                {uploading ? <Loader2 className="w-3 h-3 animate-spin" /> : 'CHANGE EN IMAGE'}
-                                                <input type="file" className="hidden" accept="image/*" onChange={(e) => handleLanguageFileUpload(e, 'value_en')} />
-                                            </label>
+                            ) : (
+                                <div className="relative group">
+                                    <input type="text" value={selectedItem.style_props?.link || ''} placeholder="https://... 또는 /path" onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, link: e.target.value } })} className="w-full p-4 bg-gray-50 border-none rounded-2xl text-xs font-mono focus:ring-2 focus:ring-indigo-500 shadow-inner" />
+                                    <Globe className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 group-focus-within:text-indigo-500" />
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="space-y-4">
+                            <label className="text-[11px] font-black text-emerald-600 flex items-center gap-2 bg-emerald-50 px-3 py-1.5 rounded-full w-fit"><Maximize className="w-3.5 h-3.5" /> SIZE & SPACING</label>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <span className="text-[9px] font-black text-gray-400 ml-1">FONT SIZE</span>
+                                    <input type="text" value={selectedItem.style_props?.fontSize || ''} placeholder={computedStyles?.fontSize} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, fontSize: e.target.value } })} className="w-full p-3 bg-gray-50 border-none rounded-xl text-xs font-bold shadow-inner" />
+                                </div>
+                                <div className="space-y-2">
+                                    <span className="text-[9px] font-black text-gray-400 ml-1">MARGIN</span>
+                                    <input type="text" value={selectedItem.style_props?.margin || ''} placeholder={computedStyles?.margin} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, margin: e.target.value } })} className="w-full p-3 bg-gray-50 border-none rounded-xl text-xs font-bold shadow-inner" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="space-y-4">
+                            <label className="text-[11px] font-black text-rose-600 flex items-center gap-2 bg-rose-50 px-3 py-1.5 rounded-full w-fit"><Palette className="w-3.5 h-3.5" /> COLORS & BACKGROUND</label>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <span className="text-[9px] font-black text-gray-400 ml-1">TEXT COLOR</span>
+                                    <div className="flex gap-2">
+                                        <div className="w-10 h-10 rounded-xl overflow-hidden relative border-4 border-white shadow-lg">
+                                            <input type="color" value={selectedItem.style_props?.color?.startsWith('#') ? selectedItem.style_props.color : (computedStyles?.color?.startsWith('#') ? computedStyles.color : '#000000')} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, color: e.target.value } })} className="absolute inset-[-10px] w-[200%] h-[200%] cursor-pointer" />
                                         </div>
+                                        <input type="text" value={selectedItem.style_props?.color || ''} placeholder={computedStyles?.color} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, color: e.target.value } })} className="flex-1 bg-gray-50 border-none rounded-xl text-[10px] uppercase font-black text-center shadow-inner" />
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <span className="text-[9px] font-black text-gray-400 ml-1">BACKGROUND</span>
+                                    <div className="flex gap-2">
+                                        <div className="w-10 h-10 rounded-xl overflow-hidden relative border-4 border-white shadow-lg">
+                                            <input type="color" value={selectedItem.style_props?.backgroundColor?.startsWith('#') ? selectedItem.style_props.backgroundColor : (computedStyles?.backgroundColor?.startsWith('#') ? computedStyles.backgroundColor : '#FFFFFF')} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, backgroundColor: e.target.value } })} className="absolute inset-[-10px] w-[200%] h-[200%] cursor-pointer" />
+                                        </div>
+                                        <input type="text" value={selectedItem.style_props?.backgroundColor || ''} placeholder={computedStyles?.backgroundColor || 'Transparent'} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, backgroundColor: e.target.value } })} className="flex-1 bg-gray-50 border-none rounded-xl text-[10px] uppercase font-black text-center shadow-inner" />
                                     </div>
                                 </div>
                             </div>
-                        ) : (
-                            <div className="relative group">
-                                <input type="text" value={selectedItem.style_props?.link || ''} placeholder="https://... 또는 /path" onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, link: e.target.value } })} className="w-full p-4 bg-gray-50 border-none rounded-2xl text-xs font-mono focus:ring-2 focus:ring-indigo-500 shadow-inner" />
-                                <Globe className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 group-focus-within:text-indigo-500" />
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="space-y-4">
-                        <label className="text-[11px] font-black text-emerald-600 flex items-center gap-2 bg-emerald-50 px-3 py-1.5 rounded-full w-fit"><Maximize className="w-3.5 h-3.5" /> SIZE & SPACING</label>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <span className="text-[9px] font-black text-gray-400 ml-1">FONT SIZE</span>
-                                <input type="text" value={selectedItem.style_props?.fontSize || ''} placeholder={computedStyles?.fontSize} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, fontSize: e.target.value } })} className="w-full p-3 bg-gray-50 border-none rounded-xl text-xs font-bold shadow-inner" />
-                            </div>
-                            <div className="space-y-2">
-                                <span className="text-[9px] font-black text-gray-400 ml-1">MARGIN</span>
-                                <input type="text" value={selectedItem.style_props?.margin || ''} placeholder={computedStyles?.margin} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, margin: e.target.value } })} className="w-full p-3 bg-gray-50 border-none rounded-xl text-xs font-bold shadow-inner" />
-                            </div>
                         </div>
-                    </div>
 
-                    <div className="space-y-4">
-                        <label className="text-[11px] font-black text-rose-600 flex items-center gap-2 bg-rose-50 px-3 py-1.5 rounded-full w-fit"><Palette className="w-3.5 h-3.5" /> COLORS & BACKGROUND</label>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-4">
+                            <label className="text-[11px] font-black text-amber-600 flex items-center gap-2 bg-amber-50 px-3 py-1.5 rounded-full w-fit"><Maximize className="w-3.5 h-3.5" /> BORDERS & ROUNDING</label>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <span className="text-[9px] font-black text-gray-400 ml-1">BORDER RADIUS</span>
+                                    <input type="text" value={selectedItem.style_props?.borderRadius || ''} placeholder={computedStyles?.borderRadius} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, borderRadius: e.target.value } })} className="w-full p-3 bg-gray-50 border-none rounded-xl text-xs font-bold shadow-inner" />
+                                </div>
+                                <div className="space-y-2">
+                                    <span className="text-[9px] font-black text-gray-400 ml-1">BORDER WIDTH</span>
+                                    <input type="text" value={selectedItem.style_props?.borderWidth || ''} placeholder={computedStyles?.borderWidth} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, borderWidth: e.target.value } })} className="w-full p-3 bg-gray-50 border-none rounded-xl text-xs font-bold shadow-inner" />
+                                </div>
+                            </div>
                             <div className="space-y-2">
-                                <span className="text-[9px] font-black text-gray-400 ml-1">TEXT COLOR</span>
+                                <span className="text-[9px] font-black text-gray-400 ml-1">BORDER COLOR</span>
                                 <div className="flex gap-2">
                                     <div className="w-10 h-10 rounded-xl overflow-hidden relative border-4 border-white shadow-lg">
-                                        <input type="color" value={selectedItem.style_props?.color?.startsWith('#') ? selectedItem.style_props.color : (computedStyles?.color?.startsWith('#') ? computedStyles.color : '#000000')} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, color: e.target.value } })} className="absolute inset-[-10px] w-[200%] h-[200%] cursor-pointer" />
+                                        <input type="color" value={selectedItem.style_props?.borderColor?.startsWith('#') ? selectedItem.style_props.borderColor : (computedStyles?.borderColor?.startsWith('#') ? computedStyles.borderColor : '#000000')} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, borderColor: e.target.value } })} className="absolute inset-[-10px] w-[200%] h-[200%] cursor-pointer" />
                                     </div>
-                                    <input type="text" value={selectedItem.style_props?.color || ''} placeholder={computedStyles?.color} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, color: e.target.value } })} className="flex-1 bg-gray-50 border-none rounded-xl text-[10px] uppercase font-black text-center shadow-inner" />
-                                </div>
-                            </div>
-                            <div className="space-y-2">
-                                <span className="text-[9px] font-black text-gray-400 ml-1">BACKGROUND</span>
-                                <div className="flex gap-2">
-                                    <div className="w-10 h-10 rounded-xl overflow-hidden relative border-4 border-white shadow-lg">
-                                        <input type="color" value={selectedItem.style_props?.backgroundColor?.startsWith('#') ? selectedItem.style_props.backgroundColor : (computedStyles?.backgroundColor?.startsWith('#') ? computedStyles.backgroundColor : '#FFFFFF')} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, backgroundColor: e.target.value } })} className="absolute inset-[-10px] w-[200%] h-[200%] cursor-pointer" />
-                                    </div>
-                                    <input type="text" value={selectedItem.style_props?.backgroundColor || ''} placeholder={computedStyles?.backgroundColor || 'Transparent'} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, backgroundColor: e.target.value } })} className="flex-1 bg-gray-50 border-none rounded-xl text-[10px] uppercase font-black text-center shadow-inner" />
+                                    <input type="text" value={selectedItem.style_props?.borderColor || ''} placeholder={computedStyles?.borderColor} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, borderColor: e.target.value } })} className="flex-1 bg-gray-50 border-none rounded-xl text-[10px] uppercase font-black text-center shadow-inner" />
                                 </div>
                             </div>
                         </div>
                     </div>
-
-                    <div className="space-y-4">
-                        <label className="text-[11px] font-black text-amber-600 flex items-center gap-2 bg-amber-50 px-3 py-1.5 rounded-full w-fit"><Maximize className="w-3.5 h-3.5" /> BORDERS & ROUNDING</label>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <span className="text-[9px] font-black text-gray-400 ml-1">BORDER RADIUS</span>
-                                <input type="text" value={selectedItem.style_props?.borderRadius || ''} placeholder={computedStyles?.borderRadius} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, borderRadius: e.target.value } })} className="w-full p-3 bg-gray-50 border-none rounded-xl text-xs font-bold shadow-inner" />
-                            </div>
-                            <div className="space-y-2">
-                                <span className="text-[9px] font-black text-gray-400 ml-1">BORDER WIDTH</span>
-                                <input type="text" value={selectedItem.style_props?.borderWidth || ''} placeholder={computedStyles?.borderWidth} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, borderWidth: e.target.value } })} className="w-full p-3 bg-gray-50 border-none rounded-xl text-xs font-bold shadow-inner" />
-                            </div>
-                        </div>
-                        <div className="space-y-2">
-                            <span className="text-[9px] font-black text-gray-400 ml-1">BORDER COLOR</span>
-                            <div className="flex gap-2">
-                                <div className="w-10 h-10 rounded-xl overflow-hidden relative border-4 border-white shadow-lg">
-                                    <input type="color" value={selectedItem.style_props?.borderColor?.startsWith('#') ? selectedItem.style_props.borderColor : (computedStyles?.borderColor?.startsWith('#') ? computedStyles.borderColor : '#000000')} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, borderColor: e.target.value } })} className="absolute inset-[-10px] w-[200%] h-[200%] cursor-pointer" />
-                                </div>
-                                <input type="text" value={selectedItem.style_props?.borderColor || ''} placeholder={computedStyles?.borderColor} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, borderColor: e.target.value } })} className="flex-1 bg-gray-50 border-none rounded-xl text-[10px] uppercase font-black text-center shadow-inner" />
-                            </div>
-                        </div>
+                ) : (
+                    <div className="h-full flex flex-col items-center justify-center text-center space-y-6 py-20">
+                        <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center shadow-inner"><Monitor className="w-10 h-10 text-gray-300" /></div>
+                        <div className="space-y-2"><p className="text-base font-black text-gray-900 uppercase tracking-tight">Select an Element</p><p className="text-xs text-gray-400 px-8 leading-relaxed font-medium">Click on any text or button in the preview window to start editing its properties.</p></div>
                     </div>
-                </div>
+                )
             ) : (
-                <div className="h-full flex flex-col items-center justify-center text-center space-y-6 py-20">
-                    <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center shadow-inner"><Monitor className="w-10 h-10 text-gray-300" /></div>
-                    <div className="space-y-2"><p className="text-base font-black text-gray-900 uppercase tracking-tight">Select an Element</p><p className="text-xs text-gray-400 px-8 leading-relaxed font-medium">Click on any text or button in the preview window to start editing its properties.</p></div>
+                <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
+                    <label className="text-[11px] font-black text-blue-600 flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-full w-fit mb-6">
+                        <LayoutIcon className="w-3.5 h-3.5" /> PAGE STRUCTURE
+                    </label>
+                    <div className="space-y-2">
+                        {currentLayout.map((sectionKey: string, index: number) => (
+                            <div
+                                key={sectionKey}
+                                draggable
+                                onDragStart={() => handleDragStart(index)}
+                                onDragOver={(e) => handleDragOver(e, index)}
+                                onDragEnd={handleDragEnd}
+                                className={`flex items-center gap-3 p-4 bg-gray-50 rounded-2xl border border-gray-100 cursor-grab active:cursor-grabbing transition-all ${draggedIndex === index ? 'opacity-50 scale-95' : 'hover:shadow-md hover:border-blue-200'}`}
+                            >
+                                <GripVertical className="w-5 h-5 text-gray-400" />
+                                <span className="text-sm font-bold text-gray-700">{SECTION_LABELS[sectionKey] || sectionKey}</span>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             )}
         </div>
