@@ -3,7 +3,7 @@ import { useI18n } from '../lib/i18n';
 
 interface EditableProps {
   k: string;
-  children: (data: { text: string; styles: React.CSSProperties; link?: string }) => React.ReactNode;
+  children: (data: { text: string; styles: React.CSSProperties; link?: string }) => React.ReactElement;
   className?: string;
   as?: string | React.ComponentType<any>;
   headless?: boolean;
@@ -13,6 +13,7 @@ interface EditableProps {
  * Helper to convert rgb(a) color to hex
  */
 const rgbaToHex = (rgba: string) => {
+  if (!rgba) return '';
   const match = rgba.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)$/);
   if (!match) return rgba;
   
@@ -26,7 +27,7 @@ const rgbaToHex = (rgba: string) => {
 
 /**
  * A wrapper component that makes an element selectable in the Admin Visual Editor.
- * Now extracts computed styles and link values to send to the Property Editor.
+ * Refactored to use direct prop injection for cleaner layouts.
  */
 export const Editable: React.FC<EditableProps> = ({ k, children, className = '', as, headless = false }) => {
   const { getContent } = useI18n();
@@ -41,26 +42,21 @@ export const Editable: React.FC<EditableProps> = ({ k, children, className = '',
     if (!isPreview) return;
 
     const handleGlobalClick = (e: MouseEvent) => {
-      // Prevent ANY navigation or default browser actions in preview mode
       const target = e.target as HTMLElement;
       const isLink = target.closest('a') || target.tagName === 'A';
       const isButton = target.closest('button') || target.tagName === 'BUTTON';
 
       if (isLink || isButton) {
         e.preventDefault();
-        // Do NOT call stopPropagation here, otherwise the Editable's onClick won't fire.
-        // We only want to stop the browser's default navigation behavior.
       }
     };
 
-    // Use capture phase to intercept before navigation starts
     window.addEventListener('click', handleGlobalClick, true);
     return () => window.removeEventListener('click', handleGlobalClick, true);
   }, [isPreview]);
 
   const handleClick = (e: React.MouseEvent) => {
     if (isPreview) {
-      // We already preventDefault in the global listener, but we also do it here for extra safety
       e.preventDefault();
       e.stopPropagation();
 
@@ -68,9 +64,10 @@ export const Editable: React.FC<EditableProps> = ({ k, children, className = '',
       let currentLink = data.link;
 
       // Extract real-time computed styles and link from DOM
-      if (elementRef.current) {
-        const el = elementRef.current;
-        const targetEl = el.firstElementChild || el;
+      // We try to find the actual element or its child
+      const el = elementRef.current;
+      if (el) {
+        const targetEl = (el.getAttribute('data-editable-key') ? el : el.firstElementChild) as HTMLElement || el;
         const style = window.getComputedStyle(targetEl);
         
         computedStyles = {
@@ -85,19 +82,16 @@ export const Editable: React.FC<EditableProps> = ({ k, children, className = '',
           borderColor: rgbaToHex(style.borderColor)
         };
 
-        // Deep search for link: check self, then all children
         if (!currentLink) {
             const findLink = (node: HTMLElement): string | null => {
                 if (node.tagName === 'A') return node.getAttribute('href');
-                
                 for (let child of Array.from(node.children)) {
                     const found = findLink(child as HTMLElement);
                     if (found) return found;
                 }
                 return null;
             };
-            const foundLink = findLink(el);
-            if (foundLink) currentLink = foundLink;
+            currentLink = findLink(targetEl) || '';
         }
       }
 
@@ -110,31 +104,39 @@ export const Editable: React.FC<EditableProps> = ({ k, children, className = '',
     }
   };
 
-  const editProps = isPreview ? {
+  const editProps: any = {
     ref: elementRef,
-    onClick: handleClick,
-    className: `${className} cursor-pointer hover:outline hover:outline-2 hover:outline-blue-400 hover:outline-offset-[-2px] transition-all`,
-    'data-editable-key': k
-  } : {
-    className,
     'data-editable-key': k
   };
 
+  if (isPreview) {
+    editProps.onClick = handleClick;
+    editProps.className = `${className} cursor-pointer hover:outline hover:outline-2 hover:outline-blue-500 hover:outline-offset-[-2px] transition-all`;
+    // Ensure large containers have pointer events even if children cover them
+    if (k.startsWith('section')) {
+        editProps.style = { cursor: 'cell' };
+    }
+  } else {
+    editProps.className = className;
+  }
+
+  const child = children(data);
+
   if (headless) {
-    // If headless, we use display: contents to minimize layout impact.
-    // However, for certain flex/grid parents, we still need a wrapper.
-    return (
-      <div {...(editProps as any)} style={{ display: 'contents' }}>
-        {children(data)}
-      </div>
-    );
+    // Inject props directly into the child element to avoid wrapper issues
+    return React.cloneElement(child, {
+        ...editProps,
+        // Merge class names if the child already has one
+        className: `${child.props.className || ''} ${editProps.className || ''}`.trim(),
+        // Prioritize explicit styles from child but allow injection
+        style: { ...child.props.style, ...editProps.style }
+    });
   }
 
   const Component = (as || 'div') as any;
-
   return (
     <Component {...editProps}>
-      {children(data)}
+      {child}
     </Component>
   );
 };
