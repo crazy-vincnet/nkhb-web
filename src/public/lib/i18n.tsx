@@ -201,8 +201,19 @@ export const I18nProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // 1. Detect language from URL path first
+    const path = window.location.pathname;
+    const isEnPath = path.startsWith('/en');
+    
+    // 2. Fallback to saved preference
     const savedLang = localStorage.getItem('lang') as Language;
-    if (savedLang) setLangState(savedLang);
+    
+    if (isEnPath) {
+        setLangState('en');
+    } else if (savedLang) {
+        setLangState(savedLang);
+    }
+    
     fetchContent();
 
     const handleMessage = (event: MessageEvent) => {
