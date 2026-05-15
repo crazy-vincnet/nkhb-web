@@ -55,8 +55,20 @@ const Content = () => {
   const [uploading, setUploading] = useState(false);
   const [modifiedKeys, setModifiedIds] = useState<Set<string>>(new Set());
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [activeTab, setActiveTab] = useState<'properties' | 'structure'>('properties');
+  const [activeTab, setActiveTab] = useState<'properties' | 'structure' | 'theme'>('properties');
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [themeSettings, setThemeSettings] = useState({
+    colors: {
+      accent: '#2563eb',
+      primary: '#1e293b',
+      secondary: '#64748b',
+    },
+    ui: {
+      sectionPadding: '5rem',
+      maxWidth: '1280px',
+      borderRadius: '1rem',
+    }
+  });
   
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
@@ -174,11 +186,47 @@ const Content = () => {
             style_props: item.style_props || {}
         }));
         setItems(normalized);
+
+        const themeItem = normalized.find(i => i.key === 'global_theme_settings');
+        if (themeItem && themeItem.style_props) {
+            setThemeSettings(prev => ({
+                ...prev,
+                ...themeItem.style_props
+            }));
+        }
     }
     setLoading(false);
   };
 
   const selectedItem = items.find(i => i.key === selectedKey);
+
+  const updateTheme = (newSettings: typeof themeSettings) => {
+    setThemeSettings(newSettings);
+    
+    setItems(prev => {
+        const exists = prev.some(i => i.key === 'global_theme_settings');
+        if (exists) {
+            return prev.map(i => i.key === 'global_theme_settings' ? { ...i, style_props: newSettings as any } : i);
+        } else {
+            const newItem: ContentItem = {
+                id: `new-theme-${Date.now()}`,
+                key: 'global_theme_settings',
+                value_ko: '',
+                value_en: '',
+                style_props: newSettings as any
+            };
+            return [...prev, newItem];
+        }
+    });
+    setModifiedIds(prev => new Set(prev).add('global_theme_settings'));
+
+    if (iframeRef.current?.contentWindow) {
+      iframeRef.current.contentWindow.postMessage({
+        type: 'NKHB_LIVE_THEME_UPDATE',
+        data: newSettings
+      }, '*');
+    }
+  };
 
   const updateItem = (key: string, updates: Partial<ContentItem>) => {
     setItems(prev => prev.map(i => i.key === key ? { ...i, ...updates } : i));
@@ -334,6 +382,12 @@ const Content = () => {
                 >
                     STRUCTURE
                 </button>
+                <button 
+                    onClick={() => setActiveTab('theme')}
+                    className={`flex-1 py-2 rounded-lg text-[10px] font-black transition-all ${activeTab === 'theme' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+                >
+                    THEME
+                </button>
             </div>
         </div>
 
@@ -461,7 +515,7 @@ const Content = () => {
                         <div className="space-y-2"><p className="text-base font-black text-gray-900 uppercase tracking-tight">Select an Element</p><p className="text-xs text-gray-400 px-8 leading-relaxed font-medium">Click on any text or button in the preview window to start editing its properties.</p></div>
                     </div>
                 )
-            ) : (
+            ) : activeTab === 'structure' ? (
                 <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
                     <label className="text-[11px] font-black text-blue-600 flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-full w-fit mb-6">
                         <LayoutIcon className="w-3.5 h-3.5" /> PAGE STRUCTURE
@@ -480,6 +534,65 @@ const Content = () => {
                                 <span className="text-sm font-bold text-gray-700">{SECTION_LABELS[sectionKey] || sectionKey}</span>
                             </div>
                         ))}
+                    </div>
+                </div>
+            ) : (
+                <div className="space-y-10 animate-in fade-in slide-in-from-right-4 duration-300">
+                    <div className="space-y-6">
+                        <label className="text-[11px] font-black text-blue-600 flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-full w-fit"><Palette className="w-3.5 h-3.5" /> BRAND COLORS</label>
+                        <div className="space-y-4">
+                            <div className="space-y-2">
+                                <span className="text-[9px] font-black text-gray-400 ml-1 uppercase tracking-widest">Accent Color</span>
+                                <div className="flex gap-2">
+                                    <div className="w-10 h-10 rounded-xl overflow-hidden relative border-4 border-white shadow-lg">
+                                        <input type="color" value={themeSettings.colors.accent} onChange={(e) => updateTheme({ ...themeSettings, colors: { ...themeSettings.colors, accent: e.target.value } })} className="absolute inset-[-10px] w-[200%] h-[200%] cursor-pointer" />
+                                    </div>
+                                    <input type="text" value={themeSettings.colors.accent} onChange={(e) => updateTheme({ ...themeSettings, colors: { ...themeSettings.colors, accent: e.target.value } })} className="flex-1 bg-gray-50 border-none rounded-xl text-[10px] uppercase font-black text-center shadow-inner" />
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <span className="text-[9px] font-black text-gray-400 ml-1 uppercase tracking-widest">Primary Color</span>
+                                <div className="flex gap-2">
+                                    <div className="w-10 h-10 rounded-xl overflow-hidden relative border-4 border-white shadow-lg">
+                                        <input type="color" value={themeSettings.colors.primary} onChange={(e) => updateTheme({ ...themeSettings, colors: { ...themeSettings.colors, primary: e.target.value } })} className="absolute inset-[-10px] w-[200%] h-[200%] cursor-pointer" />
+                                    </div>
+                                    <input type="text" value={themeSettings.colors.primary} onChange={(e) => updateTheme({ ...themeSettings, colors: { ...themeSettings.colors, primary: e.target.value } })} className="flex-1 bg-gray-50 border-none rounded-xl text-[10px] uppercase font-black text-center shadow-inner" />
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <span className="text-[9px] font-black text-gray-400 ml-1 uppercase tracking-widest">Secondary Color</span>
+                                <div className="flex gap-2">
+                                    <div className="w-10 h-10 rounded-xl overflow-hidden relative border-4 border-white shadow-lg">
+                                        <input type="color" value={themeSettings.colors.secondary} onChange={(e) => updateTheme({ ...themeSettings, colors: { ...themeSettings.colors, secondary: e.target.value } })} className="absolute inset-[-10px] w-[200%] h-[200%] cursor-pointer" />
+                                    </div>
+                                    <input type="text" value={themeSettings.colors.secondary} onChange={(e) => updateTheme({ ...themeSettings, colors: { ...themeSettings.colors, secondary: e.target.value } })} className="flex-1 bg-gray-50 border-none rounded-xl text-[10px] uppercase font-black text-center shadow-inner" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="space-y-6">
+                        <label className="text-[11px] font-black text-indigo-600 flex items-center gap-2 bg-indigo-50 px-3 py-1.5 rounded-full w-fit"><LayoutIcon className="w-3.5 h-3.5" /> LAYOUT</label>
+                        <div className="space-y-4">
+                            <div className="space-y-2">
+                                <span className="text-[9px] font-black text-gray-400 ml-1 uppercase tracking-widest">Section Padding</span>
+                                <input type="text" value={themeSettings.ui.sectionPadding} onChange={(e) => updateTheme({ ...themeSettings, ui: { ...themeSettings.ui, sectionPadding: e.target.value } })} className="w-full p-3 bg-gray-50 border-none rounded-xl text-xs font-bold shadow-inner" />
+                            </div>
+                            <div className="space-y-2">
+                                <span className="text-[9px] font-black text-gray-400 ml-1 uppercase tracking-widest">Max Width</span>
+                                <input type="text" value={themeSettings.ui.maxWidth} onChange={(e) => updateTheme({ ...themeSettings, ui: { ...themeSettings.ui, maxWidth: e.target.value } })} className="w-full p-3 bg-gray-50 border-none rounded-xl text-xs font-bold shadow-inner" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="space-y-6">
+                        <label className="text-[11px] font-black text-emerald-600 flex items-center gap-2 bg-emerald-50 px-3 py-1.5 rounded-full w-fit"><Maximize className="w-3.5 h-3.5" /> UI STYLE</label>
+                        <div className="space-y-4">
+                            <div className="space-y-2">
+                                <span className="text-[9px] font-black text-gray-400 ml-1 uppercase tracking-widest">Global Border Radius</span>
+                                <input type="text" value={themeSettings.ui.borderRadius} onChange={(e) => updateTheme({ ...themeSettings, ui: { ...themeSettings.ui, borderRadius: e.target.value } })} className="w-full p-3 bg-gray-50 border-none rounded-xl text-xs font-bold shadow-inner" />
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}
