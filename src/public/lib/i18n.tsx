@@ -220,23 +220,30 @@ export const I18nProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [liveChanges, setLiveChanges] = useState<Record<string, Partial<ContentData>>>({});
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // 1. Detect language from URL path first
-    const path = window.location.pathname;
-    const isEnPath = path.startsWith('/en');
+  const detectLanguage = useCallback(() => {
+    // 1. Detect from URL path (e.g., /en, /en/about)
+    const path = window.location.pathname.toLowerCase();
+    const isEnPath = path === '/en' || path.startsWith('/en/');
     
     // 2. Fallback to saved preference
     const savedLang = localStorage.getItem('lang') as Language;
     
     if (isEnPath) {
-        setLangState('en');
-    } else if (savedLang) {
-        setLangState(savedLang);
+      if (lang !== 'en') setLangState('en');
+    } else if (savedLang && lang !== savedLang) {
+      setLangState(savedLang);
     }
-    
+  }, [lang]);
+
+  useEffect(() => {
+    detectLanguage();
     fetchContent();
 
+    // Listen for path changes (SPA or manual)
+    window.addEventListener('popstate', detectLanguage);
+    
     const handleMessage = (event: MessageEvent) => {
+      // ... same message handler logic
       if (event.data?.type === 'NKHB_LIVE_UPDATE') {
         const { key, data } = event.data;
         setLiveChanges(prev => ({
