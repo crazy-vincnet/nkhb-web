@@ -306,16 +306,29 @@ export const I18nProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     // Support bilingual links and assets (e.g. logo_ko.png and logo_en.png)
     const baseLink = lang === 'ko' ? item?.value_ko : item?.value_en;
-    const hasDbAsset = !!(lang === 'ko' ? item?.value_ko : item?.value_en);
+    const hasDbAsset = !!baseLink;
 
     // Only fallback to static translations if it looks like a URL or a known link key
     const staticLink = (staticTranslations as any).en?.[key] || (staticTranslations as any).ko?.[key];
     const isUrl = typeof staticLink === 'string' && (staticLink.startsWith('http') || staticLink.startsWith('/') || staticLink.startsWith('#'));
 
+    // Priority for links/assets:
+    // 1. Live unsaved changes (live.link)
+    // 2. Explicit DB asset for current language (baseLink)
+    // 3. Fallback link in style_props.link
+    // 4. Static fallback if key is a URL
+    let finalLink = live?.link;
+    if (!finalLink) {
+        if (hasDbAsset) finalLink = baseLink;
+        else if (dbStyles.link) finalLink = dbStyles.link;
+        else if (isUrl) finalLink = staticLink;
+        else finalLink = baseLink; // last resort
+    }
+
     return {
       text: (live?.text ?? baseText) || key,
       styles,
-      link: live?.link ?? dbStyles.link ?? (hasDbAsset ? baseLink : (isUrl ? staticLink : baseLink))
+      link: finalLink
     };
   }, [dbContent, liveChanges, lang]);
 
