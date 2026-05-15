@@ -15,7 +15,9 @@ import {
   X,
   ExternalLink,
   Upload,
-  ImageIcon
+  ImageIcon,
+  Layout as LayoutIcon,
+  Info
 } from 'lucide-react';
 
 interface StyleProps {
@@ -43,6 +45,7 @@ const Content = () => {
   const [computedStyles, setComputedStyles] = useState<StyleProps | null>(null);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const [previewMode, setPreviewMode] = useState<'desktop' | 'mobile'>('desktop');
+  const [currentPage, setCurrentPage] = useState<string>('/');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -185,22 +188,35 @@ const Content = () => {
                     <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none">Full-Screen Workspace</p>
                 </div>
             </div>
+
+            <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-xl">
+                <button 
+                    onClick={() => setCurrentPage('/')} 
+                    className={`px-4 py-1.5 rounded-lg text-[10px] font-black transition-all flex items-center gap-2 ${currentPage === '/' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+                >
+                    <LayoutIcon className="w-3.5 h-3.5" /> HOME
+                </button>
+                <button 
+                    onClick={() => setCurrentPage('/about')} 
+                    className={`px-4 py-1.5 rounded-lg text-[10px] font-black transition-all flex items-center gap-2 ${currentPage === '/about' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+                >
+                    <Info className="w-3.5 h-3.5" /> ABOUT
+                </button>
+            </div>
+
             <div className="flex bg-gray-100 p-1 rounded-xl gap-1">
                 <button onClick={() => setPreviewMode('desktop')} className={`px-4 py-1.5 rounded-lg text-[10px] font-black transition-all flex items-center gap-2 ${previewMode === 'desktop' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}><Monitor className="w-3.5 h-3.5" /> DESKTOP</button>
                 <button onClick={() => setPreviewMode('mobile')} className={`px-4 py-1.5 rounded-lg text-[10px] font-black transition-all flex items-center gap-2 ${previewMode === 'mobile' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}><Smartphone className="w-3.5 h-3.5" /> MOBILE</button>
             </div>
+
             <div className="flex items-center gap-4">
-                <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-green-50 rounded-full border border-green-100">
-                    <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
-                    <span className="text-[10px] font-black text-green-600 uppercase">Live Sync Active</span>
-                </div>
                 <button onClick={() => window.open('/', '_blank')} className="p-2 hover:bg-gray-100 rounded-xl text-gray-400 transition-all"><ExternalLink className="w-5 h-5" /></button>
             </div>
         </header>
 
         <main className="flex-1 overflow-hidden relative flex items-center justify-center p-0">
             <div className={`transition-all duration-700 ease-in-out shadow-2xl bg-white ${previewMode === 'desktop' ? 'w-full h-full' : 'w-[375px] h-[667px] my-8 rounded-[2rem] border-[8px] border-gray-900 overflow-hidden'}`}>
-                <iframe ref={iframeRef} src="/" className="w-full h-full border-none" title="Site Preview" />
+                <iframe ref={iframeRef} src={currentPage} className="w-full h-full border-none" title="Site Preview" />
             </div>
             {!sidebarOpen && <button onClick={() => setSidebarOpen(true)} className="absolute right-6 top-20 w-12 h-12 bg-blue-600 text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-all z-30"><Palette className="w-6 h-6" /></button>}
         </main>
