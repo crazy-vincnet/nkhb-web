@@ -34,10 +34,9 @@ const Composition: React.FC<CompositionProps> = ({ onOpenSample }) => {
                 </div>
 
                 <div className="composition-action">
-                    <Editable k="composition_button_sample">
+                    <Editable k="composition_button_sample" headless>
                         {({ text, styles }) => (
-                            <button className="btn-sample-wide" style={styles} onClick={onOpenSample}>
-                                {text}
+                            <button className="btn-sample-wide" style={styles} onClick={onOpenSample} dangerouslySetInnerHTML={{ __html: text }}>
                             </button>
                         )}
                     </Editable>

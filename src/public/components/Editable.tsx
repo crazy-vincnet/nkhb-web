@@ -113,7 +113,7 @@ export const Editable: React.FC<EditableProps> = ({ k, children, className = '',
   const editProps = isPreview ? {
     ref: elementRef,
     onClick: handleClick,
-    className: `${className} cursor-pointer hover:outline hover:outline-2 hover:outline-blue-400 hover:outline-offset-2 transition-all`,
+    className: `${className} cursor-pointer hover:outline hover:outline-2 hover:outline-blue-400 hover:outline-offset-[-2px] transition-all`,
     'data-editable-key': k
   } : {
     className,
@@ -121,10 +121,12 @@ export const Editable: React.FC<EditableProps> = ({ k, children, className = '',
   };
 
   if (headless) {
+    // If headless, we use display: contents to minimize layout impact.
+    // However, for certain flex/grid parents, we still need a wrapper.
     return (
-      <span {...editProps} style={{ display: 'contents' }}>
+      <div {...(editProps as any)} style={{ display: 'contents' }}>
         {children(data)}
-      </span>
+      </div>
     );
   }
 

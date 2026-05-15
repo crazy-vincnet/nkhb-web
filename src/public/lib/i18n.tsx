@@ -232,19 +232,28 @@ export const I18nProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const live = liveChanges[key];
 
     const baseText = lang === 'ko' ? (item?.value_ko || (staticTranslations as any).ko?.[key]) : (item?.value_en || (staticTranslations as any).en?.[key]);
-    const baseStyles = item?.style_props || {};
     
-    // Support bilingual links (e.g. logo_ko.png and logo_en.png)
-    const baseLink = lang === 'ko' ? item?.value_ko : item?.value_en;
+    // CRITICAL: Only apply styles that are explicitly set in DB or Live Changes.
+    // Do NOT include default computed styles here to avoid overriding CSS classes.
+    const dbStyles = item?.style_props || {};
+    const liveStyles = live?.styles || {};
+    
+    // Filter out empty strings/nulls to let CSS classes take over
+    const activeStyles = { ...dbStyles, ...liveStyles };
+    const styles: React.CSSProperties = {};
+    Object.keys(activeStyles).forEach(k => {
+        if (activeStyles[k] && k !== 'link') (styles as any)[k] = activeStyles[k];
+    });
 
-    // Only fallback to static translations if it looks like a URL or a known link key
+    // Support bilingual links
+    const baseLink = lang === 'ko' ? item?.value_ko : item?.value_en;
     const staticLink = (staticTranslations as any).en?.[key] || (staticTranslations as any).ko?.[key];
     const isUrl = typeof staticLink === 'string' && (staticLink.startsWith('http') || staticLink.startsWith('/') || staticLink.startsWith('#'));
 
     return {
       text: (live?.text ?? baseText) || key,
-      styles: { ...baseStyles, ...live?.styles },
-      link: live?.link ?? baseStyles.link ?? (isUrl && !item?.value_ko ? staticLink : baseLink)
+      styles,
+      link: live?.link ?? dbStyles.link ?? (isUrl && !item?.value_ko ? staticLink : baseLink)
     };
   }, [dbContent, liveChanges, lang]);
 

@@ -63,7 +63,7 @@ const Support: React.FC = () => {
                         </Editable>
                         <div className="tier-buttons">
                             {['30k', '50k', '100k', '200k', '300k', '500k', '1m'].map((tier) => (
-                                <Editable k={`support_regular_${tier}`} key={tier} className="inline-block">
+                                <Editable k={`support_regular_${tier}`} key={tier} headless>
                                     {({ text, styles, link }) => (
                                         <a href={link || "#"} className={`tier-btn ${tier === '30k' ? 'tier-btn-main' : ''}`} style={styles} target="_blank" rel="noopener noreferrer" dangerouslySetInnerHTML={{ __html: text }}>
                                         </a>
@@ -72,7 +72,7 @@ const Support: React.FC = () => {
                             ))}
                         </div>
                         <div className="custom-support-wrap">
-                            <Editable k="support_custom_amount">
+                            <Editable k="support_custom_amount" headless>
                                 {({ text, styles, link }) => (
                                     <a href={link || "#"} className="btn-custom-support" style={styles} target="_blank" rel="noopener noreferrer" dangerouslySetInnerHTML={{ __html: text }}>
                                     </a>

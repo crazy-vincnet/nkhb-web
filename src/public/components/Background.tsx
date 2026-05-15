@@ -37,13 +37,13 @@ const Background: React.FC<BackgroundProps> = ({ onOpenArticle }) => {
                         </Editable>
 
                         <div className="action-area">
-                            <Editable k="background_about_nkfi" className="inline-block">
+                            <Editable k="background_about_nkfi" headless>
                                 {({ text, styles, link }) => (
                                     <Link to={link || "/about"} className="btn-hero btn-outline" style={styles} dangerouslySetInnerHTML={{ __html: text }}></Link>
                                 )}
                             </Editable>
                             
-                            <Editable k="background_read_more" className="inline-block ml-4">
+                            <Editable k="background_read_more" headless>
                                 {({ text, styles }) => (
                                     <button className="btn-hero btn-outline" style={styles} onClick={onOpenArticle} dangerouslySetInnerHTML={{ __html: text }}>
                                     </button>

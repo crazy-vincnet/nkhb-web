@@ -154,17 +154,17 @@ const About: React.FC = () => {
                 <section className="section about-cta">
                     <div className="container">
                         <div className="cta-box text-center">
-                            <Editable k="about_cta_title">
+                            <Editable k="about_cta_title" headless>
                                 {({ text, styles }) => <h2 style={styles} dangerouslySetInnerHTML={{ __html: text }}></h2>}
                             </Editable>
                             <div className="cta-buttons">
-                                <Editable k="about_cta_website" className="inline-block">
+                                <Editable k="about_cta_website" headless>
                                     {({ text, styles, link }) => (
                                         <a href={link || "https://nkfi.org"} target="_blank" rel="noopener noreferrer" className="btn-hero btn-fill-accent" style={styles} dangerouslySetInnerHTML={{ __html: text }}>
                                         </a>
                                     )}
                                 </Editable>
-                                <Editable k="about_cta_home" className="inline-block ml-4">
+                                <Editable k="about_cta_home" headless>
                                     {({ text, styles, link }) => (
                                         <Link to={link || "/"} className="btn-outline-dark" style={styles} dangerouslySetInnerHTML={{ __html: text }}>
                                         </Link>
