@@ -40,6 +40,7 @@ interface ContentItem {
 const Content = () => {
   const navigate = useNavigate();
   const [items, setItems] = useState<ContentItem[]>([]);
+  const [computedStyles, setComputedStyles] = useState<StyleProps | null>(null);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const [previewMode, setPreviewMode] = useState<'desktop' | 'mobile'>('desktop');
   const [loading, setLoading] = useState(true);
@@ -55,23 +56,23 @@ const Content = () => {
     
     const handleMessage = (event: MessageEvent) => {
       if (event.data?.type === 'NKHB_ELEMENT_SELECTED') {
-        const { key, computedStyles, link } = event.data;
+        const { key, computedStyles: cs, link } = event.data;
         setSelectedKey(key);
+        setComputedStyles(cs);
         setSidebarOpen(true);
         
-        setItems(prev => prev.map(i => {
-            if (i.key === key) {
-                return {
-                    ...i,
-                    style_props: {
-                        ...computedStyles,
-                        ...i.style_props,
-                        link: i.style_props?.link || link || ''
-                    }
-                };
-            }
-            return i;
-        }));
+        // If the item doesn't have a link yet, we can suggest the one found in DOM
+        if (link) {
+            setItems(prev => prev.map(i => {
+                if (i.key === key && !i.style_props?.link) {
+                    return {
+                        ...i,
+                        style_props: { ...i.style_props, link }
+                    };
+                }
+                return i;
+            }));
+        }
       }
     };
     window.addEventListener('message', handleMessage);
@@ -264,8 +265,14 @@ const Content = () => {
                     <div className="space-y-4">
                         <label className="text-[11px] font-black text-emerald-600 flex items-center gap-2 bg-emerald-50 px-3 py-1.5 rounded-full w-fit"><Maximize className="w-3.5 h-3.5" /> SIZE & SPACING</label>
                         <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2"><span className="text-[9px] font-black text-gray-400 ml-1">FONT SIZE</span><input type="text" value={selectedItem.style_props?.fontSize || ''} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, fontSize: e.target.value } })} className="w-full p-3 bg-gray-50 border-none rounded-xl text-xs font-bold shadow-inner" /></div>
-                            <div className="space-y-2"><span className="text-[9px] font-black text-gray-400 ml-1">MARGIN</span><input type="text" value={selectedItem.style_props?.margin || ''} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, margin: e.target.value } })} className="w-full p-3 bg-gray-50 border-none rounded-xl text-xs font-bold shadow-inner" /></div>
+                            <div className="space-y-2">
+                                <span className="text-[9px] font-black text-gray-400 ml-1">FONT SIZE</span>
+                                <input type="text" value={selectedItem.style_props?.fontSize || ''} placeholder={computedStyles?.fontSize} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, fontSize: e.target.value } })} className="w-full p-3 bg-gray-50 border-none rounded-xl text-xs font-bold shadow-inner" />
+                            </div>
+                            <div className="space-y-2">
+                                <span className="text-[9px] font-black text-gray-400 ml-1">MARGIN</span>
+                                <input type="text" value={selectedItem.style_props?.margin || ''} placeholder={computedStyles?.margin} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, margin: e.target.value } })} className="w-full p-3 bg-gray-50 border-none rounded-xl text-xs font-bold shadow-inner" />
+                            </div>
                         </div>
                     </div>
 
@@ -276,9 +283,9 @@ const Content = () => {
                                 <span className="text-[9px] font-black text-gray-400 ml-1">TEXT COLOR</span>
                                 <div className="flex gap-3">
                                     <div className="w-12 h-12 rounded-2xl overflow-hidden relative border-4 border-white shadow-xl">
-                                        <input type="color" value={selectedItem.style_props?.color?.startsWith('#') ? selectedItem.style_props.color : '#000000'} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, color: e.target.value } })} className="absolute inset-[-10px] w-[200%] h-[200%] cursor-pointer" />
+                                        <input type="color" value={selectedItem.style_props?.color?.startsWith('#') ? selectedItem.style_props.color : (computedStyles?.color?.startsWith('#') ? computedStyles.color : '#000000')} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, color: e.target.value } })} className="absolute inset-[-10px] w-[200%] h-[200%] cursor-pointer" />
                                     </div>
-                                    <input type="text" value={selectedItem.style_props?.color || ''} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, color: e.target.value } })} className="flex-1 bg-gray-50 border-none rounded-2xl text-[10px] uppercase font-black text-center shadow-inner" />
+                                    <input type="text" value={selectedItem.style_props?.color || ''} placeholder={computedStyles?.color} onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, color: e.target.value } })} className="flex-1 bg-gray-50 border-none rounded-2xl text-[10px] uppercase font-black text-center shadow-inner" />
                                 </div>
                             </div>
                         </div>
