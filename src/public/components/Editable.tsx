@@ -70,10 +70,21 @@ export const Editable: React.FC<EditableProps> = ({ k, children, className = '',
         const targetEl = (el.getAttribute('data-editable-key') ? el : el.firstElementChild) as HTMLElement || el;
         const style = window.getComputedStyle(targetEl);
         
+        // Extract background image URL if present
+        let bgImage = style.backgroundImage;
+        if (bgImage && bgImage !== 'none') {
+            const match = bgImage.match(/url\(["']?([^"']+)["']?\)/);
+            if (match) bgImage = match[1];
+            else bgImage = '';
+        } else {
+            bgImage = '';
+        }
+
         computedStyles = {
           fontSize: style.fontSize,
           color: rgbaToHex(style.color),
           backgroundColor: style.backgroundColor === 'rgba(0, 0, 0, 0)' ? '' : rgbaToHex(style.backgroundColor),
+          backgroundImage: bgImage,
           margin: style.margin,
           padding: style.padding,
           fontWeight: style.fontWeight,
@@ -83,6 +94,7 @@ export const Editable: React.FC<EditableProps> = ({ k, children, className = '',
         };
 
         if (!currentLink) {
+            // Priority: Explicit link > Background Image > Found Anchor
             const findLink = (node: HTMLElement): string | null => {
                 if (node.tagName === 'A') return node.getAttribute('href');
                 for (let child of Array.from(node.children)) {
@@ -91,7 +103,7 @@ export const Editable: React.FC<EditableProps> = ({ k, children, className = '',
                 }
                 return null;
             };
-            currentLink = findLink(targetEl) || '';
+            currentLink = bgImage || findLink(targetEl) || '';
         }
       }
 

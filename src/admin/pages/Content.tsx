@@ -190,7 +190,10 @@ const Content = () => {
     }
   };
 
-  const isImageKey = selectedKey?.includes('image') || selectedKey?.includes('logo') || selectedKey?.includes('bg');
+  const isImageKey = selectedKey?.includes('image') || 
+                    selectedKey?.includes('logo') || 
+                    selectedKey?.includes('bg') || 
+                    (computedStyles?.backgroundImage && computedStyles.backgroundImage !== 'none');
 
   if (loading) return <div className="flex items-center justify-center h-screen bg-white"><Loader2 className="animate-spin text-blue-600 w-12 h-12" /></div>;
 
