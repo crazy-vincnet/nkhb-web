@@ -4,7 +4,7 @@ import { Editable } from './Editable';
 
 const Hero: React.FC = () => {
     return (
-        <Editable k="image_hero_bg">
+        <Editable k="image_hero_bg" headless>
             {({ styles, link }) => (
                 <section 
                     className="hero" 
@@ -16,28 +16,28 @@ const Hero: React.FC = () => {
                 >
                     <div className="container">
                         <div className="hero-content">
-                            <Editable k="hero_tag">
+                            <Editable k="hero_tag" headless>
                                 {({ text, styles: s }) => <span className="hero-tag" style={s}>{text}</span>}
                             </Editable>
                             
-                            <Editable k="hero_title">
+                            <Editable k="hero_title" headless>
                                 {({ text, styles: s }) => <h1 style={s} dangerouslySetInnerHTML={{ __html: text }}></h1>}
                             </Editable>
 
-                            <Editable k="hero_subtitle">
+                            <Editable k="hero_subtitle" headless>
                                 {({ text, styles: s }) => <p style={s}>{text}</p>}
                             </Editable>
 
                             <div className="hero-btns">
-                                <Editable k="hero_button_about" className="inline-block">
+                                <Editable k="hero_button_about" headless>
                                     {({ text, styles: s, link: l }) => (
                                         <Link to={l || "/#background"} className="btn-hero btn-fill" style={s}>{text}</Link>
                                     )}
                                 </Editable>
                                 
-                                <Editable k="hero_button_letter" className="inline-block ml-4">
+                                <Editable k="hero_button_letter" headless>
                                     {({ text, styles: s, link: l }) => (
-                                        <Link to={l || "/#guide"} className="btn-hero btn-outline" style={s}>{text}</Link>
+                                        <Link to={l || "/#guide"} className="btn-hero btn-outline ml-4" style={s}>{text}</Link>
                                     )}
                                 </Editable>
                             </div>
