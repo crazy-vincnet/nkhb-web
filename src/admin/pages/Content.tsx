@@ -71,32 +71,33 @@ const Content = () => {
             const newItem: ContentItem = {
                 id: `new-${key}-${Date.now()}`,
                 key: key,
-                value_ko: '',
-                value_en: '',
+                value_ko: link || '',
+                value_en: link || '',
                 style_props: { ...cs, link: link || '' }
             };
             setItems(prev => [...prev, newItem]);
             setSelectedKey(key);
             setModifiedIds(prev => new Set(prev).add(key));
         } else {
+            // 3. If exists, ensure link/image is shown in fields if currently empty
+            if (link) {
+                setItems(prev => prev.map(i => {
+                    if (i.key === key) {
+                        return {
+                            ...i,
+                            value_ko: i.value_ko || link,
+                            value_en: i.value_en || link,
+                            style_props: { ...i.style_props, link: i.style_props?.link || link }
+                        };
+                    }
+                    return i;
+                }));
+            }
             setSelectedKey(key);
         }
 
         setComputedStyles(cs);
         setSidebarOpen(true);
-        
-        // If the item exists but doesn't have a link yet, suggest the one found in DOM
-        if (item && link && !item.style_props?.link) {
-            setItems(prev => prev.map(i => {
-                if (i.key === key) {
-                    return {
-                        ...i,
-                        style_props: { ...i.style_props, link }
-                    };
-                }
-                return i;
-            }));
-        }
       }
     };
     window.addEventListener('message', handleMessage);

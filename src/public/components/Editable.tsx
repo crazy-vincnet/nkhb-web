@@ -94,16 +94,31 @@ export const Editable: React.FC<EditableProps> = ({ k, children, className = '',
         };
 
         if (!currentLink) {
-            // Priority: Explicit link > Background Image > Found Anchor
-            const findLink = (node: HTMLElement): string | null => {
+            // Priority: Explicit link > IMG src > Background Image > Found Anchor
+            const findAsset = (node: HTMLElement): string | null => {
+                // 1. Check if it's an image
+                if (node.tagName === 'IMG') return (node as HTMLImageElement).src;
+                
+                // 2. Check for background image
+                const style = window.getComputedStyle(node);
+                const bg = style.backgroundImage;
+                if (bg && bg !== 'none') {
+                    const match = bg.match(/url\(["']?([^"']+)["']?\)/);
+                    if (match) return match[1];
+                }
+
+                // 3. Check for link
                 if (node.tagName === 'A') return node.getAttribute('href');
+
+                // 4. Recurse children
                 for (let child of Array.from(node.children)) {
-                    const found = findLink(child as HTMLElement);
+                    const found = findAsset(child as HTMLElement);
                     if (found) return found;
                 }
                 return null;
             };
-            currentLink = bgImage || findLink(targetEl) || '';
+            const foundUrl = findAsset(targetEl);
+            if (foundUrl) currentLink = foundUrl;
         }
       }
 
