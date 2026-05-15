@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { useHistory } from '../lib/useHistory';
 import { optimizeImage } from '../lib/imageOptimizer';
+import { translateText } from '../lib/translation';
 
 interface StyleProps {
   fontSize?: string; color?: string; backgroundColor?: string; margin?: string; padding?: string; fontWeight?: string; borderRadius?: string; borderWidth?: string; borderColor?: string; width?: string; height?: string; link?: string; mobile?: Partial<StyleProps>; [key: string]: any;
@@ -27,6 +28,7 @@ const Content = () => {
   const [editorLang, setEditorLang] = useState<'ko' | 'en'>('ko');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [translating, setTranslating] = useState<string | null>(null);
   const [uploading, setUploading] = useState<boolean | string>(false);
   const [modifiedKeys, setModifiedIds] = useState<Set<string>>(new Set());
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -123,6 +125,19 @@ const Content = () => {
         }
       }, '*');
     }
+  };
+
+  const handleTranslate = async (sourceField: 'value_ko' | 'value_en', targetField: 'value_ko' | 'value_en') => {
+    if (!selectedItem || !selectedKey) return;
+    const sourceText = selectedItem[sourceField];
+    if (!sourceText) return;
+    setTranslating(targetField);
+    try {
+        const targetLang = targetField === 'value_ko' ? 'KO' : 'EN';
+        const translated = await translateText(sourceText, targetLang);
+        updateItem(selectedKey, { [targetField]: translated });
+        setTimeout(handlePushHistory, 0);
+    } catch (err: any) { alert('번역 실패: ' + err.message); } finally { setTranslating(null); }
   };
 
   const handleLanguageFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: 'value_ko' | 'value_en') => {
@@ -282,11 +297,35 @@ const Content = () => {
                             <label className="text-[11px] font-black text-blue-600 flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-full w-fit"><Type className="w-3.5 h-3.5" /> TEXT CONTENT</label>
                             <div className="space-y-5">
                                 <div className="space-y-2">
-                                    <div className="flex justify-between items-center px-1"><span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">KOREAN</span>{editorLang === 'en' && <button onClick={() => updateItem(selectedKey!, { value_ko: selectedItem.value_en })} className="text-[9px] font-bold text-blue-500 hover:underline">Sync from EN</button>}</div>
+                                    <div className="flex justify-between items-center px-1">
+                                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">KOREAN</span>
+                                        {editorLang === 'en' && (
+                                            <button 
+                                                onClick={() => handleTranslate('value_en', 'value_ko')}
+                                                disabled={!!translating}
+                                                className="text-[9px] font-bold text-blue-500 hover:text-blue-700 flex items-center gap-1 bg-blue-50 px-2 py-0.5 rounded-full transition-all disabled:opacity-50"
+                                            >
+                                                {translating === 'value_ko' ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : <Globe className="w-2.5 h-2.5" />}
+                                                AI Translate from EN
+                                            </button>
+                                        )}
+                                    </div>
                                     <textarea value={selectedItem.value_ko} onChange={(e) => updateItem(selectedKey!, { value_ko: e.target.value })} className="w-full p-4 bg-gray-50 border-none rounded-2xl text-sm focus:ring-2 focus:ring-blue-500 min-h-[120px] resize-none leading-relaxed shadow-inner" onBlur={handlePushHistory} />
                                 </div>
                                 <div className="space-y-2">
-                                    <div className="flex justify-between items-center px-1"><span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">ENGLISH</span>{editorLang === 'ko' && <button onClick={() => updateItem(selectedKey!, { value_en: selectedItem.value_ko })} className="text-[9px] font-bold text-blue-500 hover:underline">Sync from KO</button>}</div>
+                                    <div className="flex justify-between items-center px-1">
+                                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">ENGLISH</span>
+                                        {editorLang === 'ko' && (
+                                            <button 
+                                                onClick={() => handleTranslate('value_ko', 'value_en')}
+                                                disabled={!!translating}
+                                                className="text-[9px] font-bold text-blue-500 hover:text-blue-700 flex items-center gap-1 bg-blue-50 px-2 py-0.5 rounded-full transition-all disabled:opacity-50"
+                                            >
+                                                {translating === 'value_en' ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : <Globe className="w-2.5 h-2.5" />}
+                                                AI Translate from KO
+                                            </button>
+                                        )}
+                                    </div>
                                     <textarea value={selectedItem.value_en} onChange={(e) => updateItem(selectedKey!, { value_en: e.target.value })} className="w-full p-4 bg-gray-50 border-none rounded-2xl text-sm focus:ring-2 focus:ring-blue-500 min-h-[120px] resize-none leading-relaxed shadow-inner" onBlur={handlePushHistory} />
                                 </div>
                             </div>
