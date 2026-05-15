@@ -43,21 +43,28 @@ export const Editable: React.FC<EditableProps> = ({ k, children, className = '',
     const handleGlobalClick = (e: MouseEvent) => {
       // Prevent ANY navigation in preview mode
       const target = e.target as HTMLElement;
+      
       const isLink = target.closest('a') || target.tagName === 'A';
       const isButton = target.closest('button') || target.tagName === 'BUTTON';
 
+      // If it's a link or button, we MUST prevent navigation/action
       if (isLink || isButton) {
         e.preventDefault();
         e.stopPropagation();
+        
+        // If it's NOT part of this specific Editable instance, let its own instance handle it
+        // But we still block the default behavior globally to be safe.
       }
     };
 
+    // Use capture phase to intercept before any other handlers
     window.addEventListener('click', handleGlobalClick, true);
     return () => window.removeEventListener('click', handleGlobalClick, true);
   }, [isPreview]);
 
   const handleClick = (e: React.MouseEvent) => {
     if (isPreview) {
+      // We already preventDefault in the global listener, but we also do it here for extra safety
       e.preventDefault();
       e.stopPropagation();
 
