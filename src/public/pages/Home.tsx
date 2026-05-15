@@ -15,7 +15,10 @@ const Home: React.FC = () => {
     const [isSampleModalOpen, setIsSampleModalOpen] = useState(false);
 
     const layoutData = getContent('page_layout_home');
-    const layout = Array.isArray(layoutData.styles?.order) ? (layoutData.styles.order as string[]) : HOME_DEFAULT_LAYOUT;
+    const layout = Array.isArray((layoutData.styles as any)?.order) 
+        ? (layoutData.styles as any).order 
+        : HOME_DEFAULT_LAYOUT;
+
 
     useEffect(() => {
         // Handle smooth scrolling for hash links whenever location changes
