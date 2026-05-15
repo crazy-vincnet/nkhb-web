@@ -16,6 +16,10 @@ interface StyleProps {
   fontSize?: string;
   color?: string;
   backgroundColor?: string;
+  margin?: string;
+  padding?: string;
+  fontWeight?: string;
+  link?: string;
   [key: string]: any;
 }
 
@@ -40,10 +44,25 @@ const Content = () => {
   useEffect(() => {
     fetchContent();
     
-    // Listen for element selection from Iframe
     const handleMessage = (event: MessageEvent) => {
       if (event.data?.type === 'NKHB_ELEMENT_SELECTED') {
-        setSelectedKey(event.data.key);
+        const { key, computedStyles, link } = event.data;
+        setSelectedKey(key);
+        
+        // Update local items with computed styles if they are empty
+        setItems(prev => prev.map(i => {
+            if (i.key === key) {
+                return {
+                    ...i,
+                    style_props: {
+                        ...computedStyles, // Default to computed values
+                        ...i.style_props,  // Override with saved values
+                        link: i.style_props?.link || link || ''
+                    }
+                };
+            }
+            return i;
+        }));
       }
     };
     window.addEventListener('message', handleMessage);
@@ -52,7 +71,14 @@ const Content = () => {
 
   const fetchContent = async () => {
     const { data } = await supabase.from('content').select('*');
-    if (data) setItems(data);
+    if (data) {
+        // Ensure style_props is an object
+        const normalized = data.map(item => ({
+            ...item,
+            style_props: item.style_props || {}
+        }));
+        setItems(normalized);
+    }
     setLoading(false);
   };
 
@@ -62,14 +88,18 @@ const Content = () => {
     setItems(prev => prev.map(i => i.key === key ? { ...i, ...updates } : i));
     setModifiedIds(prev => new Set(prev).add(key));
 
+    const item = items.find(i => i.key === key);
+    if (!item) return;
+
     // Send real-time update to iframe
     if (iframeRef.current?.contentWindow) {
       iframeRef.current.contentWindow.postMessage({
         type: 'NKHB_LIVE_UPDATE',
         key,
         data: {
-            text: updates.value_ko || updates.value_en, // Logic for live text
-            styles: updates.style_props
+            text: updates.value_ko ?? updates.value_en ?? (item.value_ko || item.value_en),
+            styles: updates.style_props || item.style_props,
+            link: (updates.style_props || item.style_props)?.link
         }
       }, '*');
     }
@@ -103,8 +133,7 @@ const Content = () => {
 
   return (
     <div className="flex h-[calc(100vh-64px)] bg-gray-50 overflow-hidden font-pretendard">
-      {/* Sidebar: Navigation & Controls */}
-      <aside className="w-80 border-r bg-white flex flex-col shrink-0">
+      <aside className="w-80 border-r bg-white flex flex-col shrink-0 shadow-xl">
         <div className="p-6 border-b">
             <h1 className="text-xl font-black flex items-center gap-2">
                 <Monitor className="w-5 h-5 text-blue-600" />
@@ -117,13 +146,12 @@ const Content = () => {
             {selectedItem ? (
                 <div className="space-y-8 animate-in slide-in-from-left-4 duration-300">
                     <div className="flex items-center justify-between">
-                        <h2 className="text-sm font-black text-gray-900 uppercase">Property Editor</h2>
+                        <h2 className="text-sm font-black text-gray-900 uppercase tracking-tight">Property Editor</h2>
                         <button onClick={() => setSelectedKey(null)} className="text-[10px] font-bold text-gray-400 hover:text-gray-900 transition-colors underline">닫기</button>
                     </div>
 
-                    {/* 1. TEXT (Priority 1) */}
                     <div className="space-y-4">
-                        <label className="text-[11px] font-black text-blue-600 flex items-center gap-2">
+                        <label className="text-[11px] font-black text-blue-600 flex items-center gap-2 bg-blue-50 px-2 py-1 rounded w-fit">
                             <Type className="w-3 h-3" /> TEXT CONTENT
                         </label>
                         <div className="space-y-3">
@@ -132,7 +160,7 @@ const Content = () => {
                                 <textarea 
                                     value={selectedItem.value_ko}
                                     onChange={(e) => updateItem(selectedKey!, { value_ko: e.target.value })}
-                                    className="w-full mt-1 p-3 bg-gray-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500 min-h-[80px] resize-none"
+                                    className="w-full mt-1 p-3 bg-gray-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500 min-h-[80px] resize-none leading-relaxed"
                                 />
                             </div>
                             <div>
@@ -140,15 +168,14 @@ const Content = () => {
                                 <textarea 
                                     value={selectedItem.value_en}
                                     onChange={(e) => updateItem(selectedKey!, { value_en: e.target.value })}
-                                    className="w-full mt-1 p-3 bg-gray-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500 min-h-[80px] resize-none"
+                                    className="w-full mt-1 p-3 bg-gray-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500 min-h-[80px] resize-none leading-relaxed"
                                 />
                             </div>
                         </div>
                     </div>
 
-                    {/* 2. LINK (Priority 2) */}
                     <div className="space-y-4">
-                        <label className="text-[11px] font-black text-indigo-600 flex items-center gap-2">
+                        <label className="text-[11px] font-black text-indigo-600 flex items-center gap-2 bg-indigo-50 px-2 py-1 rounded w-fit">
                             <LinkIcon className="w-3 h-3" /> LINK / URL
                         </label>
                         <input 
@@ -160,9 +187,8 @@ const Content = () => {
                         />
                     </div>
 
-                    {/* 3. SIZE (Priority 3) */}
                     <div className="space-y-4">
-                        <label className="text-[11px] font-black text-emerald-600 flex items-center gap-2">
+                        <label className="text-[11px] font-black text-emerald-600 flex items-center gap-2 bg-emerald-50 px-2 py-1 rounded w-fit">
                             <Maximize className="w-3 h-3" /> SIZE & SPACING
                         </label>
                         <div className="grid grid-cols-2 gap-4">
@@ -171,9 +197,8 @@ const Content = () => {
                                 <input 
                                     type="text"
                                     value={selectedItem.style_props?.fontSize || ''}
-                                    placeholder="e.g. 1.5rem"
                                     onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, fontSize: e.target.value } })}
-                                    className="w-full p-2 bg-gray-50 border-none rounded-lg text-xs"
+                                    className="w-full p-2 bg-gray-50 border-none rounded-lg text-xs font-bold"
                                 />
                             </div>
                             <div className="space-y-1.5">
@@ -181,34 +206,34 @@ const Content = () => {
                                 <input 
                                     type="text"
                                     value={selectedItem.style_props?.margin || ''}
-                                    placeholder="e.g. 10px"
                                     onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, margin: e.target.value } })}
-                                    className="w-full p-2 bg-gray-50 border-none rounded-lg text-xs"
+                                    className="w-full p-2 bg-gray-50 border-none rounded-lg text-xs font-bold"
                                 />
                             </div>
                         </div>
                     </div>
 
-                    {/* 4. COLOR (Priority 4) */}
                     <div className="space-y-4">
-                        <label className="text-[11px] font-black text-rose-600 flex items-center gap-2">
+                        <label className="text-[11px] font-black text-rose-600 flex items-center gap-2 bg-rose-50 px-2 py-1 rounded w-fit">
                             <Palette className="w-3 h-3" /> COLORS
                         </label>
                         <div className="flex gap-4">
                             <div className="flex-1 space-y-1.5">
                                 <span className="text-[9px] font-bold text-gray-400 ml-1">TEXT COLOR</span>
                                 <div className="flex gap-2">
-                                    <input 
-                                        type="color"
-                                        value={selectedItem.style_props?.color || '#000000'}
-                                        onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, color: e.target.value } })}
-                                        className="w-8 h-8 rounded-lg cursor-pointer overflow-hidden border-none"
-                                    />
+                                    <div className="w-8 h-8 rounded-lg overflow-hidden relative border border-gray-100 shadow-sm">
+                                        <input 
+                                            type="color"
+                                            value={selectedItem.style_props?.color?.startsWith('#') ? selectedItem.style_props.color : '#000000'}
+                                            onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, color: e.target.value } })}
+                                            className="absolute inset-[-5px] w-[150%] h-[150%] cursor-pointer"
+                                        />
+                                    </div>
                                     <input 
                                         type="text"
                                         value={selectedItem.style_props?.color || ''}
                                         onChange={(e) => updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, color: e.target.value } })}
-                                        className="flex-1 bg-gray-50 border-none rounded-lg text-[10px] uppercase font-bold"
+                                        className="flex-1 bg-gray-50 border-none rounded-lg text-[10px] uppercase font-bold text-center"
                                     />
                                 </div>
                             </div>
@@ -222,20 +247,19 @@ const Content = () => {
                     </div>
                     <div>
                         <p className="text-sm font-bold text-gray-500">편집할 요소를 선택하세요</p>
-                        <p className="text-[10px] text-gray-400 mt-1">미리보기 화면에서 파란색 테두리가<br/>생기는 요소를 클릭해 보세요.</p>
+                        <p className="text-[10px] text-gray-400 mt-1 px-4 leading-relaxed">미리보기 화면에서 파란색 테두리가<br/>생기는 요소를 클릭해 보세요.</p>
                     </div>
                 </div>
             )}
         </div>
 
-        {/* Footer Save Area */}
         <div className="p-6 border-t bg-gray-50">
             <button
                 onClick={handleSave}
                 disabled={modifiedKeys.size === 0 || saving}
                 className={`w-full py-4 rounded-2xl font-black text-sm transition-all shadow-xl flex items-center justify-center gap-2 ${
                     modifiedKeys.size > 0 
-                    ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-blue-200' 
+                    ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-blue-200 scale-[1.02]' 
                     : 'bg-white text-gray-300 border border-gray-100 cursor-not-allowed'
                 }`}
             >
@@ -245,10 +269,8 @@ const Content = () => {
         </div>
       </aside>
 
-      {/* Main Preview Area */}
-      <main className="flex-1 flex flex-col overflow-hidden relative">
-        {/* Device Controls */}
-        <div className="h-14 bg-white border-b flex items-center justify-center gap-2 px-6">
+      <main className="flex-1 flex flex-col overflow-hidden relative bg-gray-200">
+        <div className="h-14 bg-white border-b flex items-center justify-center gap-2 px-6 shadow-sm z-10">
             <div className="flex bg-gray-100 p-1 rounded-xl gap-1">
                 <button 
                     onClick={() => setPreviewMode('desktop')}
@@ -264,15 +286,15 @@ const Content = () => {
                 </button>
             </div>
             <div className="flex-1 flex justify-center items-center">
-                <div className="px-4 py-1.5 bg-gray-50 rounded-full text-[10px] font-black text-gray-400 flex items-center gap-2 border border-gray-100">
+                <div className="px-4 py-1.5 bg-gray-50 rounded-full text-[10px] font-black text-gray-400 flex items-center gap-2 border border-gray-100 uppercase tracking-tighter">
                     <Globe className="w-3 h-3" />
-                    PREVIEW: HTTPS://NKHB.ORG
+                    Preview Mode: Active Content Sync
                 </div>
             </div>
             <div className="w-20"></div>
         </div>
 
-        <div className="flex-1 bg-gray-200 flex items-center justify-center overflow-hidden p-8">
+        <div className="flex-1 flex items-center justify-center overflow-hidden p-8">
             <div className={`bg-white shadow-2xl transition-all duration-500 overflow-hidden rounded-[1rem] ${
                 previewMode === 'desktop' ? 'w-full h-full' : 'w-[375px] h-[667px]'
             }`}>
