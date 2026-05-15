@@ -1,0 +1,3 @@
+## 2024-05-15 - [Home Page Component Memoization]
+**Learning:** In the `src/public/pages/Home.tsx` component, modals state changes (`isArticleModalOpen`, `isLetterModalOpen`, `isSampleModalOpen`) triggered full re-renders of the entire page layout loop. Passing inline arrow functions (e.g., `() => setIsArticleModalOpen(true)`) prevented basic static rendering optimization.
+**Action:** When working on top-level pages that conditionally render static sections from `HOME_SECTION_MAP`, always extract the `layout.map` logic into a `memo` wrapper (`MemoizedSection`) and pass handlers wrapped in `useCallback` to prevent cascading layout re-renders.
