@@ -292,15 +292,18 @@ export const I18nProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (activeStyles[k] && k !== 'link') (styles as any)[k] = activeStyles[k];
     });
 
-    // Support bilingual links
+    // Support bilingual links and assets (e.g. logo_ko.png and logo_en.png)
     const baseLink = lang === 'ko' ? item?.value_ko : item?.value_en;
+    const hasDbAsset = !!(lang === 'ko' ? item?.value_ko : item?.value_en);
+
+    // Only fallback to static translations if it looks like a URL or a known link key
     const staticLink = (staticTranslations as any).en?.[key] || (staticTranslations as any).ko?.[key];
     const isUrl = typeof staticLink === 'string' && (staticLink.startsWith('http') || staticLink.startsWith('/') || staticLink.startsWith('#'));
 
     return {
       text: (live?.text ?? baseText) || key,
       styles,
-      link: live?.link ?? dbStyles.link ?? (isUrl && !item?.value_ko ? staticLink : baseLink)
+      link: live?.link ?? dbStyles.link ?? (hasDbAsset ? baseLink : (isUrl ? staticLink : baseLink))
     };
   }, [dbContent, liveChanges, lang]);
 
