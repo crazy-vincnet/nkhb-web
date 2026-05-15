@@ -17,7 +17,7 @@ const Hero: React.FC = () => {
                     <div className="container">
                         <div className="hero-content">
                             <Editable k="hero_tag" headless>
-                                {({ text, styles: s }) => <span className="hero-tag" style={s}>{text}</span>}
+                                {({ text, styles: s }) => <span className="hero-tag" style={s} dangerouslySetInnerHTML={{ __html: text }}></span>}
                             </Editable>
                             
                             <Editable k="hero_title" headless>
@@ -25,19 +25,19 @@ const Hero: React.FC = () => {
                             </Editable>
 
                             <Editable k="hero_subtitle" headless>
-                                {({ text, styles: s }) => <p style={s}>{text}</p>}
+                                {({ text, styles: s }) => <p style={s} dangerouslySetInnerHTML={{ __html: text }}></p>}
                             </Editable>
 
                             <div className="hero-btns">
                                 <Editable k="hero_button_about" headless>
                                     {({ text, styles: s, link: l }) => (
-                                        <Link to={l || "/#background"} className="btn-hero btn-fill" style={s}>{text}</Link>
+                                        <Link to={l || "/#background"} className="btn-hero btn-fill" style={s} dangerouslySetInnerHTML={{ __html: text }}></Link>
                                     )}
                                 </Editable>
                                 
                                 <Editable k="hero_button_letter" headless>
                                     {({ text, styles: s, link: l }) => (
-                                        <Link to={l || "/#guide"} className="btn-hero btn-outline ml-4" style={s}>{text}</Link>
+                                        <Link to={l || "/#guide"} className="btn-hero btn-outline ml-4" style={s} dangerouslySetInnerHTML={{ __html: text }}></Link>
                                     )}
                                 </Editable>
                             </div>

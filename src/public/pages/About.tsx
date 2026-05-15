@@ -11,10 +11,10 @@ const About: React.FC = () => {
                 <div className="container">
                     <div className="about-hero-content">
                         <Editable k="about_hero_title">
-                            {({ text, styles }) => <h1 style={styles}>{text}</h1>}
+                            {({ text, styles }) => <h1 style={styles} dangerouslySetInnerHTML={{ __html: text }}></h1>}
                         </Editable>
                         <Editable k="about_hero_subtitle">
-                            {({ text, styles }) => <p className="subtitle" style={styles}>{text}</p>}
+                            {({ text, styles }) => <p className="subtitle" style={styles} dangerouslySetInnerHTML={{ __html: text }}></p>}
                         </Editable>
                     </div>
                 </div>
@@ -25,29 +25,29 @@ const About: React.FC = () => {
                     <div className="container">
                         <div className="intro-top-banner">
                             <Editable k="about_intro_top">
-                                {({ text, styles }) => <p className="intro-top-text" style={styles}>{text}</p>}
+                                {({ text, styles }) => <p className="intro-top-text" style={styles} dangerouslySetInnerHTML={{ __html: text }}></p>}
                             </Editable>
                         </div>
                         <div className="about-intro-grid">
                             <div className="text-content">
                                 <Editable k="about_intro_title">
-                                    {({ text, styles }) => <h2 style={styles}>{text}</h2>}
+                                    {({ text, styles }) => <h2 style={styles} dangerouslySetInnerHTML={{ __html: text }}></h2>}
                                 </Editable>
                                 <Editable k="about_intro_p1">
-                                    {({ text, styles }) => <p className="description" style={styles}>{text}</p>}
+                                    {({ text, styles }) => <p className="description" style={styles} dangerouslySetInnerHTML={{ __html: text }}></p>}
                                 </Editable>
                                 <Editable k="about_intro_p2">
-                                    {({ text, styles }) => <p className="description" style={styles}>{text}</p>}
+                                    {({ text, styles }) => <p className="description" style={styles} dangerouslySetInnerHTML={{ __html: text }}></p>}
                                 </Editable>
                                 <ul className="info-list">
                                     <Editable k="about_intro_info1" as="li">
-                                        {({ text, styles }) => <span style={styles}>{text}</span>}
+                                        {({ text, styles }) => <span style={styles} dangerouslySetInnerHTML={{ __html: text }}></span>}
                                     </Editable>
                                     <Editable k="about_intro_info2" as="li">
-                                        {({ text, styles }) => <span style={styles}>{text}</span>}
+                                        {({ text, styles }) => <span style={styles} dangerouslySetInnerHTML={{ __html: text }}></span>}
                                     </Editable>
                                     <Editable k="about_intro_info3" as="li">
-                                        {({ text, styles }) => <span style={styles}>{text}</span>}
+                                        {({ text, styles }) => <span style={styles} dangerouslySetInnerHTML={{ __html: text }}></span>}
                                     </Editable>
                                 </ul>
                             </div>
@@ -68,24 +68,24 @@ const About: React.FC = () => {
                     <div className="container">
                         <div className="vision-box">
                             <Editable k="about_vision_title">
-                                {({ text, styles }) => <h3 style={styles}>{text}</h3>}
+                                {({ text, styles }) => <h3 style={styles} dangerouslySetInnerHTML={{ __html: text }}></h3>}
                             </Editable>
                             <Editable k="about_vision_desc">
-                                {({ text, styles }) => <p style={styles}>{text}</p>}
+                                {({ text, styles }) => <p style={styles} dangerouslySetInnerHTML={{ __html: text }}></p>}
                             </Editable>
                         </div>
                         
                         <div className="mission-box">
                             <Editable k="about_mission_title">
-                                {({ text, styles }) => <h3 className="section-title text-center" style={styles}>{text}</h3>}
+                                {({ text, styles }) => <h3 className="section-title text-center" style={styles} dangerouslySetInnerHTML={{ __html: text }}></h3>}
                             </Editable>
                             <Editable k="about_mission_desc">
-                                {({ text, styles }) => <p className="mission-desc text-center" style={styles}>{text}</p>}
+                                {({ text, styles }) => <p className="mission-desc text-center" style={styles} dangerouslySetInnerHTML={{ __html: text }}></p>}
                             </Editable>
                             <div className="mission-grid">
                                 {[1, 2, 3, 4, 5, 6].map((i) => (
                                     <Editable k={`about_mission_li${i}`} key={i} className="mission-item">
-                                        {({ text, styles }) => <span style={styles}>{text}</span>}
+                                        {({ text, styles }) => <span style={styles} dangerouslySetInnerHTML={{ __html: text }}></span>}
                                     </Editable>
                                 ))}
                             </div>
@@ -96,7 +96,7 @@ const About: React.FC = () => {
                 <section className="section about-ministry">
                     <div className="container">
                         <Editable k="about_ministry_title">
-                            {({ text, styles }) => <h2 className="section-title text-center" style={styles}>{text}</h2>}
+                            {({ text, styles }) => <h2 className="section-title text-center" style={styles} dangerouslySetInnerHTML={{ __html: text }}></h2>}
                         </Editable>
                         <div className="ministry-grid">
                             {[1, 2, 3, 4].map((i) => (
@@ -105,10 +105,10 @@ const About: React.FC = () => {
                                         {i === 1 ? '📢' : i === 2 ? '📖' : i === 3 ? '🤝' : '🆘'}
                                     </div>
                                     <Editable k={`about_ministry_card${i}_title`}>
-                                        {({ text, styles }) => <h4 style={styles}>{text}</h4>}
+                                        {({ text, styles }) => <h4 style={styles} dangerouslySetInnerHTML={{ __html: text }}></h4>}
                                     </Editable>
                                     <Editable k={`about_ministry_card${i}_desc`}>
-                                        {({ text, styles }) => <p style={styles}>{text}</p>}
+                                        {({ text, styles }) => <p style={styles} dangerouslySetInnerHTML={{ __html: text }}></p>}
                                     </Editable>
                                 </div>
                             ))}
@@ -131,20 +131,20 @@ const About: React.FC = () => {
                             </div>
                             <div className="founder-info">
                                 <Editable k="about_founder_title">
-                                    {({ text, styles }) => <h2 style={styles}>{text}</h2>}
+                                    {({ text, styles }) => <h2 style={styles} dangerouslySetInnerHTML={{ __html: text }}></h2>}
                                 </Editable>
                                 <Editable k="about_founder_desc_title">
-                                    {({ text, styles }) => <h3 className="highlight-title" style={styles}>{text}</h3>}
+                                    {({ text, styles }) => <h3 className="highlight-title" style={styles} dangerouslySetInnerHTML={{ __html: text }}></h3>}
                                 </Editable>
                                 <ul className="profile-list">
                                     {[1, 2, 3, 4, 5, 6].map((i) => (
                                         <Editable k={`about_founder_profile${i}`} key={i} as="li">
-                                            {({ text, styles }) => <span style={styles}>{text}</span>}
+                                            {({ text, styles }) => <span style={styles} dangerouslySetInnerHTML={{ __html: text }}></span>}
                                         </Editable>
                                     ))}
                                 </ul>
                                 <Editable k="about_founder_book">
-                                    {({ text, styles }) => <p className="book-info" style={styles}>{text}</p>}
+                                    {({ text, styles }) => <p className="book-info" style={styles} dangerouslySetInnerHTML={{ __html: text }}></p>}
                                 </Editable>
                             </div>
                         </div>
@@ -155,20 +155,18 @@ const About: React.FC = () => {
                     <div className="container">
                         <div className="cta-box text-center">
                             <Editable k="about_cta_title">
-                                {({ text, styles }) => <h2 style={styles}>{text}</h2>}
+                                {({ text, styles }) => <h2 style={styles} dangerouslySetInnerHTML={{ __html: text }}></h2>}
                             </Editable>
                             <div className="cta-buttons">
                                 <Editable k="about_cta_website" className="inline-block">
                                     {({ text, styles, link }) => (
-                                        <a href={link || "https://nkfi.org"} target="_blank" rel="noopener noreferrer" className="btn-hero btn-fill-accent" style={styles}>
-                                            {text}
+                                        <a href={link || "https://nkfi.org"} target="_blank" rel="noopener noreferrer" className="btn-hero btn-fill-accent" style={styles} dangerouslySetInnerHTML={{ __html: text }}>
                                         </a>
                                     )}
                                 </Editable>
                                 <Editable k="about_cta_home" className="inline-block ml-4">
                                     {({ text, styles, link }) => (
-                                        <Link to={link || "/"} className="btn-outline-dark" style={styles}>
-                                            {text}
+                                        <Link to={link || "/"} className="btn-outline-dark" style={styles} dangerouslySetInnerHTML={{ __html: text }}>
                                         </Link>
                                     )}
                                 </Editable>

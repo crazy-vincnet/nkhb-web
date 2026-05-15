@@ -15,11 +15,11 @@ const Background: React.FC<BackgroundProps> = ({ onOpenArticle }) => {
                         <span className="section-tag">01 — Background</span>
                         
                         <Editable k="background_title">
-                            {({ text, styles }) => <h2 style={styles}>{text}</h2>}
+                            {({ text, styles }) => <h2 style={styles} dangerouslySetInnerHTML={{ __html: text }}></h2>}
                         </Editable>
 
                         <Editable k="background_desc1">
-                            {({ text, styles }) => <p className="description" style={styles}>{text}</p>}
+                            {({ text, styles }) => <p className="description" style={styles} dangerouslySetInnerHTML={{ __html: text }}></p>}
                         </Editable>
 
                         <div className="founder-story">
@@ -29,24 +29,23 @@ const Background: React.FC<BackgroundProps> = ({ onOpenArticle }) => {
                         </div>
 
                         <Editable k="background_desc2">
-                            {({ text, styles }) => <p className="description" style={styles}>{text}</p>}
+                            {({ text, styles }) => <p className="description" style={styles} dangerouslySetInnerHTML={{ __html: text }}></p>}
                         </Editable>
 
                         <Editable k="background_desc3">
-                            {({ text, styles }) => <p className="description sub-desc" style={styles}>{text}</p>}
+                            {({ text, styles }) => <p className="description sub-desc" style={styles} dangerouslySetInnerHTML={{ __html: text }}></p>}
                         </Editable>
 
                         <div className="action-area">
                             <Editable k="background_about_nkfi" className="inline-block">
                                 {({ text, styles, link }) => (
-                                    <Link to={link || "/about"} className="btn-hero btn-outline" style={styles}>{text}</Link>
+                                    <Link to={link || "/about"} className="btn-hero btn-outline" style={styles} dangerouslySetInnerHTML={{ __html: text }}></Link>
                                 )}
                             </Editable>
                             
                             <Editable k="background_read_more" className="inline-block ml-4">
                                 {({ text, styles }) => (
-                                    <button className="btn-hero btn-outline" style={styles} onClick={onOpenArticle}>
-                                        {text}
+                                    <button className="btn-hero btn-outline" style={styles} onClick={onOpenArticle} dangerouslySetInnerHTML={{ __html: text }}>
                                     </button>
                                 )}
                             </Editable>
@@ -64,10 +63,10 @@ const Background: React.FC<BackgroundProps> = ({ onOpenArticle }) => {
                         
                         <div className="testimonial-box">
                             <Editable k="background_testimonial_tag">
-                                {({ text, styles }) => <span className="testimonial-tag" style={styles}>{text}</span>}
+                                {({ text, styles }) => <span className="testimonial-tag" style={styles} dangerouslySetInnerHTML={{ __html: text }}></span>}
                             </Editable>
                             <Editable k="background_testimonial_text">
-                                {({ text, styles }) => <p className="testimonial-text" style={styles}>{text}</p>}
+                                {({ text, styles }) => <p className="testimonial-text" style={styles} dangerouslySetInnerHTML={{ __html: text }}></p>}
                             </Editable>
                         </div>
                     </div>
