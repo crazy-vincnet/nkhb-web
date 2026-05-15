@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { useI18n } from '../lib/i18n';
 
 interface EditableProps {
@@ -36,6 +36,26 @@ export const Editable: React.FC<EditableProps> = ({ k, children, className = '',
   // Detect if we are inside an iframe (preview mode)
   const isPreview = window.self !== window.top;
 
+  // Global click interceptor for preview mode
+  useEffect(() => {
+    if (!isPreview) return;
+
+    const handleGlobalClick = (e: MouseEvent) => {
+      // Prevent ANY navigation in preview mode
+      const target = e.target as HTMLElement;
+      const isLink = target.closest('a') || target.tagName === 'A';
+      const isButton = target.closest('button') || target.tagName === 'BUTTON';
+
+      if (isLink || isButton) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    };
+
+    window.addEventListener('click', handleGlobalClick, true);
+    return () => window.removeEventListener('click', handleGlobalClick, true);
+  }, [isPreview]);
+
   const handleClick = (e: React.MouseEvent) => {
     if (isPreview) {
       e.preventDefault();
@@ -63,7 +83,6 @@ export const Editable: React.FC<EditableProps> = ({ k, children, className = '',
         if (!currentLink) {
             const findLink = (node: HTMLElement): string | null => {
                 if (node.tagName === 'A') return node.getAttribute('href');
-                if (node.tagName === 'BUTTON' && node.onclick) return 'JS_ACTION'; // Mark as action if not a standard link
                 
                 for (let child of Array.from(node.children)) {
                     const found = findLink(child as HTMLElement);
@@ -71,7 +90,8 @@ export const Editable: React.FC<EditableProps> = ({ k, children, className = '',
                 }
                 return null;
             };
-            currentLink = findLink(el) || '';
+            const foundLink = findLink(el);
+            if (foundLink) currentLink = foundLink;
         }
       }
 
