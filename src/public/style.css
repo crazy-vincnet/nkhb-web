@@ -77,8 +77,15 @@ main {
 /* =========================================================
    TYPOGRAPHY
    ========================================================= */
+h1 {
+    font-size: clamp(32px, 8vw, 64px);
+    font-weight: 900;
+    line-height: 1.1;
+    letter-spacing: -1.5px;
+}
+
 h2 {
-    font-size: clamp(30px, 5vw, 42px);
+    font-size: clamp(24px, 5vw, 42px);
     font-weight: 800;
     color: var(--primary-color);
     line-height: 1.2;
@@ -86,18 +93,16 @@ h2 {
     letter-spacing: -0.5px;
 }
 
-.section-tag {
-    display: inline-block;
-    font-size: 12px;
+h3 {
+    font-size: clamp(20px, 4vw, 28px);
     font-weight: 700;
-    color: var(--accent-color);
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    margin-bottom: 16px;
+}
+
+.section {
+    padding: clamp(60px, 10vw, 120px) 0;
 }
 
 .description {
-    font-size: 17px;
     line-height: 1.8;
     color: var(--text-light);
     word-break: keep-all;
