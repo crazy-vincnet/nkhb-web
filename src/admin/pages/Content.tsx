@@ -376,13 +376,19 @@ const Content = () => {
     
     try {
         const { error } = await supabase.from('content').upsert(
-            updates.map(i => ({
-                id: i.id,
-                key: i.key,
-                value_ko: i.value_ko,
-                value_en: i.value_en,
-                style_props: i.style_props
-            }))
+            updates.map(i => {
+                const payload: any = {
+                    key: i.key,
+                    value_ko: i.value_ko,
+                    value_en: i.value_en,
+                    style_props: i.style_props
+                };
+                // Only include ID if it's a real UUID (not our temporary 'new-' prefix)
+                if (i.id && !i.id.startsWith('new-')) {
+                    payload.id = i.id;
+                }
+                return payload;
+            })
         );
         if (error) throw error;
         setModifiedIds(new Set());
