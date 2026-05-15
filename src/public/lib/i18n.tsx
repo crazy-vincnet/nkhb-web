@@ -322,7 +322,10 @@ export const I18nProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const activeStyles = { ...dbStyles, ...liveStyles };
     const styles: React.CSSProperties = {};
     Object.keys(activeStyles).forEach(k => {
-        if (activeStyles[k] && k !== 'link') (styles as any)[k] = activeStyles[k];
+        const value = activeStyles[k];
+        if (value && k !== 'link') {
+            (styles as any)[k] = value;
+        }
     });
 
     // Special Priority for Links/Assets (like logo_url)
