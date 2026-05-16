@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import ArticleModal from '../components/ArticleModal';
 import LetterModal from '../components/LetterModal';
@@ -13,6 +13,15 @@ const Home: React.FC = () => {
     const [isArticleModalOpen, setIsArticleModalOpen] = useState(false);
     const [isLetterModalOpen, setIsLetterModalOpen] = useState(false);
     const [isSampleModalOpen, setIsSampleModalOpen] = useState(false);
+
+    // ⚡ Bolt Performance Optimization: Memoize modal handlers
+    // Prevents unneeded re-renders of child section components when a modal toggles
+    const handleOpenArticle = useCallback(() => setIsArticleModalOpen(true), []);
+    const handleCloseArticle = useCallback(() => setIsArticleModalOpen(false), []);
+    const handleOpenLetter = useCallback(() => setIsLetterModalOpen(true), []);
+    const handleCloseLetter = useCallback(() => setIsLetterModalOpen(false), []);
+    const handleOpenSample = useCallback(() => setIsSampleModalOpen(true), []);
+    const handleCloseSample = useCallback(() => setIsSampleModalOpen(false), []);
 
     const layoutData = getContent('page_layout_home');
     const layout = Array.isArray((layoutData.styles as any)?.order) 
@@ -48,9 +57,10 @@ const Home: React.FC = () => {
                     if (!Component) return null;
 
                     const props: any = {};
-                    if (key === 'background') props.onOpenArticle = () => setIsArticleModalOpen(true);
-                    if (key === 'composition') props.onOpenSample = () => setIsSampleModalOpen(true);
-                    if (key === 'guide') props.onOpenLetter = () => setIsLetterModalOpen(true);
+                    // ⚡ Bolt: Use memoized handlers for child components
+                    if (key === 'background') props.onOpenArticle = handleOpenArticle;
+                    if (key === 'composition') props.onOpenSample = handleOpenSample;
+                    if (key === 'guide') props.onOpenLetter = handleOpenLetter;
 
                     return <Component key={key} {...props} />;
                 })}
@@ -58,15 +68,15 @@ const Home: React.FC = () => {
 
             <ArticleModal 
                 isOpen={isArticleModalOpen} 
-                onClose={() => setIsArticleModalOpen(false)} 
+                onClose={handleCloseArticle}
             />
             <LetterModal 
                 isOpen={isLetterModalOpen} 
-                onClose={() => setIsLetterModalOpen(false)} 
+                onClose={handleCloseLetter}
             />
             <SampleModal 
                 isOpen={isSampleModalOpen} 
-                onClose={() => setIsSampleModalOpen(false)} 
+                onClose={handleCloseSample}
             />
         </>
     );
