@@ -1,0 +1,3 @@
+## 2024-05-16 - [Page-level Modal State Re-renders]
+**Learning:** Managing modal states (`isArticleModalOpen`, etc.) at the page level in `Home.tsx` without memoization causes all child section components to unnecessarily re-render whenever any modal is opened or closed. This is a codebase-specific architectural pattern causing widespread wasted render cycles.
+**Action:** Wrap event handler props (`onOpenArticle`, etc.) with `useCallback` in the parent, and apply `React.memo` to the static child section components (`Background.tsx`, `Composition.tsx`, `Guide.tsx`) to prevent these full-page re-renders.
