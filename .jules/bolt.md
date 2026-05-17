@@ -1,0 +1,3 @@
+## 2024-05-18 - [Optimize Page-Level Modal State Re-renders]
+**Learning:** In this Vite React application, page-level modal states (e.g., `isArticleModalOpen`, `isSampleModalOpen`, `isLetterModalOpen` in `Home.tsx`) were triggering unnecessary full-page re-renders because inline callback functions were passed as props to static child section components (`Background`, `Composition`, `Guide`). Due to this pattern, all child sections were re-rendering regardless of which modal was opened.
+**Action:** Always wrap event handler props with `useCallback` when passing them down to child components, and wrap the corresponding static child section components with `React.memo` to skip rendering when their props (the memoized callbacks) haven't changed.
