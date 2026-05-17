@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import ArticleModal from '../components/ArticleModal';
 import LetterModal from '../components/LetterModal';
@@ -19,6 +19,10 @@ const Home: React.FC = () => {
         ? (layoutData.styles as any).order 
         : HOME_DEFAULT_LAYOUT;
 
+
+    const handleOpenArticle = useCallback(() => setIsArticleModalOpen(true), []);
+    const handleOpenSample = useCallback(() => setIsSampleModalOpen(true), []);
+    const handleOpenLetter = useCallback(() => setIsLetterModalOpen(true), []);
 
     useEffect(() => {
         // Handle smooth scrolling for hash links whenever location changes
@@ -48,9 +52,9 @@ const Home: React.FC = () => {
                     if (!Component) return null;
 
                     const props: any = {};
-                    if (key === 'background') props.onOpenArticle = () => setIsArticleModalOpen(true);
-                    if (key === 'composition') props.onOpenSample = () => setIsSampleModalOpen(true);
-                    if (key === 'guide') props.onOpenLetter = () => setIsLetterModalOpen(true);
+                    if (key === 'background') props.onOpenArticle = handleOpenArticle;
+                    if (key === 'composition') props.onOpenSample = handleOpenSample;
+                    if (key === 'guide') props.onOpenLetter = handleOpenLetter;
 
                     return <Component key={key} {...props} />;
                 })}
