@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Editable } from './Editable';
 
 interface GuideProps {
     onOpenLetter: () => void;
 }
 
-const Guide: React.FC<GuideProps> = ({ onOpenLetter }) => {
+// ⚡ Bolt: Wrapped with React.memo to prevent re-renders when parent state changes
+const Guide: React.FC<GuideProps> = memo(({ onOpenLetter }) => {
     return (
         <Editable k="section_guide" headless>
             {({ styles: sectionStyles }) => (
@@ -92,6 +93,8 @@ const Guide: React.FC<GuideProps> = ({ onOpenLetter }) => {
             )}
         </Editable>
     );
-};
+});
+
+Guide.displayName = 'Guide';
 
 export default Guide;

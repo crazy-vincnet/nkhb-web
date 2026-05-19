@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Editable } from './Editable';
 
 interface CompositionProps {
     onOpenSample: () => void;
 }
 
-const Composition: React.FC<CompositionProps> = ({ onOpenSample }) => {
+// ⚡ Bolt: Wrapped with React.memo to prevent re-renders when parent state changes
+const Composition: React.FC<CompositionProps> = memo(({ onOpenSample }) => {
     return (
         <Editable k="section_composition" headless>
             {({ styles: sectionStyles }) => (
@@ -48,6 +49,8 @@ const Composition: React.FC<CompositionProps> = ({ onOpenSample }) => {
             )}
         </Editable>
     );
-};
+});
+
+Composition.displayName = 'Composition';
 
 export default Composition;
