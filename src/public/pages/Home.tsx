@@ -1,8 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import ArticleModal from '../components/ArticleModal';
-import LetterModal from '../components/LetterModal';
-import SampleModal from '../components/SampleModal';
 import SEO from '../components/SEO';
 import { useI18n } from '../lib/i18n';
 import { HOME_SECTION_MAP, HOME_DEFAULT_LAYOUT } from '../lib/registry';
@@ -10,28 +7,11 @@ import { HOME_SECTION_MAP, HOME_DEFAULT_LAYOUT } from '../lib/registry';
 const Home: React.FC = () => {
     const { getContent, lang } = useI18n();
     const location = useLocation();
-    const [isArticleModalOpen, setIsArticleModalOpen] = useState(false);
-    const [isLetterModalOpen, setIsLetterModalOpen] = useState(false);
-    const [isSampleModalOpen, setIsSampleModalOpen] = useState(false);
-
-    useEffect(() => {
-        const handleMessage = (event: MessageEvent) => {
-            if (event.data?.type === 'NKHB_OPEN_MODAL') {
-                const { modalType } = event.data;
-                if (modalType === 'article') setIsArticleModalOpen(true);
-                if (modalType === 'letter') setIsLetterModalOpen(true);
-                if (modalType === 'sample') setIsSampleModalOpen(true);
-            }
-        };
-        window.addEventListener('message', handleMessage);
-        return () => window.removeEventListener('message', handleMessage);
-    }, []);
 
     const layoutData = getContent('page_layout_home');
     const layout = Array.isArray((layoutData.styles as any)?.order) 
         ? (layoutData.styles as any).order 
         : HOME_DEFAULT_LAYOUT;
-
 
     useEffect(() => {
         // Handle smooth scrolling for hash links whenever location changes
@@ -61,26 +41,13 @@ const Home: React.FC = () => {
                     if (!Component) return null;
 
                     const props: any = {};
-                    if (key === 'background') props.onOpenArticle = () => setIsArticleModalOpen(true);
-                    if (key === 'composition') props.onOpenSample = () => setIsSampleModalOpen(true);
-                    if (key === 'guide') props.onOpenLetter = () => setIsLetterModalOpen(true);
+                    if (key === 'background') props.onOpenArticle = () => window.postMessage({ type: 'NKHB_OPEN_MODAL', modalType: 'article' }, '*');
+                    if (key === 'composition') props.onOpenSample = () => window.postMessage({ type: 'NKHB_OPEN_MODAL', modalType: 'sample' }, '*');
+                    if (key === 'guide') props.onOpenLetter = () => window.postMessage({ type: 'NKHB_OPEN_MODAL', modalType: 'letter' }, '*');
 
                     return <Component key={key} {...props} />;
                 })}
             </main>
-
-            <ArticleModal 
-                isOpen={isArticleModalOpen} 
-                onClose={() => setIsArticleModalOpen(false)} 
-            />
-            <LetterModal 
-                isOpen={isLetterModalOpen} 
-                onClose={() => setIsLetterModalOpen(false)} 
-            />
-            <SampleModal 
-                isOpen={isSampleModalOpen} 
-                onClose={() => setIsSampleModalOpen(false)} 
-            />
         </>
     );
 };
