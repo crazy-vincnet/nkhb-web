@@ -41,7 +41,7 @@ const Content = () => {
   const [uploading, setUploading] = useState<boolean | string>(false);
   const [modifiedKeys, setModifiedIds] = useState<Set<string>>(new Set());
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [activeTab, setActiveTab] = useState<'properties' | 'structure' | 'theme' | 'audit'>('properties');
+  const [activeTab, setActiveTab] = useState<'properties' | 'structure' | 'theme' | 'audit' | 'popups'>('properties');
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [themeSettings, setThemeSettings] = useState({
     colors: { accent: '#2563eb', primary: '#1e293b', secondary: '#64748b' },
@@ -273,6 +273,12 @@ const Content = () => {
     }
     updateItem(sectionKey, { style_props: { items: currentItems.filter((id: number) => id !== itemId) } });
     handlePushHistory();
+  };
+
+  const handleOpenModal = (modalType: string) => {
+    if (iframeRef.current?.contentWindow) {
+      iframeRef.current.contentWindow.postMessage({ type: 'NKHB_OPEN_MODAL', modalType }, '*');
+    }
   };
 
   const selectedItem = items.find(i => i.key === selectedKey);

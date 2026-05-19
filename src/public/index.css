@@ -1,2 +1,6 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* Reset or minimal base styles for public site if needed */
-/* Removed Tailwind directives to prevent conflict with style.css */
+/* Removed Tailwind directives to prevent conflict with style.css was a mistake if we use tailwind classes */

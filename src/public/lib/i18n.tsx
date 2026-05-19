@@ -315,7 +315,10 @@ export const I18nProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const styles: React.CSSProperties = {};
     Object.keys(resolvedStyles).forEach(k => {
         const value = resolvedStyles[k];
-        if (value && k !== 'link' && k !== 'mobile') (styles as any)[k] = value;
+        // Filter out non-CSS properties
+        if (value && k !== 'link' && k !== 'mobile' && k !== 'items' && k !== 'order') {
+            (styles as any)[k] = value;
+        }
     });
 
     let finalLink = live?.link;
