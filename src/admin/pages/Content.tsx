@@ -7,6 +7,7 @@ import {
 import { useHistory } from '../lib/useHistory';
 import { optimizeImage } from '../lib/imageOptimizer';
 import { translateText } from '../lib/translation';
+import { HOME_DEFAULT_LAYOUT, ABOUT_DEFAULT_LAYOUT } from '../../public/lib/registry';
 
 interface StyleProps {
   fontSize?: string; color?: string; backgroundColor?: string; margin?: string; padding?: string; fontWeight?: string; borderRadius?: string; borderWidth?: string; borderColor?: string; width?: string; height?: string; link?: string; mobile?: Partial<StyleProps>; [key: string]: any;
@@ -211,9 +212,9 @@ const Content = () => {
     return () => window.removeEventListener('message', handleMessage);
   }, []);
 
-  const currentLayoutKey = currentPage === '/' ? 'home_layout' : 'about_layout';
+  const currentLayoutKey = currentPage === '/' ? 'page_layout_home' : 'page_layout_about';
   const layoutItem = items.find(i => i.key === currentLayoutKey);
-  const currentLayout = layoutItem?.style_props?.order || (currentPage === '/' ? ['Hero', 'Background', 'Composition', 'Effects', 'Reach', 'Guide', 'Support'] : ['AboutHero', 'AboutIntro', 'AboutVision', 'AboutMinistry', 'AboutFounder', 'AboutCTA']);
+  const currentLayout = layoutItem?.style_props?.order || (currentPage === '/' ? HOME_DEFAULT_LAYOUT : ABOUT_DEFAULT_LAYOUT);
 
   const handleDragStart = (index: number) => setDraggedIndex(index);
   const handleDragOver = (e: React.DragEvent, index: number) => {
