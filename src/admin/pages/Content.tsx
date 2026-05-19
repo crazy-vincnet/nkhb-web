@@ -2,7 +2,7 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { 
-  Save, Type, Link as LinkIcon, Maximize, Palette, Smartphone, Monitor, RotateCcw, RotateCw, Loader2, X, Image as ImageIcon, ChevronLeft, Info, Layout as LayoutIcon, GripVertical, Globe, Languages, AlertCircle, Trash2, Plus
+  Save, Type, Link as LinkIcon, Maximize, Palette, Smartphone, Monitor, RotateCcw, RotateCw, Loader2, X, Image as ImageIcon, ChevronLeft, Info, Layout as LayoutIcon, GripVertical, Globe, Languages, AlertCircle, Trash2, Plus, Box
 } from 'lucide-react';
 import { useHistory } from '../lib/useHistory';
 import { optimizeImage } from '../lib/imageOptimizer';
@@ -328,14 +328,15 @@ const Content = () => {
       <aside className={`w-96 bg-white border-l shadow-[-20px_0_50px_rgba(0,0,0,0.05)] transition-all duration-500 z-30 flex flex-col ${sidebarOpen ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0 absolute right-0'}`}>
         <div className="p-8 border-b flex flex-col gap-6">
             <div className="flex items-center justify-between"><h2 className="text-lg font-black text-gray-900 uppercase tracking-tight">Visual Editor</h2><button onClick={() => { setSelectedKey(null); setSidebarOpen(false); }} className="p-2 hover:bg-gray-100 rounded-full transition-colors"><X className="w-5 h-5 text-gray-400" /></button></div>
-            <div className="flex bg-gray-100 p-1 rounded-xl">
-                <button onClick={() => setActiveTab('properties')} className={`flex-1 py-2 rounded-lg text-[10px] font-black transition-all ${activeTab === 'properties' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}>PROPERTIES</button>
-                <button onClick={() => setActiveTab('structure')} className={`flex-1 py-2 rounded-lg text-[10px] font-black transition-all ${activeTab === 'structure' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}>STRUCTURE</button>
-                <button onClick={() => setActiveTab('theme')} className={`flex-1 py-2 rounded-lg text-[10px] font-black transition-all ${activeTab === 'theme' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}>THEME</button>
-                <button onClick={() => setActiveTab('audit')} className={`flex-1 py-2 rounded-lg text-[10px] font-black transition-all relative ${activeTab === 'audit' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}>
+            <div className="flex bg-gray-100 p-1 rounded-xl overflow-x-auto no-scrollbar">
+                <button onClick={() => setActiveTab('properties')} className={`flex-1 py-2 px-1 rounded-lg text-[9px] font-black transition-all whitespace-nowrap ${activeTab === 'properties' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}>PROPERTIES</button>
+                <button onClick={() => setActiveTab('structure')} className={`flex-1 py-2 px-1 rounded-lg text-[9px] font-black transition-all whitespace-nowrap ${activeTab === 'structure' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}>STRUCTURE</button>
+                <button onClick={() => setActiveTab('theme')} className={`flex-1 py-2 px-1 rounded-lg text-[9px] font-black transition-all whitespace-nowrap ${activeTab === 'theme' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}>THEME</button>
+                <button onClick={() => setActiveTab('popups')} className={`flex-1 py-2 px-1 rounded-lg text-[9px] font-black transition-all whitespace-nowrap ${activeTab === 'popups' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}>POPUPS</button>
+                <button onClick={() => setActiveTab('audit')} className={`flex-1 py-2 px-1 rounded-lg text-[9px] font-black transition-all relative whitespace-nowrap ${activeTab === 'audit' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}>
                     AUDIT
                     {untranslatedItems.length > 0 && (
-                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[8px] px-1.5 py-0.5 rounded-full border-2 border-white animate-pulse">
+                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[7px] px-1 py-0.5 rounded-full border border-white animate-pulse">
                             {untranslatedItems.length}
                         </span>
                     )}
