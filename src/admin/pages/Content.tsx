@@ -2,7 +2,7 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { 
-  Save, Type, Link as LinkIcon, Maximize, Palette, Smartphone, Monitor, RotateCcw, RotateCw, Loader2, X, Image as ImageIcon, ChevronLeft, Info, Layout as LayoutIcon, GripVertical, Globe
+  Save, Type, Link as LinkIcon, Maximize, Palette, Smartphone, Monitor, RotateCcw, RotateCw, Loader2, X, Image as ImageIcon, ChevronLeft, Info, Layout as LayoutIcon, GripVertical, Globe, Languages, AlertCircle
 } from 'lucide-react';
 import { useHistory } from '../lib/useHistory';
 import { optimizeImage } from '../lib/imageOptimizer';
@@ -33,7 +33,7 @@ const Content = () => {
   const [uploading, setUploading] = useState<boolean | string>(false);
   const [modifiedKeys, setModifiedIds] = useState<Set<string>>(new Set());
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [activeTab, setActiveTab] = useState<'properties' | 'structure' | 'theme'>('properties');
+  const [activeTab, setActiveTab] = useState<'properties' | 'structure' | 'theme' | 'audit'>('properties');
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [themeSettings, setThemeSettings] = useState({
     colors: { accent: '#2563eb', primary: '#1e293b', secondary: '#64748b' },
@@ -43,6 +43,12 @@ const Content = () => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const itemsRef = useRef(items);
   const themeSettingsRef = useRef(themeSettings);
+
+  const untranslatedItems = items.filter(i => 
+    i.key !== 'global_theme_settings' && 
+    !i.key.startsWith('page_layout_') && 
+    (!i.value_ko || !i.value_en)
+  );
 
   useEffect(() => { itemsRef.current = items; themeSettingsRef.current = themeSettings; }, [items, themeSettings]);
 
@@ -286,6 +292,14 @@ const Content = () => {
                 <button onClick={() => setActiveTab('properties')} className={`flex-1 py-2 rounded-lg text-[10px] font-black transition-all ${activeTab === 'properties' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}>PROPERTIES</button>
                 <button onClick={() => setActiveTab('structure')} className={`flex-1 py-2 rounded-lg text-[10px] font-black transition-all ${activeTab === 'structure' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}>STRUCTURE</button>
                 <button onClick={() => setActiveTab('theme')} className={`flex-1 py-2 rounded-lg text-[10px] font-black transition-all ${activeTab === 'theme' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}>THEME</button>
+                <button onClick={() => setActiveTab('audit')} className={`flex-1 py-2 rounded-lg text-[10px] font-black transition-all relative ${activeTab === 'audit' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}>
+                    AUDIT
+                    {untranslatedItems.length > 0 && (
+                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[8px] px-1.5 py-0.5 rounded-full border-2 border-white animate-pulse">
+                            {untranslatedItems.length}
+                        </span>
+                    )}
+                </button>
             </div>
         </div>
 
@@ -454,6 +468,43 @@ const Content = () => {
                             <div key={sectionKey} draggable onDragStart={() => handleDragStart(index)} onDragOver={(e) => handleDragOver(e, index)} onDragEnd={handleDragEnd} className={`flex items-center gap-3 p-4 bg-gray-50 rounded-2xl border border-gray-100 cursor-grab active:cursor-grabbing transition-all ${draggedIndex === index ? 'opacity-50 scale-95' : 'hover:shadow-md hover:border-blue-200'}`}><GripVertical className="w-5 h-5 text-gray-400" /><span className="text-sm font-bold text-gray-700">{SECTION_LABELS[sectionKey] || sectionKey}</span></div>
                         ))}
                     </div>
+                </div>
+            ) : activeTab === 'audit' ? (
+                <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+                    <div className="flex items-center justify-between">
+                        <label className="text-[11px] font-black text-red-600 flex items-center gap-2 bg-red-50 px-3 py-1.5 rounded-full w-fit"><Languages className="w-3.5 h-3.5" /> TRANSLATION AUDIT</label>
+                        <span className="text-[10px] font-bold text-gray-400">{untranslatedItems.length} issues found</span>
+                    </div>
+                    
+                    {untranslatedItems.length > 0 ? (
+                        <div className="space-y-3">
+                            {untranslatedItems.map(item => (
+                                <button 
+                                    key={item.id}
+                                    onClick={() => {
+                                        setSelectedKey(item.key);
+                                        setActiveTab('properties');
+                                    }}
+                                    className="w-full p-4 bg-gray-50 hover:bg-white hover:shadow-md rounded-2xl border border-gray-100 transition-all text-left flex flex-col gap-2 group"
+                                >
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{item.key}</span>
+                                        <AlertCircle className="w-3.5 h-3.5 text-red-400" />
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <div className={`flex-1 h-1.5 rounded-full ${item.value_ko ? 'bg-blue-200' : 'bg-red-200 animate-pulse'}`} title="Korean" />
+                                        <div className={`flex-1 h-1.5 rounded-full ${item.value_en ? 'bg-blue-200' : 'bg-red-200 animate-pulse'}`} title="English" />
+                                    </div>
+                                    <span className="text-[11px] font-bold text-gray-700 line-clamp-1 group-hover:text-blue-600">{item.value_ko || item.value_en || 'Empty Content'}</span>
+                                </button>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="py-20 flex flex-col items-center justify-center text-center space-y-4">
+                            <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center shadow-inner"><Globe className="w-8 h-8 text-blue-300" /></div>
+                            <div className="space-y-1"><p className="text-sm font-black text-gray-900 uppercase">All Translated!</p><p className="text-[10px] text-gray-400 px-8">No missing translations found across the site.</p></div>
+                        </div>
+                    )}
                 </div>
             ) : (
                 <div className="space-y-10 animate-in fade-in slide-in-from-right-4 duration-300">
