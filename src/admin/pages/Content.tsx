@@ -2,12 +2,19 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { 
-  Save, Type, Link as LinkIcon, Maximize, Palette, Smartphone, Monitor, RotateCcw, RotateCw, Loader2, X, Image as ImageIcon, ChevronLeft, Info, Layout as LayoutIcon, GripVertical, Globe, Languages, AlertCircle
+  Save, Type, Link as LinkIcon, Maximize, Palette, Smartphone, Monitor, RotateCcw, RotateCw, Loader2, X, Image as ImageIcon, ChevronLeft, Info, Layout as LayoutIcon, GripVertical, Globe, Languages, AlertCircle, Trash2, Plus
 } from 'lucide-react';
 import { useHistory } from '../lib/useHistory';
 import { optimizeImage } from '../lib/imageOptimizer';
 import { translateText } from '../lib/translation';
-import { HOME_DEFAULT_LAYOUT, ABOUT_DEFAULT_LAYOUT } from '../../public/lib/registry';
+import { 
+    HOME_DEFAULT_LAYOUT, 
+    ABOUT_DEFAULT_LAYOUT, 
+    SECTION_LABELS as REGISTRY_LABELS, 
+    HOME_SECTION_MAP, 
+    ABOUT_SECTION_MAP,
+    REPEATABLE_ELEMENTS
+} from '../../public/lib/registry';
 
 interface StyleProps {
   fontSize?: string; color?: string; backgroundColor?: string; margin?: string; padding?: string; fontWeight?: string; borderRadius?: string; borderWidth?: string; borderColor?: string; width?: string; height?: string; link?: string; mobile?: Partial<StyleProps>; [key: string]: any;
@@ -16,6 +23,7 @@ interface StyleProps {
 interface ContentItem { id: string; key: string; value_ko: string; value_en: string; style_props: StyleProps; }
 
 const SECTION_LABELS: Record<string, string> = {
+    ...REGISTRY_LABELS,
     'section_hero': 'Hero Section', 'section_background': 'Background Section', 'section_composition': 'Composition Section', 'section_effects': 'Effects Section', 'section_reach': 'Reach Section', 'section_guide': 'Guide Section', 'section_support': 'Support Section', 'section_about_hero': 'About Hero', 'section_about_intro': 'About Intro', 'section_about_vision': 'About Vision', 'section_about_ministry': 'About Ministry', 'section_about_founder': 'About Founder', 'section_about_cta': 'About CTA'
 };
 
@@ -235,6 +243,38 @@ const Content = () => {
   };
   const handleDragEnd = () => { setDraggedIndex(null); handlePushHistory(); };
 
+  const handleDeleteSection = (index: number) => {
+    const newLayout = [...currentLayout];
+    newLayout.splice(index, 1);
+    updateItem(currentLayoutKey, { style_props: { order: newLayout } });
+    handlePushHistory();
+  };
+
+  const handleAddSection = (sectionKey: string) => {
+    const newLayout = [...currentLayout, sectionKey];
+    updateItem(currentLayoutKey, { style_props: { order: newLayout } });
+    handlePushHistory();
+  };
+
+  const handleAddItem = (sectionKey: string, config: any) => {
+    const item = items.find(i => i.key === sectionKey);
+    const currentItems = item?.style_props?.items || Array.from({ length: config.defaultCount }, (_, i) => i + 1);
+    const nextId = currentItems.length > 0 ? Math.max(...currentItems) + 1 : 1;
+    updateItem(sectionKey, { style_props: { items: [...currentItems, nextId] } });
+    handlePushHistory();
+  };
+
+  const handleRemoveItem = (sectionKey: string, itemId: number) => {
+    const item = items.find(i => i.key === sectionKey);
+    const currentItems = item?.style_props?.items || [];
+    if (currentItems.length <= 1) {
+        alert('최소 하나 이상의 요소가 필요합니다.');
+        return;
+    }
+    updateItem(sectionKey, { style_props: { items: currentItems.filter((id: number) => id !== itemId) } });
+    handlePushHistory();
+  };
+
   const selectedItem = items.find(i => i.key === selectedKey);
 
   if (loading) return <div className="flex items-center justify-center h-screen bg-white"><Loader2 className="animate-spin text-blue-600 w-12 h-12" /></div>;
@@ -453,6 +493,31 @@ const Content = () => {
                                 <div className="space-y-2"><span className="text-[9px] font-black text-gray-400 ml-1">BORDER WIDTH</span><input type="text" value={(previewMode === 'mobile' ? selectedItem.style_props?.mobile?.borderWidth : selectedItem.style_props?.borderWidth) || ''} placeholder={computedStyles?.borderWidth} onChange={(e) => { const prop = previewMode === 'mobile' ? { mobile: { ...(selectedItem.style_props.mobile || {}), borderWidth: e.target.value } } : { borderWidth: e.target.value }; updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, ...prop } }); }} className="w-full p-3 bg-gray-50 border-none rounded-xl text-xs font-bold shadow-inner" onBlur={handlePushHistory} /></div>
                             </div>
                         </div>
+
+                        {/* 7. REPEATABLE ITEMS (If applicable) */}
+                        {(() => {
+                            const sectionName = selectedKey?.replace('section_', '');
+                            const config = REPEATABLE_ELEMENTS[sectionName || ''];
+                            if (!config) return null;
+                            const currentItems = selectedItem.style_props?.items || Array.from({ length: config.defaultCount }, (_, i) => i + 1);
+
+                            return (
+                                <div className="space-y-6 pt-4 border-t border-gray-100">
+                                    <div className="flex items-center justify-between">
+                                        <label className="text-[11px] font-black text-violet-600 flex items-center gap-2 bg-violet-50 px-3 py-1.5 rounded-full w-fit"><GripVertical className="w-3.5 h-3.5" /> {config.label}</label>
+                                        <button onClick={() => handleAddItem(selectedKey!, config)} className="text-[9px] font-black text-violet-500 hover:bg-violet-100 px-3 py-1.5 rounded-full border border-violet-200 transition-all flex items-center gap-1"><Plus className="w-3 h-3" /> ADD ITEM</button>
+                                    </div>
+                                    <div className="space-y-2">
+                                        {currentItems.map((id: number) => (
+                                            <div key={id} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100">
+                                                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-tight">Item #{id}</span>
+                                                <button onClick={() => handleRemoveItem(selectedKey!, id)} className="p-1.5 hover:bg-red-50 text-gray-300 hover:text-red-500 rounded-lg transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            );
+                        })()}
                     </div>
                 ) : (
                     <div className="h-full flex flex-col items-center justify-center text-center space-y-6 py-20">
@@ -461,12 +526,32 @@ const Content = () => {
                     </div>
                 )
             ) : activeTab === 'structure' ? (
-                <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
-                    <label className="text-[11px] font-black text-blue-600 flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-full w-fit mb-6"><LayoutIcon className="w-3.5 h-3.5" /> PAGE STRUCTURE</label>
+                <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+                    <label className="text-[11px] font-black text-blue-600 flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-full w-fit mb-2"><LayoutIcon className="w-3.5 h-3.5" /> PAGE STRUCTURE</label>
                     <div className="space-y-2">
                         {currentLayout.map((sectionKey: string, index: number) => (
-                            <div key={sectionKey} draggable onDragStart={() => handleDragStart(index)} onDragOver={(e) => handleDragOver(e, index)} onDragEnd={handleDragEnd} className={`flex items-center gap-3 p-4 bg-gray-50 rounded-2xl border border-gray-100 cursor-grab active:cursor-grabbing transition-all ${draggedIndex === index ? 'opacity-50 scale-95' : 'hover:shadow-md hover:border-blue-200'}`}><GripVertical className="w-5 h-5 text-gray-400" /><span className="text-sm font-bold text-gray-700">{SECTION_LABELS[sectionKey] || sectionKey}</span></div>
+                            <div key={`${sectionKey}-${index}`} draggable onDragStart={() => handleDragStart(index)} onDragOver={(e) => handleDragOver(e, index)} onDragEnd={handleDragEnd} className={`flex items-center gap-3 p-4 bg-gray-50 rounded-2xl border border-gray-100 transition-all ${draggedIndex === index ? 'opacity-50 scale-95' : 'hover:shadow-md hover:border-blue-200'}`}>
+                                <GripVertical className="w-5 h-5 text-gray-400 cursor-grab active:cursor-grabbing" />
+                                <span className="text-sm font-bold text-gray-700 flex-1">{SECTION_LABELS[sectionKey] || sectionKey}</span>
+                                <button onClick={() => handleDeleteSection(index)} className="p-2 hover:bg-red-50 text-gray-300 hover:text-red-500 rounded-lg transition-colors"><Trash2 className="w-4 h-4" /></button>
+                            </div>
                         ))}
+                    </div>
+
+                    <div className="pt-6 border-t border-gray-100">
+                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-4 block">Available Sections</label>
+                        <div className="grid grid-cols-1 gap-2">
+                            {Object.keys(currentPage === '/' ? HOME_SECTION_MAP : ABOUT_SECTION_MAP).map(key => (
+                                <button 
+                                    key={key} 
+                                    onClick={() => handleAddSection(key)}
+                                    className="flex items-center justify-between p-3 bg-white border border-gray-100 rounded-xl hover:border-blue-500 hover:text-blue-600 transition-all text-left group"
+                                >
+                                    <span className="text-xs font-bold text-gray-600 group-hover:text-blue-600">{SECTION_LABELS[key] || key}</span>
+                                    <Plus className="w-4 h-4 text-gray-300 group-hover:text-blue-500" />
+                                </button>
+                            ))}
+                        </div>
                     </div>
                 </div>
             ) : activeTab === 'audit' ? (

@@ -38,10 +38,10 @@ const Reach: React.FC = () => {
                                     </Editable>
                                 </div>
                                 <div className="reach-features">
-                                    {[1, 2, 3].map(num => (
-                                        <div className="feature-item" key={num}>
+                                    {((sectionStyles as any).items || [1, 2, 3]).map((id: number) => (
+                                        <div className="feature-item" key={id}>
                                             <span className="dot"></span>
-                                            <Editable k={`reach_feature${num}`} headless>
+                                            <Editable k={`reach_feature${id}`} headless>
                                                 {({ text, styles }) => <p style={styles}>{text}</p>}
                                             </Editable>
                                         </div>

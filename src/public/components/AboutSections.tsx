@@ -46,15 +46,11 @@ export const AboutIntro: React.FC = () => {
                                     {({ text, styles }) => <p className="description" style={styles} dangerouslySetInnerHTML={{ __html: text }}></p>}
                                 </Editable>
                                 <ul className="info-list">
-                                    <Editable k="about_intro_info1" as="li" headless>
-                                        {({ text, styles }) => <span style={styles} dangerouslySetInnerHTML={{ __html: text }}></span>}
-                                    </Editable>
-                                    <Editable k="about_intro_info2" as="li" headless>
-                                        {({ text, styles }) => <span style={styles} dangerouslySetInnerHTML={{ __html: text }}></span>}
-                                    </Editable>
-                                    <Editable k="about_intro_info3" as="li" headless>
-                                        {({ text, styles }) => <span style={styles} dangerouslySetInnerHTML={{ __html: text }}></span>}
-                                    </Editable>
+                                    {((s2 as any).items || [1, 2, 3]).map((i: number) => (
+                                        <Editable k={`about_intro_info${i}`} key={i} as="li" headless>
+                                            {({ text, styles }) => <span style={styles} dangerouslySetInnerHTML={{ __html: text }}></span>}
+                                        </Editable>
+                                    ))}
                                 </ul>
                             </div>
                             <div className="image-content poster-image">
@@ -97,7 +93,7 @@ export const AboutVision: React.FC = () => {
                                 {({ text, styles }) => <p className="mission-desc text-center" style={styles} dangerouslySetInnerHTML={{ __html: text }}></p>}
                             </Editable>
                             <div className="mission-grid">
-                                {[1, 2, 3, 4, 5, 6].map((i) => (
+                                {((s3 as any).items || [1, 2, 3, 4, 5, 6]).map((i: number) => (
                                     <Editable k={`about_mission_li${i}`} key={i} className="mission-item" headless>
                                         {({ text, styles }) => <span style={styles} dangerouslySetInnerHTML={{ __html: text }}></span>}
                                     </Editable>
@@ -121,7 +117,7 @@ export const AboutMinistry: React.FC = () => {
                             {({ text, styles }) => <h2 className="section-title text-center" style={styles} dangerouslySetInnerHTML={{ __html: text }}></h2>}
                         </Editable>
                         <div className="ministry-grid">
-                            {[1, 2, 3, 4].map((i) => (
+                            {((s4 as any).items || [1, 2, 3, 4]).map((i: number) => (
                                 <div className="ministry-card" key={i}>
                                     <div className="card-icon-svg" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto 20px', fontSize: '2.5rem' }}>
                                         {i === 1 ? '📢' : i === 2 ? '📖' : i === 3 ? '🤝' : '🆘'}
@@ -167,7 +163,7 @@ export const AboutFounder: React.FC = () => {
                                     {({ text, styles }) => <h3 className="highlight-title" style={styles} dangerouslySetInnerHTML={{ __html: text }}></h3>}
                                 </Editable>
                                 <ul className="profile-list">
-                                    {[1, 2, 3, 4, 5, 6].map((i) => (
+                                    {((s5 as any).items || [1, 2, 3, 4, 5, 6]).map((i: number) => (
                                         <Editable k={`about_founder_profile${i}`} key={i} as="li" headless>
                                             {({ text, styles }) => <span style={styles} dangerouslySetInnerHTML={{ __html: text }}></span>}
                                         </Editable>

@@ -65,3 +65,12 @@ export const SECTION_LABELS: Record<string, string> = {
     about_founder: '설립자 소개',
     about_cta: '소개 하단 CTA'
 };
+
+export const REPEATABLE_ELEMENTS: Record<string, { label: string, prefix: string, defaultCount: number }> = {
+    reach: { label: '주요 특징 (Features)', prefix: 'reach_feature', defaultCount: 3 },
+    guide: { label: '참여 단계 (Steps)', prefix: 'guide_step', defaultCount: 3 },
+    about_intro: { label: '주요 정보 (Info List)', prefix: 'about_intro_info', defaultCount: 3 },
+    about_vision: { label: '핵심 가치 (Mission)', prefix: 'about_mission_li', defaultCount: 6 },
+    about_ministry: { label: '사역 항목 (Ministries)', prefix: 'about_ministry_card', defaultCount: 4 },
+    about_founder: { label: '설립자 약력 (Profile)', prefix: 'about_founder_profile', defaultCount: 6 }
+};

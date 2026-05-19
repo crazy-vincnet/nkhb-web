@@ -42,13 +42,13 @@ const Guide: React.FC<GuideProps> = ({ onOpenLetter }) => {
                             </div>
 
                             <div className="guide-steps">
-                                {[1, 2, 3].map(num => (
-                                    <div className="step-card" key={num}>
-                                        <div className="step-num">STEP 0{num}</div>
-                                        <Editable k={`guide_step${num}_title`} headless>
+                                {((sectionStyles as any).items || [1, 2, 3]).map((id: number) => (
+                                    <div className="step-card" key={id}>
+                                        <div className="step-num">STEP 0{id}</div>
+                                        <Editable k={`guide_step${id}_title`} headless>
                                             {({ text, styles }) => <h4 style={styles} dangerouslySetInnerHTML={{ __html: text }}></h4>}
                                         </Editable>
-                                        <Editable k={`guide_step${num}_desc`} headless>
+                                        <Editable k={`guide_step${id}_desc`} headless>
                                             {({ text, styles }) => <p style={styles} dangerouslySetInnerHTML={{ __html: text }}></p>}
                                         </Editable>
                                     </div>
