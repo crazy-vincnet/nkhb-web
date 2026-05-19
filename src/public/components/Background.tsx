@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Link } from 'react-router-dom';
 import { Editable } from './Editable';
 
@@ -6,7 +6,8 @@ interface BackgroundProps {
     onOpenArticle: () => void;
 }
 
-const Background: React.FC<BackgroundProps> = ({ onOpenArticle }) => {
+// ⚡ Bolt: Wrapped with React.memo to prevent re-renders when parent state changes
+const Background: React.FC<BackgroundProps> = memo(({ onOpenArticle }) => {
     return (
         <Editable k="section_background" headless>
             {({ styles: sectionStyles }) => (
@@ -78,6 +79,8 @@ const Background: React.FC<BackgroundProps> = ({ onOpenArticle }) => {
             )}
         </Editable>
     );
-};
+});
+
+Background.displayName = 'Background';
 
 export default Background;
