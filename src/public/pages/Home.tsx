@@ -14,6 +14,19 @@ const Home: React.FC = () => {
     const [isLetterModalOpen, setIsLetterModalOpen] = useState(false);
     const [isSampleModalOpen, setIsSampleModalOpen] = useState(false);
 
+    useEffect(() => {
+        const handleMessage = (event: MessageEvent) => {
+            if (event.data?.type === 'NKHB_OPEN_MODAL') {
+                const { modalType } = event.data;
+                if (modalType === 'article') setIsArticleModalOpen(true);
+                if (modalType === 'letter') setIsLetterModalOpen(true);
+                if (modalType === 'sample') setIsSampleModalOpen(true);
+            }
+        };
+        window.addEventListener('message', handleMessage);
+        return () => window.removeEventListener('message', handleMessage);
+    }, []);
+
     const layoutData = getContent('page_layout_home');
     const layout = Array.isArray((layoutData.styles as any)?.order) 
         ? (layoutData.styles as any).order 

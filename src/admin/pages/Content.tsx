@@ -591,6 +591,35 @@ const Content = () => {
                         </div>
                     )}
                 </div>
+            ) : activeTab === 'popups' ? (
+                <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+                    <label className="text-[11px] font-black text-violet-600 flex items-center gap-2 bg-violet-50 px-3 py-1.5 rounded-full w-fit mb-2"><Box className="w-3.5 h-3.5" /> EDITABLE POPUPS</label>
+                    <div className="space-y-3">
+                        {[
+                            { key: 'modal_article', label: '상세 기사 (Article)', id: 'article' },
+                            { key: 'modal_letter', label: '희망의 편지 (Letter)', id: 'letter' },
+                            { key: 'modal_sample', label: '샘플 듣기 (Sample)', id: 'sample' }
+                        ].map(modal => (
+                            <button 
+                                key={modal.id}
+                                onClick={() => handleOpenModal(modal.id)}
+                                className="w-full p-4 bg-gray-50 hover:bg-white hover:shadow-md rounded-2xl border border-gray-100 transition-all text-left flex items-center justify-between group"
+                            >
+                                <div className="flex flex-col gap-1">
+                                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{modal.key}</span>
+                                    <span className="text-sm font-bold text-gray-700 group-hover:text-blue-600">{modal.label}</span>
+                                </div>
+                                <Plus className="w-4 h-4 text-gray-300 group-hover:text-blue-500" />
+                            </button>
+                        ))}
+                    </div>
+                    <div className="p-4 bg-blue-50 rounded-2xl border border-blue-100 flex gap-3">
+                        <Info className="w-4 h-4 text-blue-500 shrink-0" />
+                        <p className="text-[10px] font-medium text-blue-700 leading-relaxed">
+                            팝업을 열면 프리뷰 화면에 나타납니다. 팝업 내의 텍스트나 이미지를 직접 클릭하여 평소와 같이 수정할 수 있습니다.
+                        </p>
+                    </div>
+                </div>
             ) : (
                 <div className="space-y-10 animate-in fade-in slide-in-from-right-4 duration-300">
                     <div className="space-y-6">
