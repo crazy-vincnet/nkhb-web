@@ -80,4 +80,4 @@ const Background: React.FC<BackgroundProps> = ({ onOpenArticle }) => {
     );
 };
 
-export default Background;
+export default React.memo(Background);
