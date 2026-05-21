@@ -5,7 +5,8 @@ interface GuideProps {
     onOpenLetter: () => void;
 }
 
-const Guide: React.FC<GuideProps> = ({ onOpenLetter }) => {
+// ⚡ Bolt Optimization: Use React.memo to prevent re-renders when parent state changes but props remain stable
+const Guide = React.memo(({ onOpenLetter }: GuideProps) => {
     return (
         <Editable k="section_guide" headless>
             {({ styles: sectionStyles }) => (
@@ -92,6 +93,6 @@ const Guide: React.FC<GuideProps> = ({ onOpenLetter }) => {
             )}
         </Editable>
     );
-};
+});
 
 export default Guide;

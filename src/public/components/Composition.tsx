@@ -5,7 +5,8 @@ interface CompositionProps {
     onOpenSample: () => void;
 }
 
-const Composition: React.FC<CompositionProps> = ({ onOpenSample }) => {
+// ⚡ Bolt Optimization: Use React.memo to prevent re-renders when parent state changes but props remain stable
+const Composition = React.memo(({ onOpenSample }: CompositionProps) => {
     return (
         <Editable k="section_composition" headless>
             {({ styles: sectionStyles }) => (
@@ -48,6 +49,6 @@ const Composition: React.FC<CompositionProps> = ({ onOpenSample }) => {
             )}
         </Editable>
     );
-};
+});
 
 export default Composition;
