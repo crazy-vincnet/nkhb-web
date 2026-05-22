@@ -1,0 +1,3 @@
+## 2024-05-18 - Full-Page Re-renders via Window Messages & State
+**Learning:** In this Vite React application, modal states (like `isArticleModalOpen`) are managed at the root `App.tsx` level and triggered via `window.postMessage` from deeply nested child components. This architectural pattern causes unnecessary full-page re-renders whenever a modal is toggled.
+**Action:** Always wrap event handler props that post messages to the window in `useCallback` inside the parent mapping loop (like in `Home.tsx`), and apply `React.memo()` to the static child section components receiving those props. Note that when applying `React.memo` in this TypeScript environment, avoid typing the component variable with `React.FC` to prevent TS compilation errors; type props inline instead.
