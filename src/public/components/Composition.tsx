@@ -5,7 +5,7 @@ interface CompositionProps {
     onOpenSample: () => void;
 }
 
-const Composition: React.FC<CompositionProps> = ({ onOpenSample }) => {
+const Composition = ({ onOpenSample }: CompositionProps) => {
     return (
         <Editable k="section_composition" headless>
             {({ styles: sectionStyles }) => (
@@ -50,4 +50,4 @@ const Composition: React.FC<CompositionProps> = ({ onOpenSample }) => {
     );
 };
 
-export default Composition;
+export default React.memo(Composition);

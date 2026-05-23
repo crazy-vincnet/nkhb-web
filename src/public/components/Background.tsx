@@ -6,7 +6,7 @@ interface BackgroundProps {
     onOpenArticle: () => void;
 }
 
-const Background: React.FC<BackgroundProps> = ({ onOpenArticle }) => {
+const Background = ({ onOpenArticle }: BackgroundProps) => {
     return (
         <Editable k="section_background" headless>
             {({ styles: sectionStyles }) => (
@@ -80,4 +80,4 @@ const Background: React.FC<BackgroundProps> = ({ onOpenArticle }) => {
     );
 };
 
-export default Background;
+export default React.memo(Background);
