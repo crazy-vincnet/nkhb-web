@@ -6,7 +6,7 @@ interface BackgroundProps {
     onOpenArticle: () => void;
 }
 
-const Background = React.memo(function Background({ onOpenArticle }: BackgroundProps) {
+const Background: React.FC<BackgroundProps> = ({ onOpenArticle }) => {
     return (
         <Editable k="section_background" headless>
             {({ styles: sectionStyles }) => (
@@ -15,7 +15,7 @@ const Background = React.memo(function Background({ onOpenArticle }: BackgroundP
                         <div className="content-grid">
                             <div className="text-content">
                                 <span className="section-tag">01 — Background</span>
-                                
+
                                 <Editable k="background_title" headless>
                                     {({ text, styles }) => <h2 style={styles} dangerouslySetInnerHTML={{ __html: text }}></h2>}
                                 </Editable>
@@ -44,7 +44,7 @@ const Background = React.memo(function Background({ onOpenArticle }: BackgroundP
                                             <Link to={link || "/about"} className="btn-hero btn-outline" style={styles} dangerouslySetInnerHTML={{ __html: text }}></Link>
                                         )}
                                     </Editable>
-                                    
+
                                     <Editable k="background_read_more" headless>
                                         {({ text, styles }) => (
                                             <button className="btn-hero btn-outline" style={styles} onClick={onOpenArticle} dangerouslySetInnerHTML={{ __html: text }}>
@@ -53,7 +53,7 @@ const Background = React.memo(function Background({ onOpenArticle }: BackgroundP
                                     </Editable>
                                 </div>
                             </div>
-                            
+
                             <div className="image-content">
                                 <Editable k="image_background_section" headless>
                                     {({ link, styles }) => (
@@ -62,7 +62,7 @@ const Background = React.memo(function Background({ onOpenArticle }: BackgroundP
                                         </div>
                                     )}
                                 </Editable>
-                                
+
                                 <div className="testimonial-box">
                                     <Editable k="background_testimonial_tag" headless>
                                         {({ text, styles }) => <span className="testimonial-tag" style={styles} dangerouslySetInnerHTML={{ __html: text }}></span>}
@@ -78,6 +78,6 @@ const Background = React.memo(function Background({ onOpenArticle }: BackgroundP
             )}
         </Editable>
     );
-});
+};
 
 export default Background;
