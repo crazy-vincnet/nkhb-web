@@ -1,0 +1,3 @@
+## 2024-05-26 - [Avoid Re-renders with Root Modal State]
+**Learning:** Modal states triggered via `window.postMessage` in deeply nested child components force full-page re-renders because the state lives at the root `App.tsx` level. Inline arrow functions passed as props to layout components like `Background`, `Composition`, and `Guide` in `Home.tsx` cause these child components to re-render unnecessarily on every state change.
+**Action:** Always wrap event handler props triggering these modales with `useCallback` in the parent (e.g., `Home.tsx`), and ensure the static layout section components are wrapped in `React.memo` (remembering to drop the `React.FC` type annotation to avoid TS errors in this specific environment).
