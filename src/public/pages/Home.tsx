@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import SEO from '../components/SEO';
 import { useI18n } from '../lib/i18n';
@@ -12,6 +12,14 @@ const Home: React.FC = () => {
     const layout = Array.isArray((layoutData.styles as any)?.order) 
         ? (layoutData.styles as any).order 
         : HOME_DEFAULT_LAYOUT;
+
+    // ⚡ Bolt Optimization: Memoize modal handlers with useCallback
+    // Impact: Prevents recreation of function instances on every Home component render.
+    // Why: When passed to React.memo wrapped child sections (Background, Composition, Guide),
+    // stable function references prevent unnecessary, expensive re-renders of the heavy static sections.
+    const onOpenArticle = useCallback(() => window.postMessage({ type: 'NKHB_OPEN_MODAL', modalType: 'article' }, '*'), []);
+    const onOpenSample = useCallback(() => window.postMessage({ type: 'NKHB_OPEN_MODAL', modalType: 'sample' }, '*'), []);
+    const onOpenLetter = useCallback(() => window.postMessage({ type: 'NKHB_OPEN_MODAL', modalType: 'letter' }, '*'), []);
 
     useEffect(() => {
         // Handle smooth scrolling for hash links whenever location changes
@@ -41,9 +49,9 @@ const Home: React.FC = () => {
                     if (!Component) return null;
 
                     const props: any = {};
-                    if (key === 'background') props.onOpenArticle = () => window.postMessage({ type: 'NKHB_OPEN_MODAL', modalType: 'article' }, '*');
-                    if (key === 'composition') props.onOpenSample = () => window.postMessage({ type: 'NKHB_OPEN_MODAL', modalType: 'sample' }, '*');
-                    if (key === 'guide') props.onOpenLetter = () => window.postMessage({ type: 'NKHB_OPEN_MODAL', modalType: 'letter' }, '*');
+                    if (key === 'background') props.onOpenArticle = onOpenArticle;
+                    if (key === 'composition') props.onOpenSample = onOpenSample;
+                    if (key === 'guide') props.onOpenLetter = onOpenLetter;
 
                     return <Component key={key} {...props} />;
                 })}
