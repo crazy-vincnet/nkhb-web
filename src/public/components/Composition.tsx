@@ -5,7 +5,8 @@ interface CompositionProps {
     onOpenSample: () => void;
 }
 
-const Composition: React.FC<CompositionProps> = ({ onOpenSample }) => {
+// ⚡ Bolt: Wrap with React.memo to prevent unnecessary re-renders when modal states change in App.tsx
+const Composition = React.memo(({ onOpenSample }: CompositionProps) => {
     return (
         <Editable k="section_composition" headless>
             {({ styles: sectionStyles }) => (
@@ -48,6 +49,6 @@ const Composition: React.FC<CompositionProps> = ({ onOpenSample }) => {
             )}
         </Editable>
     );
-};
+});
 
 export default Composition;

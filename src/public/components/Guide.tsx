@@ -5,7 +5,8 @@ interface GuideProps {
     onOpenLetter: () => void;
 }
 
-const Guide: React.FC<GuideProps> = ({ onOpenLetter }) => {
+// ⚡ Bolt: Wrap with React.memo to prevent unnecessary re-renders when modal states change in App.tsx
+const Guide = React.memo(({ onOpenLetter }: GuideProps) => {
     return (
         <Editable k="section_guide" headless>
             {({ styles: sectionStyles }) => (
@@ -92,6 +93,6 @@ const Guide: React.FC<GuideProps> = ({ onOpenLetter }) => {
             )}
         </Editable>
     );
-};
+});
 
 export default Guide;
