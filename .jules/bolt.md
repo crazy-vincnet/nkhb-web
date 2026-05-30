@@ -1,0 +1,3 @@
+## 2024-05-15 - React.memo integration with `window.postMessage` modal triggers
+**Learning:** The application manages modal state at the root `App.tsx` level and triggers them via `window.postMessage` from deeply nested child components. Passing unmemoized functions down to child section components causes unnecessary full-page re-renders, especially when `useLocation` changes. Adding `React.memo` and strictly managing `React.FC` types is critical to avoid TypeScript compilation errors when applying memoization in this environment.
+**Action:** Always wrap event handler props with `useCallback` when passing them down to static sections, and use `React.memo` (without the `React.FC` type annotation) on those sections to prevent unnecessary re-renders.
