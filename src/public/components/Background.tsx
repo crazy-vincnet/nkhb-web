@@ -1,4 +1,4 @@
-import React from 'react';
+import { memo } from 'react';
 import { Link } from 'react-router-dom';
 import { Editable } from './Editable';
 
@@ -6,7 +6,7 @@ interface BackgroundProps {
     onOpenArticle: () => void;
 }
 
-const Background: React.FC<BackgroundProps> = ({ onOpenArticle }) => {
+const Background = memo(({ onOpenArticle }: BackgroundProps) => {
     return (
         <Editable k="section_background" headless>
             {({ styles: sectionStyles }) => (
@@ -78,6 +78,6 @@ const Background: React.FC<BackgroundProps> = ({ onOpenArticle }) => {
             )}
         </Editable>
     );
-};
+});
 
 export default Background;
