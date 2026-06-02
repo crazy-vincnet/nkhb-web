@@ -35,8 +35,9 @@
     <link rel="stylesheet" href="/src/public/style.css">
 
     <!-- Security & Headers -->
-    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
-    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+    <!-- X-Frame-Options is set as a real HTTP header in vercel.json; it has no
+         effect via <meta http-equiv> and browsers warn about it. -->
+    <meta name="referrer" content="strict-origin-when-cross-origin">
 </head>
 
 <body>
