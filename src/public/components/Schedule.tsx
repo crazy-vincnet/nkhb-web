@@ -4,15 +4,22 @@ import { supabase } from '../lib/supabase';
 
 interface ScheduleItem {
     id: string;
-    day: string;
+    day?: string;
+    day_ko?: string;
+    day_en?: string;
     time: string;
     frequency: string;
     is_active: boolean;
 }
 
 const Schedule: React.FC = () => {
-    const { t } = useI18n();
+    const { t, lang } = useI18n();
     const [scheduleData, setScheduleData] = useState<ScheduleItem[]>([]);
+
+    // Pick the day label for the active language, falling back across the
+    // bilingual columns and the legacy single `day` (pre-migration safety).
+    const getDay = (item: ScheduleItem) =>
+        (lang === 'ko' ? item.day_ko : item.day_en) || item.day_ko || item.day_en || item.day || '';
 
     useEffect(() => {
         const fetchSchedule = async () => {
@@ -55,7 +62,7 @@ const Schedule: React.FC = () => {
                                             <line x1="3" y1="10" x2="21" y2="10"></line>
                                         </svg>
                                     </div>
-                                    <span className="day-text">{item.day}</span>
+                                    <span className="day-text">{getDay(item)}</span>
                                 </div>
                                 <div className="info-group">
                                     <div className="info-label">{t('schedule_card1_label_time')}</div>

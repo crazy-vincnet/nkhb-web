@@ -4,25 +4,28 @@ import { Plus, Trash2, Pencil, Check, X, Loader2 } from 'lucide-react';
 
 interface ScheduleItem {
   id: string;
-  day: string;
+  day?: string;
+  day_ko: string;
+  day_en: string;
   time: string;
   frequency: string;
   is_active: boolean;
 }
 
-type EditForm = { day: string; time: string; frequency: string };
+type EditForm = { day_ko: string; day_en: string; time: string; frequency: string };
 
 const Schedule = () => {
   const [schedule, setSchedule] = useState<ScheduleItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [newDay, setNewDay] = useState('');
+  const [newDayKo, setNewDayKo] = useState('');
+  const [newDayEn, setNewDayEn] = useState('');
   const [newTime, setNewTime] = useState('');
   const [newFreq, setNewFreq] = useState('');
   const [adding, setAdding] = useState(false);
 
   // Inline editing state
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState<EditForm>({ day: '', time: '', frequency: '' });
+  const [editForm, setEditForm] = useState<EditForm>({ day_ko: '', day_en: '', time: '', frequency: '' });
   const [savingEdit, setSavingEdit] = useState(false);
 
   useEffect(() => {
@@ -34,7 +37,7 @@ const Schedule = () => {
     const { data, error } = await supabase
       .from('schedule')
       .select('*')
-      .order('day', { ascending: true });
+      .order('day_ko', { ascending: true });
 
     if (error) {
       console.error('Error fetching schedule:', error);
@@ -46,16 +49,27 @@ const Schedule = () => {
 
   const addItem = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!newDayKo.trim() && !newDayEn.trim()) {
+      alert('요일(한국어 또는 영어)을 입력하세요.');
+      return;
+    }
     setAdding(true);
     const { error } = await supabase
       .from('schedule')
-      .insert([{ day: newDay.trim(), time: newTime.trim(), frequency: newFreq.trim(), is_active: true }]);
+      .insert([{
+        day_ko: newDayKo.trim(),
+        day_en: newDayEn.trim(),
+        time: newTime.trim(),
+        frequency: newFreq.trim(),
+        is_active: true,
+      }]);
 
     if (error) {
       console.error('Error adding item:', error);
       alert('추가 실패: ' + error.message);
     } else {
-      setNewDay('');
+      setNewDayKo('');
+      setNewDayEn('');
       setNewTime('');
       setNewFreq('');
       await fetchSchedule();
@@ -65,24 +79,30 @@ const Schedule = () => {
 
   const startEdit = (item: ScheduleItem) => {
     setEditingId(item.id);
-    setEditForm({ day: item.day, time: item.time, frequency: item.frequency || '' });
+    setEditForm({
+      day_ko: item.day_ko || item.day || '',
+      day_en: item.day_en || item.day || '',
+      time: item.time,
+      frequency: item.frequency || '',
+    });
   };
 
   const cancelEdit = () => {
     setEditingId(null);
-    setEditForm({ day: '', time: '', frequency: '' });
+    setEditForm({ day_ko: '', day_en: '', time: '', frequency: '' });
   };
 
   const saveEdit = async (id: string) => {
-    if (!editForm.day.trim() || !editForm.time.trim()) {
-      alert('요일과 시간은 필수입니다.');
+    if ((!editForm.day_ko.trim() && !editForm.day_en.trim()) || !editForm.time.trim()) {
+      alert('요일(한국어 또는 영어)과 시간은 필수입니다.');
       return;
     }
     setSavingEdit(true);
     const { error } = await supabase
       .from('schedule')
       .update({
-        day: editForm.day.trim(),
+        day_ko: editForm.day_ko.trim(),
+        day_en: editForm.day_en.trim(),
         time: editForm.time.trim(),
         frequency: editForm.frequency.trim(),
       })
@@ -140,16 +160,25 @@ const Schedule = () => {
       {/* Add new entry */}
       <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
         <h3 className="text-lg font-semibold mb-4">새 편성 추가</h3>
-        <form onSubmit={addItem} className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <form onSubmit={addItem} className="grid grid-cols-1 md:grid-cols-5 gap-4">
           <div>
-            <label className="block text-xs font-bold text-gray-500 mb-1">요일 (Day)</label>
+            <label className="block text-xs font-bold text-gray-500 mb-1">요일 (한국어)</label>
             <input
               type="text"
-              required
-              value={newDay}
-              onChange={(e) => setNewDay(e.target.value)}
+              value={newDayKo}
+              onChange={(e) => setNewDayKo(e.target.value)}
               className={inputClass}
               placeholder="예: 월 · 수 · 금"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-gray-500 mb-1">요일 (English)</label>
+            <input
+              type="text"
+              value={newDayEn}
+              onChange={(e) => setNewDayEn(e.target.value)}
+              className={inputClass}
+              placeholder="e.g., Mon · Wed · Fri"
             />
           </div>
           <div>
@@ -200,7 +229,8 @@ const Schedule = () => {
           <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead className="bg-gray-50 dark:bg-gray-900">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">요일</th>
+                <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">요일 (KO)</th>
+                <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">요일 (EN)</th>
                 <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">시간 (KST)</th>
                 <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">주파수</th>
                 <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">상태</th>
@@ -217,9 +247,19 @@ const Schedule = () => {
                         <td className="px-6 py-3">
                           <input
                             type="text"
-                            value={editForm.day}
-                            onChange={(e) => setEditForm(f => ({ ...f, day: e.target.value }))}
+                            value={editForm.day_ko}
+                            onChange={(e) => setEditForm(f => ({ ...f, day_ko: e.target.value }))}
                             className={inputClass}
+                            placeholder="월 · 수 · 금"
+                          />
+                        </td>
+                        <td className="px-6 py-3">
+                          <input
+                            type="text"
+                            value={editForm.day_en}
+                            onChange={(e) => setEditForm(f => ({ ...f, day_en: e.target.value }))}
+                            className={inputClass}
+                            placeholder="Mon · Wed · Fri"
                           />
                         </td>
                         <td className="px-6 py-3">
@@ -264,7 +304,8 @@ const Schedule = () => {
                       </>
                     ) : (
                       <>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">{item.day}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">{item.day_ko || item.day || <span className="text-gray-300">—</span>}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm">{item.day_en || <span className="text-gray-300">—</span>}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">{item.time}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">{item.frequency}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
