@@ -1583,6 +1583,11 @@ footer {
     align-items: center;
 }
 
+.footer-logo {
+    display: flex;
+    justify-content: center;
+}
+
 .footer-logo img {
     height: 80px;
     filter: brightness(0) invert(1);
