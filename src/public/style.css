@@ -685,7 +685,8 @@ nav {
     max-width: 900px;
 }
 
-#support-sub {
+#support-sub,
+#support-en-sub {
     margin: 20px auto 40px;
 }
 
