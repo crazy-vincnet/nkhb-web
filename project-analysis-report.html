@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NKHB Web - 심층 아키텍처 및 어드민 가이드</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #334155;
+            --text-muted: #64748b;
+            --code-bg: #f1f5f9;
+            --border-color: #e2e8f0;
+            --accent: #f59e0b;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-main);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 2rem;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+        h1 { color: var(--primary-dark); font-size: 2.5rem; margin-bottom: 0.5rem; }
+        h2 { color: var(--primary); font-size: 1.75rem; margin-top: 3rem; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 1.5rem; }
+        h3 { color: #0f172a; font-size: 1.25rem; margin-top: 2rem; margin-bottom: 1rem; border-left: 4px solid var(--primary); padding-left: 0.75rem; }
+        .subtitle { color: var(--text-muted); font-size: 1.1rem; }
+        
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            border: 1px solid var(--border-color);
+        }
+        
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 2rem; }
+        
+        ul { padding-left: 1.5rem; margin-top: 0.5rem; }
+        li { margin-bottom: 0.5rem; }
+        
+        code {
+            background-color: var(--code-bg);
+            color: #db2777;
+            padding: 0.2rem 0.4rem;
+            border-radius: 6px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.9em;
+        }
+        
+        .tag {
+            display: inline-block;
+            background-color: #dbeafe;
+            color: var(--primary-dark);
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .highlight-box {
+            background-color: #eff6ff;
+            border-left: 4px solid var(--primary);
+            padding: 1rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .guide-step {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .step-num {
+            background-color: var(--primary);
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .admin-nav {
+            background: #1e293b;
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: flex;
+            gap: 1rem;
+            font-size: 0.9rem;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>NKHB Web 통합 명세서 및 어드민 가이드</h1>
+            <div class="subtitle">시스템 아키텍처 분석부터 운영자를 위한 상세 매뉴얼까지</div>
+        </header>
+
+        <!-- 섹션 1: 아키텍처 분석 -->
+        <div class="card">
+            <h2>1. 시스템 아키텍처 분석</h2>
+            <div class="grid">
+                <div>
+                    <h3>기술 스택 & 구조</h3>
+                    <ul>
+                        <li><strong>Frontend:</strong> React 18 (Multi-entry MPA)</li>
+                        <li><strong>Backend:</strong> Supabase (PostgreSQL, Auth, Storage)</li>
+                        <li><strong>I18n:</strong> 동적/정적 데이터 병합 커스텀 시스템</li>
+                        <li><strong>Design:</strong> TailwindCSS 기반 디자인 토큰 관리</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3>핵심 로직 특이사항</h3>
+                    <ul>
+                        <li><strong>실시간 테마 엔진:</strong> CSS 변수를 통한 다이나믹 브랜딩.</li>
+                        <li><strong>이미지 최적화:</strong> Canvas API를 통한 클라이언트 사이드 WebP 압축.</li>
+                        <li><strong>보안:</strong> 데이터베이스 레벨의 RLS 정책 기반 접근 제어.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 섹션 2: 어드민 페이지 사용 설명서 -->
+        <div class="card">
+            <h2>2. 어드민 페이지 사용 설명서</h2>
+            <p class="subtitle">운영자가 효율적으로 사이트를 관리하기 위한 핵심 매뉴얼입니다.</p>
+            
+            <div class="admin-nav">
+                <span>📍 대시보드</span> | <span>✍️ 소식 관리</span> | <span>🎙️ 오디오 관리</span> | <span>🌐 시각적 편집</span> | <span>📋 편지 관리</span> | <span>📈 SEO 설정</span>
+            </div>
+
+            <h3>✍️ 게시글 및 소식 관리 (Posts)</h3>
+            <div class="highlight-box">
+                Tiptap 에디터를 사용하여 공지사항이나 뉴스를 작성합니다. 한국어와 영어를 동시에 입력하여 글로벌 대응이 가능합니다.
+            </div>
+            <div class="guide-step">
+                <div class="step-num">1</div>
+                <div><strong>새 소식 작성:</strong> "새 소식 작성" 버튼을 눌러 에디터로 진입합니다.</div>
+            </div>
+            <div class="guide-step">
+                <div class="step-num">2</div>
+                <div><strong>자동 번역 활용:</strong> 한국어 내용을 작성한 후 "자동 번역(DeepL)" 버튼을 누르면 영어 필드가 즉시 채워집니다.</div>
+            </div>
+            <div class="guide-step">
+                <div class="step-num">3</div>
+                <div><strong>미디어 삽입:</strong> 유튜브 URL이나 이미지를 에디터에 직접 삽입하여 풍부한 콘텐츠를 구성할 수 있습니다.</div>
+            </div>
+
+            <h3>🌐 시각적 편집기 사용법 (Visual Editor)</h3>
+            <div class="highlight-box">
+                홈페이지와 About 페이지의 텍스트, 이미지, 스타일을 실시간으로 확인하며 수정합니다.
+            </div>
+            <ul>
+                <li><strong>PROPERTIES 탭:</strong> 현재 선택된 요소의 텍스트와 개별 스타일(글자색, 여백 등)을 수정합니다.</li>
+                <li><strong>THEME 탭:</strong> 사이트 전체의 강조색(Accent), 기본 테두리 둥글기, 섹션 간격 등을 일괄 제어합니다.</li>
+                <li><strong>모바일 미리보기:</strong> 우측 상단의 스마트폰 아이콘을 눌러 모바일 기기에서의 노출 상태를 즉시 점검합니다.</li>
+                <li><strong>히스토리:</strong> <code>Ctrl+Z</code> (되돌리기)와 <code>Ctrl+Shift+Z</code> (다시실행)를 지원합니다.</li>
+            </ul>
+
+            <h3>🎙️ 오디오 및 방송 관리 (Audio & Schedule)</h3>
+            <div class="grid">
+                <div>
+                    <h4>샘플 듣기 관리</h4>
+                    <ul>
+                        <li>오디오 파일을 업로드하면 <strong>WebP/MP3 압축</strong>이 자동 적용됩니다.</li>
+                        <li>드래그 앤 드롭으로 사용자에게 보여질 재생 목록 순서를 변경할 수 있습니다.</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>방송 시간표 업데이트</h4>
+                    <ul>
+                        <li>주파수와 요일별 시간을 테이블 형태로 수정합니다.</li>
+                        <li>수정 즉시 퍼블릭 사이트의 하단(Footer) 및 상세 페이지에 반영됩니다.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>📋 희망의 편지 관리 (Letters)</h3>
+            <ul>
+                <li><strong>상태 관리:</strong> 접수된 편지를 <code>대기</code>, <code>승인</code>, <code>보관</code> 상태로 변경하여 관리합니다.</li>
+                <li><strong>개인정보 보호:</strong> 접수된 작성자의 위치와 이메일 정보를 확인하고 필요시 삭제하거나 아카이브할 수 있습니다.</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>3. 운영 팁 및 주의사항</h2>
+            <div class="grid">
+                <div>
+                    <h3>💡 운영 팁</h3>
+                    <ul>
+                        <li><strong>이미지 업로드:</strong> 가급적 <code>Visual Editor</code>나 <code>Audio</code> 관리자에서 제공하는 업로드 도구를 사용하세요. 자동으로 용량이 최적화되어 서버 비용을 절감합니다.</li>
+                        <li><strong>번역 검토:</strong> DeepL 자동 번역은 매우 정확하지만, 고유 명사(방송 프로그램 이름 등)는 직접 검토하는 것이 좋습니다.</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3>⚠️ 주의사항</h3>
+                    <ul>
+                        <li><strong>저장 버튼:</strong> 시각적 편집기(Visual Editor)는 "저장" 버튼을 누르기 전까지는 DB에 반영되지 않습니다.</li>
+                        <li><strong>GrapesJS:</strong> 동적 페이지를 만들 때 너무 복잡한 HTML 구조는 로딩 속도에 영향을 줄 수 있습니다.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
