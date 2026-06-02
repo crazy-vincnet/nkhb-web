@@ -57,13 +57,15 @@ const Background: React.FC<BackgroundProps> = ({ onOpenArticle }) => {
                             </div>
                             
                             <div className="image-content">
-                                <Editable k="image_background_section" headless>
-                                    {({ link, styles }) => (
-                                        <div className="image-placeholder" style={styles}>
-                                            <img src={link} alt="background" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                        </div>
-                                    )}
-                                </Editable>
+                                <div className="image-placeholder" style={{ aspectRatio: '16 / 9' }}>
+                                    <iframe
+                                        src="https://www.youtube.com/embed/GSmBL-TYauE?autoplay=1&mute=1&loop=1&playlist=GSmBL-TYauE&playsinline=1&rel=0&modestbranding=1"
+                                        title="New Korea Hope Broadcasting"
+                                        style={{ width: '100%', height: '100%', border: 0, display: 'block' }}
+                                        allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+                                        allowFullScreen
+                                    />
+                                </div>
                                 
                                 <div className="testimonial-box">
                                     <Editable k="background_testimonial_tag" headless>
