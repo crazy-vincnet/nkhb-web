@@ -222,7 +222,7 @@ const Audio = () => {
       }
       const audio = new window.Audio(track.url);
       audioInstance.current = audio;
-      audio.play();
+      audio.play().catch(() => setPlayingId(null));
       audio.onended = () => setPlayingId(null);
       setPlayingId(track.id);
     }

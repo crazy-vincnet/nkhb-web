@@ -18,6 +18,9 @@ const GrapesEditor = ({ initialData, onReady }: GrapesEditorProps) => {
   useEffect(() => {
     if (!editorRef.current || grapesInstance.current) return;
 
+    let isMounted = true;
+    let refreshTimer: ReturnType<typeof setTimeout> | undefined;
+
     try {
         const editor = grapesjs.init({
           container: editorRef.current,
@@ -109,7 +112,7 @@ const GrapesEditor = ({ initialData, onReady }: GrapesEditorProps) => {
           try {
             const { data: files, error } = await supabase.storage.from('assets').list('cms');
             if (error) throw error;
-            if (files) {
+            if (files && isMounted && grapesInstance.current) {
               const assets = files
                 .filter(file => file.name !== '.emptyFolderPlaceholder')
                 .map(file => {
@@ -141,13 +144,17 @@ const GrapesEditor = ({ initialData, onReady }: GrapesEditorProps) => {
         onReady(editor);
 
         // Auto-refresh to handle container sizing
-        setTimeout(() => editor.refresh(), 200);
+        refreshTimer = setTimeout(() => {
+          if (isMounted && grapesInstance.current) editor.refresh();
+        }, 200);
 
     } catch (err) {
         console.error('GrapesJS Init Error:', err);
     }
 
     return () => {
+      isMounted = false;
+      if (refreshTimer) clearTimeout(refreshTimer);
       if (grapesInstance.current) {
         try {
           grapesInstance.current.destroy();

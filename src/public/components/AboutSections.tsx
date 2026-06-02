@@ -26,7 +26,7 @@ export const AboutHero: React.FC = () => {
 export const AboutIntro: React.FC = () => {
     return (
         <Editable k="section_about_intro" headless>
-            {({ styles: s2 }) => (
+            {({ styles: s2, items: items2 }) => (
                 <section className="section about-intro" style={s2 || {}}>
                     <div className="container">
                         <div className="intro-top-banner">
@@ -46,7 +46,7 @@ export const AboutIntro: React.FC = () => {
                                     {({ text, styles }) => <p className="description" style={styles} dangerouslySetInnerHTML={{ __html: text || '' }}></p>}
                                 </Editable>
                                 <ul className="info-list">
-                                    {((s2 as any)?.items || [1, 2, 3]).map((i: number) => (
+                                    {(items2 || [1, 2, 3]).map((i: number) => (
                                         <Editable k={`about_intro_info${i}`} key={`intro-info-${i}`} as="li" headless>
                                             {({ text, styles }) => <span style={styles} dangerouslySetInnerHTML={{ __html: text || '' }}></span>}
                                         </Editable>
@@ -73,7 +73,7 @@ export const AboutIntro: React.FC = () => {
 export const AboutVision: React.FC = () => {
     return (
         <Editable k="section_about_vision" headless>
-            {({ styles: s3 }) => (
+            {({ styles: s3, items: items3 }) => (
                 <section className="section about-vision bg-alt" style={s3 || {}}>
                     <div className="container">
                         <div className="vision-box">
@@ -93,7 +93,7 @@ export const AboutVision: React.FC = () => {
                                 {({ text, styles }) => <p className="mission-desc text-center" style={styles} dangerouslySetInnerHTML={{ __html: text || '' }}></p>}
                             </Editable>
                             <div className="mission-grid">
-                                {((s3 as any)?.items || [1, 2, 3, 4, 5, 6]).map((i: number) => (
+                                {(items3 || [1, 2, 3, 4, 5, 6]).map((i: number) => (
                                     <Editable k={`about_mission_li${i}`} key={`mission-item-${i}`} className="mission-item" headless>
                                         {({ text, styles }) => <span style={styles} dangerouslySetInnerHTML={{ __html: text || '' }}></span>}
                                     </Editable>
@@ -110,14 +110,14 @@ export const AboutVision: React.FC = () => {
 export const AboutMinistry: React.FC = () => {
     return (
         <Editable k="section_about_ministry" headless>
-            {({ styles: s4 }) => (
+            {({ styles: s4, items: items4 }) => (
                 <section className="section about-ministry" style={s4 || {}}>
                     <div className="container">
                         <Editable k="about_ministry_title" headless>
                             {({ text, styles }) => <h2 className="section-title text-center" style={styles} dangerouslySetInnerHTML={{ __html: text || '' }}></h2>}
                         </Editable>
                         <div className="ministry-grid">
-                            {((s4 as any)?.items || [1, 2, 3, 4]).map((i: number) => (
+                            {(items4 || [1, 2, 3, 4]).map((i: number) => (
                                 <div className="ministry-card" key={`ministry-card-${i}`}>
                                     <div className="card-icon-svg" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto 20px', fontSize: '2.5rem' }}>
                                         {i === 1 ? '📢' : i === 2 ? '📖' : i === 3 ? '🤝' : '🆘'}
@@ -141,7 +141,7 @@ export const AboutMinistry: React.FC = () => {
 export const AboutFounder: React.FC = () => {
     return (
         <Editable k="section_about_founder" headless>
-            {({ styles: s5 }) => (
+            {({ styles: s5, items: items5 }) => (
                 <section className="section about-founder" style={s5 || {}}>
                     <div className="container">
                         <div className="founder-grid">
@@ -163,7 +163,7 @@ export const AboutFounder: React.FC = () => {
                                     {({ text, styles }) => <h3 className="highlight-title" style={styles} dangerouslySetInnerHTML={{ __html: text || '' }}></h3>}
                                 </Editable>
                                 <ul className="profile-list">
-                                    {((s5 as any)?.items || [1, 2, 3, 4, 5, 6]).map((i: number) => (
+                                    {(items5 || [1, 2, 3, 4, 5, 6]).map((i: number) => (
                                         <Editable k={`about_founder_profile${i}`} key={`profile-item-${i}`} as="li" headless>
                                             {({ text, styles }) => <span style={styles} dangerouslySetInnerHTML={{ __html: text || '' }}></span>}
                                         </Editable>

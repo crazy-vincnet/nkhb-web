@@ -4,7 +4,7 @@ import { Editable } from './Editable';
 const Reach: React.FC = () => {
     return (
         <Editable k="section_reach" headless>
-            {({ styles: sectionStyles }) => (
+            {({ styles: sectionStyles, items }) => (
                 <section className="section reach" id="reach" style={sectionStyles}>
                     <div className="container">
                         <div className="reach-grid">
@@ -38,7 +38,7 @@ const Reach: React.FC = () => {
                                     </Editable>
                                 </div>
                                 <div className="reach-features">
-                                    {((sectionStyles as any).items || [1, 2, 3]).map((id: number) => (
+                                    {(items || [1, 2, 3]).map((id: number) => (
                                         <div className="feature-item" key={id}>
                                             <span className="dot"></span>
                                             <Editable k={`reach_feature${id}`} headless>

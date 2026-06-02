@@ -51,6 +51,7 @@ const Content = () => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const itemsRef = useRef(items);
   const themeSettingsRef = useRef(themeSettings);
+  const editorLangRef = useRef(editorLang);
 
   const untranslatedItems = items.filter(i => 
     i.key !== 'global_theme_settings' && 
@@ -59,6 +60,7 @@ const Content = () => {
   );
 
   useEffect(() => { itemsRef.current = items; themeSettingsRef.current = themeSettings; }, [items, themeSettings]);
+  useEffect(() => { editorLangRef.current = editorLang; }, [editorLang]);
 
   const { state: historyState, push: pushHistory, undo, redo, canUndo, canRedo, reset: resetHistory } = useHistory({ 
     items: [] as ContentItem[], 
@@ -125,7 +127,7 @@ const Content = () => {
   const updateItem = (key: string, updates: Partial<ContentItem>) => {
     const currentItem = itemsRef.current.find(i => i.key === key);
     if (!currentItem) return;
-    let finalUpdates = { ...updates };
+    const finalUpdates = { ...updates };
     if (updates.style_props) finalUpdates.style_props = { ...currentItem.style_props, ...updates.style_props };
     setItems(prev => prev.map(i => i.key === key ? { ...i, ...finalUpdates } : i));
     setModifiedIds(prev => new Set(prev).add(key));
@@ -196,9 +198,13 @@ const Content = () => {
     const handleMessage = (event: MessageEvent) => {
       if (event.data?.type === 'NKHB_ELEMENT_SELECTED') {
         const { key, computedStyles: cs, link, innerText } = event.data;
-        let item = itemsRef.current.find(i => i.key === key);
+        // Use the live language (effect-synced ref) and derive the image flag from the
+        // incoming key — relying on the closed-over editorLang/isImageKey would be stale.
+        const currentLang = editorLangRef.current;
+        const isImg = key.includes('image') || key.includes('logo') || key.includes('bg');
+        const item = itemsRef.current.find(i => i.key === key);
         if (!item) {
-            const newItem: ContentItem = { id: `new-${key}-${Date.now()}`, key, value_ko: isImageKey ? (link || '') : (editorLang === 'ko' ? innerText : ''), value_en: isImageKey ? (link || '') : (editorLang === 'en' ? innerText : ''), style_props: { ...cs, link: link || '' } };
+            const newItem: ContentItem = { id: `new-${key}-${Date.now()}`, key, value_ko: isImg ? (link || '') : (currentLang === 'ko' ? innerText : ''), value_en: isImg ? (link || '') : (currentLang === 'en' ? innerText : ''), style_props: { ...cs, link: link || '' } };
             setItems(prev => [...prev, newItem]);
             setSelectedKey(key);
             setModifiedIds(prev => new Set(prev).add(key));
@@ -206,10 +212,9 @@ const Content = () => {
             if (innerText || link) {
                 setItems(prev => prev.map(i => {
                     if (i.key === key) {
-                        const isImg = key.includes('image') || key.includes('logo') || key.includes('bg');
                         const updates: any = {};
-                        if (editorLang === 'ko' && !i.value_ko) updates.value_ko = isImg ? link : innerText;
-                        if (editorLang === 'en' && !i.value_en) updates.value_en = isImg ? link : innerText;
+                        if (currentLang === 'ko' && !i.value_ko) updates.value_ko = isImg ? link : innerText;
+                        if (currentLang === 'en' && !i.value_en) updates.value_en = isImg ? link : innerText;
                         if (link && !i.style_props?.link) updates.style_props = { ...i.style_props, link };
                         return Object.keys(updates).length > 0 ? { ...i, ...updates } : i;
                     }

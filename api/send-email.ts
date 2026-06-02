@@ -9,7 +9,33 @@ export default async function handler(
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { name, email, location, reason, message } = req.body;
+  const { name, email, location, reason, message } = req.body || {};
+
+  // Validate required fields before doing anything else.
+  if (!name || !email || !message) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  // Validate the submitted email so it can't be abused as an arbitrary recipient.
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (typeof email !== 'string' || !emailRegex.test(email)) {
+    return res.status(400).json({ error: 'Invalid email address' });
+  }
+
+  // Escape user-provided values before interpolating into the HTML body to prevent injection.
+  const escapeHtml = (value: unknown): string =>
+    String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+
+  const safeName = escapeHtml(name);
+  const safeEmail = escapeHtml(email);
+  const safeLocation = escapeHtml(location);
+  const safeReason = escapeHtml(reason);
+  const safeMessage = escapeHtml(message);
 
   // Verify credentials
   const user = process.env.SMTP_USER;
@@ -63,7 +89,7 @@ ${message}
                     <span style="font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase;">이름</span>
                   </td>
                   <td style="padding: 16px 20px; border-bottom: 1px solid #e2e8f0;">
-                    <span style="font-size: 15px; font-weight: 600; color: #1e293b;">${name}</span>
+                    <span style="font-size: 15px; font-weight: 600; color: #1e293b;">${safeName}</span>
                   </td>
                 </tr>
                 <tr>
@@ -71,7 +97,7 @@ ${message}
                     <span style="font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase;">이메일</span>
                   </td>
                   <td style="padding: 16px 20px; border-bottom: 1px solid #e2e8f0;">
-                    <a href="mailto:${email}" style="font-size: 15px; font-weight: 600; color: #2563eb; text-decoration: none;">${email}</a>
+                    <a href="mailto:${safeEmail}" style="font-size: 15px; font-weight: 600; color: #2563eb; text-decoration: none;">${safeEmail}</a>
                   </td>
                 </tr>
                 <tr>
@@ -79,7 +105,7 @@ ${message}
                     <span style="font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase;">지역</span>
                   </td>
                   <td style="padding: 16px 20px; border-bottom: 1px solid #e2e8f0;">
-                    <span style="font-size: 15px; font-weight: 600; color: #1e293b;">${location}</span>
+                    <span style="font-size: 15px; font-weight: 600; color: #1e293b;">${safeLocation}</span>
                   </td>
                 </tr>
                 <tr>
@@ -87,7 +113,7 @@ ${message}
                     <span style="font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase;">계기</span>
                   </td>
                   <td style="padding: 16px 20px;">
-                    <span style="font-size: 15px; font-weight: 600; color: #1e293b;">${reason}</span>
+                    <span style="font-size: 15px; font-weight: 600; color: #1e293b;">${safeReason}</span>
                   </td>
                 </tr>
               </table>
@@ -97,7 +123,7 @@ ${message}
               <h2 style="font-size: 18px; font-weight: 700; color: #1e293b; margin-bottom: 16px;">
                 💬 메시지 내용
               </h2>
-              <div style="background-color: #ffffff; border: 2px solid #f1f5f9; padding: 24px; border-radius: 16px; font-size: 16px; line-height: 1.7; color: #334155; white-space: pre-wrap;">${message}</div>
+              <div style="background-color: #ffffff; border: 2px solid #f1f5f9; padding: 24px; border-radius: 16px; font-size: 16px; line-height: 1.7; color: #334155; white-space: pre-wrap;">${safeMessage}</div>
             </div>
 
             <div style="margin-top: 40px; text-align: center;">

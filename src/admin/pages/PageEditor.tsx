@@ -133,7 +133,7 @@ const PageEditor = () => {
     if (!page) return;
     setLoadingPosts(true);
     const { data, error } = await supabase
-      .from('posts')
+      .from('nkhb_posts')
       .select('*')
       .eq('page_id', page.id)
       .order('created_at', { ascending: false });
@@ -146,7 +146,7 @@ const PageEditor = () => {
 
   const deletePost = async (postId: string) => {
     if (!window.confirm('게시글을 삭제하시겠습니까?')) return;
-    const { error } = await supabase.from('posts').delete().eq('id', postId);
+    const { error } = await supabase.from('nkhb_posts').delete().eq('id', postId);
     if (!error) setPosts(posts.filter(p => p.id !== postId));
   };
 
@@ -268,8 +268,8 @@ const PageEditor = () => {
                 if (window.confirm('한국어 레이아웃을 영어 레이아웃으로 덮어쓰시겠습니까? 현재 영어 데이터는 삭제됩니다.')) {
                   setPage(prev => prev ? ({ ...prev, layout_en: prev.layout_ko }) : null);
                   // Refresh editor if it's already mounted
-                  if (editorRef.current) {
-                    editorRef.current.loadProjectData(page?.layout_ko);
+                  if (editorRef.current && page?.layout_ko) {
+                    editorRef.current.loadProjectData(page.layout_ko);
                   }
                 }
               }}

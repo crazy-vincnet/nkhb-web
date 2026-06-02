@@ -37,7 +37,7 @@ const Board: React.FC<BoardProps> = ({ pageId, lang, titleKo, titleEn, subtitleK
 
   useEffect(() => {
     fetchPosts();
-  }, [pageId]);
+  }, [pageId, mode]);
 
   const fetchPosts = async () => {
     setLoading(true);
@@ -76,7 +76,7 @@ const Board: React.FC<BoardProps> = ({ pageId, lang, titleKo, titleEn, subtitleK
     
     // Google Drive direct link conversion
     if (url.includes('drive.google.com')) {
-      const match = url.match(/\/file\/d\/(.+?)\//) || url.match(/id=(.+?)(&|$)/);
+      const match = url.match(/\/file\/d\/([^/]+)/) || url.match(/[?&]id=([^&]+)/);
       if (match && match[1]) {
         return `https://drive.google.com/uc?export=download&id=${match[1]}`;
       }

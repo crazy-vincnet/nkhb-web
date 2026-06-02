@@ -72,7 +72,7 @@ const PostEditor = () => {
     
     setTitleKo(data.title_ko || data.title || '');
     setTitleEn(data.title_en || '');
-    setAuthorName(data.author_name);
+    setAuthorName(data.author_name || 'NKHB 관리자');
     setContentKo(data.content_ko || data.content || '');
     setContentEn(data.content_en || '');
     setPostType(data.post_type || 'news');

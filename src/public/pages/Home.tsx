@@ -9,8 +9,8 @@ const Home: React.FC = () => {
     const location = useLocation();
 
     const layoutData = getContent('page_layout_home');
-    const layout = Array.isArray((layoutData.styles as any)?.order) 
-        ? (layoutData.styles as any).order 
+    const layout = Array.isArray(layoutData.order)
+        ? layoutData.order
         : HOME_DEFAULT_LAYOUT;
 
     useEffect(() => {

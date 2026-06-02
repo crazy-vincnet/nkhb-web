@@ -139,28 +139,43 @@ const MenuAdmin = () => {
       }
 
       const parents = menuItems.filter(i => !i.parent_id);
-      const parentData = parents.map((item, index) => ({
-        id: item.id.startsWith('temp-') ? undefined : item.id,
-        label_ko: item.label_ko,
-        label_en: item.label_en,
-        path: item.path,
-        order: index + 1,
-        is_active: item.is_active,
-        parent_id: null
-      }));
 
-      const { data: savedParents, error: parentError } = await supabase
-        .from('menu_items')
-        .upsert(parentData)
-        .select();
+      // Map each parent's local id (incl. temp ids) to its real DB id.
+      // Inserting new parents one-by-one guarantees an unambiguous mapping —
+      // matching by label/path can collide when two new parents share defaults.
+      const parentIdMap = new Map<string, string>();
+      for (let index = 0; index < parents.length; index++) {
+        const item = parents[index];
+        const row = {
+          label_ko: item.label_ko,
+          label_en: item.label_en,
+          path: item.path,
+          order: index + 1,
+          is_active: item.is_active,
+          parent_id: null
+        };
 
-      if (parentError) throw parentError;
+        if (item.id.startsWith('temp-')) {
+          const { data: inserted, error: insertError } = await supabase
+            .from('menu_items')
+            .insert(row)
+            .select()
+            .single();
+          if (insertError) throw insertError;
+          parentIdMap.set(item.id, inserted.id);
+        } else {
+          const { error: updateError } = await supabase
+            .from('menu_items')
+            .update(row)
+            .eq('id', item.id);
+          if (updateError) throw updateError;
+          parentIdMap.set(item.id, item.id);
+        }
+      }
 
       const childrenData: any[] = [];
       parents.forEach((parent) => {
-        const realParentId = savedParents.find(sp => 
-          sp.label_ko === parent.label_ko && sp.path === parent.path
-        )?.id;
+        const realParentId = parentIdMap.get(parent.id);
 
         const children = menuItems.filter(i => i.parent_id === parent.id);
         children.forEach((child, cIndex) => {

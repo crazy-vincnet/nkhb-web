@@ -122,7 +122,7 @@ const SEOAdmin = () => {
     setSaving(key);
     const { error } = await supabase
         .from('sites_settings')
-        .upsert({ key, value_ko, value_en, updated_at: new Date().toISOString() });
+        .upsert({ key, value_ko, value_en, updated_at: new Date().toISOString() }, { onConflict: 'key' });
     
     if (error) alert('저장 실패: ' + error.message);
     setSaving(null);

@@ -7,8 +7,8 @@ const About: React.FC = () => {
     const { getContent } = useI18n();
 
     const layoutData = getContent('page_layout_about');
-    const layout = Array.isArray((layoutData.styles as any)?.order) 
-        ? (layoutData.styles as any).order 
+    const layout = Array.isArray(layoutData.order)
+        ? layoutData.order
         : ABOUT_DEFAULT_LAYOUT;
 
     return (

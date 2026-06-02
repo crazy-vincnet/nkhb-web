@@ -3,7 +3,7 @@ import { useI18n } from '../lib/i18n';
 
 interface EditableProps {
   k: string;
-  children: (data: { text: string; styles: React.CSSProperties; link?: string }) => React.ReactElement;
+  children: (data: { text: string; styles: React.CSSProperties; link?: string; order?: any[]; items?: any[] }) => React.ReactElement;
   className?: string;
   as?: string | React.ComponentType<any>;
   headless?: boolean;
@@ -111,7 +111,7 @@ export const Editable: React.FC<EditableProps> = ({ k, children, className = '',
                 if (node.tagName === 'A') return node.getAttribute('href');
 
                 // 4. Recurse children
-                for (let child of Array.from(node.children)) {
+                for (const child of Array.from(node.children)) {
                     const found = findAsset(child as HTMLElement);
                     if (found) return found;
                 }

@@ -7,6 +7,8 @@ interface ContentData {
   text: string;
   styles: React.CSSProperties;
   link?: string;
+  order?: any[];
+  items?: any[];
 }
 
 interface I18nContextType {
@@ -103,6 +105,15 @@ const staticTranslations = {
         image_hero_bg: "/images/main-hero.png",
         image_background_section: "https://cdn.imweb.me/thumbnail/20260424/ae13dd489d8ac.png",
         image_reach_map: "https://cdn.imweb.me/thumbnail/20260424/ae13dd489d8ac.png",
+        about_ministry_title: "NKFI Ministry",
+        about_ministry_card1_title: "Mobilization",
+        about_ministry_card1_desc: "Raising people who prepare for New Korea",
+        about_ministry_card2_title: "Training",
+        about_ministry_card2_desc: "Preparing as disciples of Christ for spiritual reconstruction",
+        about_ministry_card3_title: "Networking",
+        about_ministry_card3_desc: "Uniting with organizations preparing for unification",
+        about_ministry_card4_title: "Relief",
+        about_ministry_card4_desc: "Rescuing and bringing relief to North Koreans and defector-refugees",
         image_about_poster: "/images/poster.png",
         image_about_kenneth: "/images/kenneth-bae.png",
     },
@@ -188,6 +199,15 @@ const staticTranslations = {
         image_hero_bg: "/images/main-hero.png",
         image_background_section: "https://cdn.imweb.me/thumbnail/20260424/ae13dd489d8ac.png",
         image_reach_map: "https://cdn.imweb.me/thumbnail/20260424/ae13dd489d8ac.png",
+        about_ministry_title: "NKFI 사역",
+        about_ministry_card1_title: "동원 / Mobilization",
+        about_ministry_card1_desc: "뉴코리아를 준비하는 사람들을 일으킵니다",
+        about_ministry_card2_title: "훈련 / Training",
+        about_ministry_card2_desc: "영적 재건을 위해 그리스도의 제자로 준비시킵니다",
+        about_ministry_card3_title: "네트워킹 / Networking",
+        about_ministry_card3_desc: "통일을 준비하는 단체들과 연합합니다.",
+        about_ministry_card4_title: "구호 / Relief",
+        about_ministry_card4_desc: "북한 주민과 탈북난민들을 구출하고 구호합니다.",
         image_about_poster: "/images/poster.png",
         image_about_kenneth: "/images/kenneth-bae.png",
     }
@@ -328,7 +348,12 @@ export const I18nProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         else if (staticValue && (staticValue.startsWith('http') || staticValue.startsWith('/') || staticValue.startsWith('#'))) finalLink = staticValue;
     }
 
-    return { text: (live?.text ?? baseText), styles, link: finalLink };
+    // Expose non-CSS layout metadata separately so it isn't filtered out above.
+    // `order` drives page section ordering; `items` drives repeatable item counts.
+    const order = Array.isArray(resolvedStyles.order) ? resolvedStyles.order : undefined;
+    const items = Array.isArray(resolvedStyles.items) ? resolvedStyles.items : undefined;
+
+    return { text: (live?.text ?? baseText), styles, link: finalLink, order, items };
   }, [dbContent, liveChanges, lang, isMobile]);
 
   const t = (key: string): string => getContent(key).text;

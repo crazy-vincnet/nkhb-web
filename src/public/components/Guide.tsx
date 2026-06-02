@@ -8,7 +8,7 @@ interface GuideProps {
 const Guide: React.FC<GuideProps> = ({ onOpenLetter }) => {
     return (
         <Editable k="section_guide" headless>
-            {({ styles: sectionStyles }) => (
+            {({ styles: sectionStyles, items }) => (
                 <section className="section guide" id="guide" style={sectionStyles}>
                     <div className="container">
                         <div className="section-header">
@@ -42,7 +42,7 @@ const Guide: React.FC<GuideProps> = ({ onOpenLetter }) => {
                             </div>
 
                             <div className="guide-steps">
-                                {((sectionStyles as any).items || [1, 2, 3]).map((id: number) => (
+                                {(items || [1, 2, 3]).map((id: number) => (
                                     <div className="step-card" key={id}>
                                         <div className="step-num">STEP 0{id}</div>
                                         <Editable k={`guide_step${id}_title`} headless>
