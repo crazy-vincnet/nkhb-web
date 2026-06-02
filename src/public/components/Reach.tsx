@@ -22,7 +22,9 @@ const Reach: React.FC = () => {
                             </div>
 
                             <div className="reach-text">
-                                <span className="section-tag">04 — Broadcast Reach</span>
+                                <Editable k="reach_tag" headless>
+                                    {({ text, styles }) => <span className="section-tag" style={styles} dangerouslySetInnerHTML={{ __html: text }}></span>}
+                                </Editable>
                                 <Editable k="reach_title" headless>
                                     {({ text, styles }) => <h2 style={styles} dangerouslySetInnerHTML={{ __html: text }}></h2>}
                                 </Editable>

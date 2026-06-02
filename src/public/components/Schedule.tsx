@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useI18n } from '../lib/i18n';
 import { supabase } from '../lib/supabase';
+import { Editable } from './Editable';
 
 interface ScheduleItem {
     id: string;
@@ -42,7 +43,9 @@ const Schedule: React.FC = () => {
         <section className="section schedule" id="schedule">
             <div className="container">
                 <div className="section-header">
-                    <span className="section-tag">07 — Broadcast Schedule</span>
+                    <Editable k="schedule_tag" headless>
+                        {({ text, styles }) => <span className="section-tag" style={styles} dangerouslySetInnerHTML={{ __html: text }}></span>}
+                    </Editable>
                     <h2>{t('schedule_title')}</h2>
                     <p className="description">{t('schedule_desc')}</p>
                 </div>

@@ -8,7 +8,9 @@ const Effects: React.FC = () => {
                 <section className="section effects" id="effects" style={sectionStyles}>
                     <div className="container">
                         <div className="section-header">
-                            <span className="section-tag">03 — Expected Impact</span>
+                            <Editable k="effects_tag" headless>
+                                {({ text, styles }) => <span className="section-tag" style={styles} dangerouslySetInnerHTML={{ __html: text }}></span>}
+                            </Editable>
                             <Editable k="effects_title" headless>
                                 {({ text, styles }) => <h2 style={styles} dangerouslySetInnerHTML={{ __html: text }}></h2>}
                             </Editable>

@@ -12,7 +12,9 @@ const Composition: React.FC<CompositionProps> = ({ onOpenSample }) => {
                 <section className="section composition" id="composition" style={sectionStyles}>
                     <div className="container">
                         <div className="section-header">
-                            <span className="section-tag">02 — Program Structure</span>
+                            <Editable k="composition_tag" headless>
+                                {({ text, styles }) => <span className="section-tag" style={styles} dangerouslySetInnerHTML={{ __html: text }}></span>}
+                            </Editable>
                             <Editable k="composition_title" headless>
                                 {({ text, styles }) => <h2 style={styles} dangerouslySetInnerHTML={{ __html: text }}></h2>}
                             </Editable>

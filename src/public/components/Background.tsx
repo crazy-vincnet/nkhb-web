@@ -14,7 +14,9 @@ const Background: React.FC<BackgroundProps> = ({ onOpenArticle }) => {
                     <div className="container">
                         <div className="content-grid">
                             <div className="text-content">
-                                <span className="section-tag">01 — Background</span>
+                                <Editable k="background_tag" headless>
+                                    {({ text, styles }) => <span className="section-tag" style={styles} dangerouslySetInnerHTML={{ __html: text }}></span>}
+                                </Editable>
                                 
                                 <Editable k="background_title" headless>
                                     {({ text, styles }) => <h2 style={styles} dangerouslySetInnerHTML={{ __html: text }}></h2>}

@@ -8,7 +8,9 @@ const Support: React.FC = () => {
                 <section className="section support" id="support" style={sectionStyles}>
                     <div className="container">
                         <div className="section-header">
-                            <span className="section-tag">06 — Support</span>
+                            <Editable k="support_tag" headless>
+                                {({ text, styles }) => <span className="section-tag" style={styles} dangerouslySetInnerHTML={{ __html: text }}></span>}
+                            </Editable>
                             <Editable k="support_title" headless>
                                 {({ text, styles }) => <h2 style={styles} dangerouslySetInnerHTML={{ __html: text }}></h2>}
                             </Editable>
@@ -29,14 +31,14 @@ const Support: React.FC = () => {
                                     {({ text, styles }) => <h3 style={styles} dangerouslySetInnerHTML={{ __html: text }}></h3>}
                                 </Editable>
                                 <ul>
-                                    <Editable k="support_impact1_li1" as="li" headless>
-                                        {({ text, styles }) => <span style={styles} dangerouslySetInnerHTML={{ __html: text }}></span>}
+                                    <Editable k="support_impact1_li1" headless>
+                                        {({ text, styles }) => <li style={styles} dangerouslySetInnerHTML={{ __html: text }}></li>}
                                     </Editable>
-                                    <Editable k="support_impact1_li2" as="li" headless>
-                                        {({ text, styles }) => <span style={styles} dangerouslySetInnerHTML={{ __html: text }}></span>}
+                                    <Editable k="support_impact1_li2" headless>
+                                        {({ text, styles }) => <li style={styles} dangerouslySetInnerHTML={{ __html: text }}></li>}
                                     </Editable>
-                                    <Editable k="support_impact1_li3" as="li" headless>
-                                        {({ text, styles }) => <span style={styles} dangerouslySetInnerHTML={{ __html: text }}></span>}
+                                    <Editable k="support_impact1_li3" headless>
+                                        {({ text, styles }) => <li style={styles} dangerouslySetInnerHTML={{ __html: text }}></li>}
                                     </Editable>
                                 </ul>
                             </div>
@@ -45,14 +47,14 @@ const Support: React.FC = () => {
                                     {({ text, styles }) => <h3 style={styles} dangerouslySetInnerHTML={{ __html: text }}></h3>}
                                 </Editable>
                                 <ul>
-                                    <Editable k="support_impact2_li1" as="li" headless>
-                                        {({ text, styles }) => <span style={styles} dangerouslySetInnerHTML={{ __html: text }}></span>}
+                                    <Editable k="support_impact2_li1" headless>
+                                        {({ text, styles }) => <li style={styles} dangerouslySetInnerHTML={{ __html: text }}></li>}
                                     </Editable>
-                                    <Editable k="support_impact2_li2" as="li" headless>
-                                        {({ text, styles }) => <span style={styles} dangerouslySetInnerHTML={{ __html: text }}></span>}
+                                    <Editable k="support_impact2_li2" headless>
+                                        {({ text, styles }) => <li style={styles} dangerouslySetInnerHTML={{ __html: text }}></li>}
                                     </Editable>
-                                    <Editable k="support_impact2_li3" as="li" headless>
-                                        {({ text, styles }) => <span style={styles} dangerouslySetInnerHTML={{ __html: text }}></span>}
+                                    <Editable k="support_impact2_li3" headless>
+                                        {({ text, styles }) => <li style={styles} dangerouslySetInnerHTML={{ __html: text }}></li>}
                                     </Editable>
                                 </ul>
                             </div>
@@ -113,7 +115,9 @@ const Support: React.FC = () => {
                                 <Editable k="support_account_bank" headless>
                                     {({ text, styles }) => <p className="bank-name" style={styles} dangerouslySetInnerHTML={{ __html: text }}></p>}
                                 </Editable>
-                                <p className="account-number">164-890058-38004</p>
+                                <Editable k="support_account_number" headless>
+                                    {({ text, styles }) => <p className="account-number" style={styles} dangerouslySetInnerHTML={{ __html: text }}></p>}
+                                </Editable>
                                 <Editable k="support_account_holder" headless>
                                     {({ text, styles }) => <p className="account-holder" style={styles} dangerouslySetInnerHTML={{ __html: text }}></p>}
                                 </Editable>

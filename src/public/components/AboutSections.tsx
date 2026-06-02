@@ -47,8 +47,8 @@ export const AboutIntro: React.FC = () => {
                                 </Editable>
                                 <ul className="info-list">
                                     {(items2 || [1, 2, 3]).map((i: number) => (
-                                        <Editable k={`about_intro_info${i}`} key={`intro-info-${i}`} as="li" headless>
-                                            {({ text, styles }) => <span style={styles} dangerouslySetInnerHTML={{ __html: text || '' }}></span>}
+                                        <Editable k={`about_intro_info${i}`} key={`intro-info-${i}`} headless>
+                                            {({ text, styles }) => <li style={styles} dangerouslySetInnerHTML={{ __html: text || '' }}></li>}
                                         </Editable>
                                     ))}
                                 </ul>
@@ -164,8 +164,8 @@ export const AboutFounder: React.FC = () => {
                                 </Editable>
                                 <ul className="profile-list">
                                     {(items5 || [1, 2, 3, 4, 5, 6]).map((i: number) => (
-                                        <Editable k={`about_founder_profile${i}`} key={`profile-item-${i}`} as="li" headless>
-                                            {({ text, styles }) => <span style={styles} dangerouslySetInnerHTML={{ __html: text || '' }}></span>}
+                                        <Editable k={`about_founder_profile${i}`} key={`profile-item-${i}`} headless>
+                                            {({ text, styles }) => <li style={styles} dangerouslySetInnerHTML={{ __html: text || '' }}></li>}
                                         </Editable>
                                     ))}
                                 </ul>

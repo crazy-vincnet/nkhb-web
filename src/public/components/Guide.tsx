@@ -12,7 +12,9 @@ const Guide: React.FC<GuideProps> = ({ onOpenLetter }) => {
                 <section className="section guide" id="guide" style={sectionStyles}>
                     <div className="container">
                         <div className="section-header">
-                            <span className="section-tag">05 — Get Involved</span>
+                            <Editable k="guide_tag" headless>
+                                {({ text, styles }) => <span className="section-tag" style={styles} dangerouslySetInnerHTML={{ __html: text }}></span>}
+                            </Editable>
                             <Editable k="guide_title" headless>
                                 {({ text, styles }) => <h2 style={styles} dangerouslySetInnerHTML={{ __html: text }}></h2>}
                             </Editable>
@@ -75,8 +77,8 @@ const Guide: React.FC<GuideProps> = ({ onOpenLetter }) => {
                                     </Editable>
                                     <ul className="guide-list">
                                         {[1, 2, 3, 4].map(num => (
-                                            <Editable k={`guide_writing_li${num}`} key={num} as="li" headless>
-                                                {({ text, styles }) => <span style={styles} dangerouslySetInnerHTML={{ __html: text }}></span>}
+                                            <Editable k={`guide_writing_li${num}`} key={num} headless>
+                                                {({ text, styles }) => <li style={styles} dangerouslySetInnerHTML={{ __html: text }}></li>}
                                             </Editable>
                                         ))}
                                     </ul>
