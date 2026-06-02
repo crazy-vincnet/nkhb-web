@@ -5,7 +5,7 @@ const SupportEn: React.FC = () => {
     const { t } = useI18n();
 
     return (
-        <section className="section support-en" id="support-en">
+        <section className="section support-en" id="support">
             <div className="container">
                 <div className="section-header">
                     <h2>{t('support_en_title')}</h2>
