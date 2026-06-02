@@ -6,7 +6,9 @@ interface BackgroundProps {
     onOpenArticle: () => void;
 }
 
-const Background: React.FC<BackgroundProps> = ({ onOpenArticle }) => {
+// Bolt Performance Optimization: Wrapped with React.memo to prevent unnecessary re-renders
+// when the parent component updates, provided the props (onOpenArticle) remain referentially equal.
+const Background = React.memo(function Background({ onOpenArticle }: BackgroundProps) {
     return (
         <Editable k="section_background" headless>
             {({ styles: sectionStyles }) => (
@@ -82,6 +84,6 @@ const Background: React.FC<BackgroundProps> = ({ onOpenArticle }) => {
             )}
         </Editable>
     );
-};
+});
 
 export default Background;
