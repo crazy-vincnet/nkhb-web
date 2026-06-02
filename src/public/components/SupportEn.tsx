@@ -8,8 +8,34 @@ const SupportEn: React.FC = () => {
         <section className="section support-en" id="support">
             <div className="container">
                 <div className="section-header">
+                    <span className="section-tag">06 — Support</span>
                     <h2>{t('support_en_title')}</h2>
+                    <p className="description">Become a radio-wave missionary bringing truth and hope to the people of North Korea.</p>
                 </div>
+
+                <div className="participation-sub-section" id="support-en-sub">
+                    <p className="sub-description">If 1,000 radio-wave missionaries each give 1,000 KRW a day — 30,000 KRW a month — we can produce and broadcast two hours of programming every day, carrying hope across all of North Korea.</p>
+                </div>
+
+                <div className="impact-info-container">
+                    <div className="impact-box">
+                        <h3>🙌 Your prayers and support</h3>
+                        <ul>
+                            <li>Produce broadcasts that bring the gospel and hope to North Koreans</li>
+                            <li>Sustain reliable shortwave radio transmission</li>
+                            <li>Create content made for the people of North Korea</li>
+                        </ul>
+                    </div>
+                    <div className="impact-box">
+                        <h3>✨ For the people of North Korea</h3>
+                        <ul>
+                            <li>A new window to the outside world</li>
+                            <li>A message of hope that sustains their lives</li>
+                            <li>The light of the gospel shining through the darkness</li>
+                        </ul>
+                    </div>
+                </div>
+
                 <div className="support-en-grid">
                     <div className="support-en-card">
                         <h3>Donation from USA</h3>
