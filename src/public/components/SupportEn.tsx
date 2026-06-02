@@ -14,7 +14,7 @@ const SupportEn: React.FC = () => {
                 </div>
 
                 <div className="participation-sub-section" id="support-en-sub">
-                    <p className="sub-description">If 1,000 radio-wave missionaries each give 1,000 KRW a day — 30,000 KRW a month — we can produce and broadcast two hours of programming every day, carrying hope across all of North Korea.</p>
+                    <p className="sub-description">If 1,000 radio-wave missionaries each give $1 a day — $30 a month — we can produce and broadcast two hours of programming every day, carrying hope across all of North Korea.</p>
                 </div>
 
                 <div className="impact-info-container">
