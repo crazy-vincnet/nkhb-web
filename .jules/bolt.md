@@ -1,0 +1,3 @@
+## 2025-02-12 - Prevented Unnecessary Modal Trigger Renders
+**Learning:** In the React application, root-level state updates (like `isArticleModalOpen`) can cause cascading re-renders for the entire page map if mapped components rely on inline arrow functions as props. This is a critical performance bottleneck given the `window.postMessage` architecture used for modals.
+**Action:** Used `useCallback` at the root `Home.tsx` to memoize event handlers and wrapped static child layout components (`Background`, `Composition`, `Guide`) with `React.memo` to effectively prune the render tree and optimize performance. Avoided `React.FC` typing with `React.memo` to satisfy TS compiler.

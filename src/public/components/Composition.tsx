@@ -2,10 +2,10 @@ import React from 'react';
 import { Editable } from './Editable';
 
 interface CompositionProps {
-    onOpenSample: () => void;
+    onOpenSample?: () => void;
 }
 
-const Composition: React.FC<CompositionProps> = ({ onOpenSample }) => {
+const Composition = React.memo(({ onOpenSample }: CompositionProps) => {
     return (
         <Editable k="section_composition" headless>
             {({ styles: sectionStyles }) => (
@@ -50,6 +50,8 @@ const Composition: React.FC<CompositionProps> = ({ onOpenSample }) => {
             )}
         </Editable>
     );
-};
+});
+
+Composition.displayName = 'Composition';
 
 export default Composition;
