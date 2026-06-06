@@ -6,7 +6,8 @@ interface BackgroundProps {
     onOpenArticle: () => void;
 }
 
-const Background: React.FC<BackgroundProps> = ({ onOpenArticle }) => {
+// ⚡ Bolt Optimization: Memoize to prevent full-page re-renders when modal state changes
+const Background = React.memo(function Background({ onOpenArticle }: BackgroundProps) {
     return (
         <Editable k="section_background" headless>
             {({ styles: sectionStyles }) => (
@@ -82,6 +83,8 @@ const Background: React.FC<BackgroundProps> = ({ onOpenArticle }) => {
             )}
         </Editable>
     );
-};
+});
+
+Background.displayName = 'Background';
 
 export default Background;
