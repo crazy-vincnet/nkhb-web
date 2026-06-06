@@ -5,7 +5,8 @@ interface CompositionProps {
     onOpenSample: () => void;
 }
 
-const Composition: React.FC<CompositionProps> = ({ onOpenSample }) => {
+// ⚡ Bolt Optimization: Memoize to prevent full-page re-renders when modal state changes
+const Composition = React.memo(function Composition({ onOpenSample }: CompositionProps) {
     return (
         <Editable k="section_composition" headless>
             {({ styles: sectionStyles }) => (
@@ -50,6 +51,8 @@ const Composition: React.FC<CompositionProps> = ({ onOpenSample }) => {
             )}
         </Editable>
     );
-};
+});
+
+Composition.displayName = 'Composition';
 
 export default Composition;

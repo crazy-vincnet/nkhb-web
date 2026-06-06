@@ -5,7 +5,8 @@ interface GuideProps {
     onOpenLetter: () => void;
 }
 
-const Guide: React.FC<GuideProps> = ({ onOpenLetter }) => {
+// ⚡ Bolt Optimization: Memoize to prevent full-page re-renders when modal state changes
+const Guide = React.memo(function Guide({ onOpenLetter }: GuideProps) {
     return (
         <Editable k="section_guide" headless>
             {({ styles: sectionStyles, items }) => (
@@ -94,6 +95,8 @@ const Guide: React.FC<GuideProps> = ({ onOpenLetter }) => {
             )}
         </Editable>
     );
-};
+});
+
+Guide.displayName = 'Guide';
 
 export default Guide;
