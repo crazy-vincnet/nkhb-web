@@ -5,7 +5,11 @@ interface CompositionProps {
     onOpenSample: () => void;
 }
 
-const Composition: React.FC<CompositionProps> = ({ onOpenSample }) => {
+// ⚡ Bolt Performance Optimization:
+// Wrapped in React.memo to prevent unnecessary re-renders when the parent Home component
+// re-renders. Combined with memoized callbacks, this ensures static layout sections
+// skip the render phase completely.
+const Composition = React.memo(({ onOpenSample }: CompositionProps) => {
     return (
         <Editable k="section_composition" headless>
             {({ styles: sectionStyles }) => (
@@ -50,6 +54,6 @@ const Composition: React.FC<CompositionProps> = ({ onOpenSample }) => {
             )}
         </Editable>
     );
-};
+});
 
 export default Composition;

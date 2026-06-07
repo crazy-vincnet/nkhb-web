@@ -6,7 +6,11 @@ interface BackgroundProps {
     onOpenArticle: () => void;
 }
 
-const Background: React.FC<BackgroundProps> = ({ onOpenArticle }) => {
+// ⚡ Bolt Performance Optimization:
+// Wrapped in React.memo to prevent unnecessary re-renders when the parent Home component
+// re-renders. Combined with memoized callbacks, this ensures static layout sections
+// skip the render phase completely.
+const Background = React.memo(({ onOpenArticle }: BackgroundProps) => {
     return (
         <Editable k="section_background" headless>
             {({ styles: sectionStyles }) => (
@@ -82,6 +86,6 @@ const Background: React.FC<BackgroundProps> = ({ onOpenArticle }) => {
             )}
         </Editable>
     );
-};
+});
 
 export default Background;

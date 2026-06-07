@@ -5,7 +5,11 @@ interface GuideProps {
     onOpenLetter: () => void;
 }
 
-const Guide: React.FC<GuideProps> = ({ onOpenLetter }) => {
+// ⚡ Bolt Performance Optimization:
+// Wrapped in React.memo to prevent unnecessary re-renders when the parent Home component
+// re-renders. Combined with memoized callbacks, this ensures static layout sections
+// skip the render phase completely.
+const Guide = React.memo(({ onOpenLetter }: GuideProps) => {
     return (
         <Editable k="section_guide" headless>
             {({ styles: sectionStyles, items }) => (
@@ -94,6 +98,6 @@ const Guide: React.FC<GuideProps> = ({ onOpenLetter }) => {
             )}
         </Editable>
     );
-};
+});
 
 export default Guide;
