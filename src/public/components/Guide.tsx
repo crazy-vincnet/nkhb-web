@@ -5,7 +5,7 @@ interface GuideProps {
     onOpenLetter: () => void;
 }
 
-const Guide: React.FC<GuideProps> = ({ onOpenLetter }) => {
+const Guide = ({ onOpenLetter }: GuideProps) => {
     return (
         <Editable k="section_guide" headless>
             {({ styles: sectionStyles, items }) => (
@@ -96,4 +96,4 @@ const Guide: React.FC<GuideProps> = ({ onOpenLetter }) => {
     );
 };
 
-export default Guide;
+export default React.memo(Guide);
