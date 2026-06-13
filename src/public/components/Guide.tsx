@@ -5,7 +5,10 @@ interface GuideProps {
     onOpenLetter: () => void;
 }
 
-const Guide: React.FC<GuideProps> = ({ onOpenLetter }) => {
+// Bolt: Memoize the Guide component so it only re-renders when its props change.
+// Since Home.tsx now passes a memoized 'onOpenLetter' (via useCallback), this large component
+// will correctly bail out of rendering when modal state changes in App.tsx.
+const Guide = React.memo(({ onOpenLetter }: GuideProps) => {
     return (
         <Editable k="section_guide" headless>
             {({ styles: sectionStyles, items }) => (
@@ -94,6 +97,6 @@ const Guide: React.FC<GuideProps> = ({ onOpenLetter }) => {
             )}
         </Editable>
     );
-};
+});
 
 export default Guide;
