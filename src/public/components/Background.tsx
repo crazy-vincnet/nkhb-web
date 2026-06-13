@@ -6,7 +6,10 @@ interface BackgroundProps {
     onOpenArticle: () => void;
 }
 
-const Background: React.FC<BackgroundProps> = ({ onOpenArticle }) => {
+// Bolt: Memoize the Background component so it only re-renders when its props change.
+// Since Home.tsx now passes a memoized 'onOpenArticle' (via useCallback), this large component
+// will correctly bail out of rendering when modal state changes in App.tsx.
+const Background = React.memo(({ onOpenArticle }: BackgroundProps) => {
     return (
         <Editable k="section_background" headless>
             {({ styles: sectionStyles }) => (
@@ -82,6 +85,6 @@ const Background: React.FC<BackgroundProps> = ({ onOpenArticle }) => {
             )}
         </Editable>
     );
-};
+});
 
 export default Background;

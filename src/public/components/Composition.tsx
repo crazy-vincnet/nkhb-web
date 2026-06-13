@@ -5,7 +5,10 @@ interface CompositionProps {
     onOpenSample: () => void;
 }
 
-const Composition: React.FC<CompositionProps> = ({ onOpenSample }) => {
+// Bolt: Memoize the Composition component so it only re-renders when its props change.
+// Since Home.tsx now passes a memoized 'onOpenSample' (via useCallback), this large component
+// will correctly bail out of rendering when modal state changes in App.tsx.
+const Composition = React.memo(({ onOpenSample }: CompositionProps) => {
     return (
         <Editable k="section_composition" headless>
             {({ styles: sectionStyles }) => (
@@ -50,6 +53,6 @@ const Composition: React.FC<CompositionProps> = ({ onOpenSample }) => {
             )}
         </Editable>
     );
-};
+});
 
 export default Composition;
