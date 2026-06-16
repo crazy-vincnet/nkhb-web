@@ -8,7 +8,7 @@ interface BackgroundProps {
 
 const YOUTUBE_VIDEO_ID = 'GSmBL-TYauE';
 
-const Background: React.FC<BackgroundProps> = ({ onOpenArticle }) => {
+const Background = React.memo(({ onOpenArticle }: BackgroundProps) => {
     const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
     useEffect(() => {
@@ -107,6 +107,6 @@ const Background: React.FC<BackgroundProps> = ({ onOpenArticle }) => {
             )}
         </Editable>
     );
-};
+});
 
 export default Background;
