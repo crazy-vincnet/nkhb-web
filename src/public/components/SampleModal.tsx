@@ -67,7 +67,9 @@ const SampleModal: React.FC<SampleModalProps> = ({ isOpen, onClose }) => {
         <div className="modal active" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
             <div className="modal-content" role="dialog" aria-modal="true" aria-labelledby="sample-modal-title" ref={contentRef}>
                 <div className="modal-header">
-                    <h3 id="sample-modal-title">{t('sample_modal_title')}</h3>
+                    {/* Forced label: overrides the CMS value (sample_modal_title) so the
+                        popup always reads "방송 듣기" to match the trigger button. */}
+                    <h3 id="sample-modal-title">{lang === 'en' ? '🎙️ Listen to the Broadcast' : '🎙️ 방송 듣기'}</h3>
                     <button 
                         className="close-modal-sample" 
                         aria-label={t('alt_close')} 
@@ -77,7 +79,7 @@ const SampleModal: React.FC<SampleModalProps> = ({ isOpen, onClose }) => {
                         &times;
                     </button>
                 </div>
-                <div className="modal-body-sample" style={{ padding: '40px', textAlign: 'center' }}>
+                <div className="modal-body-sample">
                     <audio 
                         ref={audioRef} 
                         controls 
@@ -89,7 +91,7 @@ const SampleModal: React.FC<SampleModalProps> = ({ isOpen, onClose }) => {
                     <div id="current-track-title" style={{ marginBottom: '20px', fontWeight: 'bold', color: 'var(--primary-color)' }}>
                         {currentTrack ? (lang === 'en' ? currentTrack.title_en : currentTrack.title_ko) : ''}
                     </div>
-                    <div id="track-list" className="track-list" style={{ marginBottom: '30px', display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'center' }}>
+                    <div id="track-list" className="track-list">
                         {tracks.map((track) => (
                             <button
                                 key={track.id}
