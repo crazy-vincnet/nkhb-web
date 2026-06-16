@@ -1392,6 +1392,10 @@ nav {
     transform: translateY(30px);
     transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
     box-shadow: 0 40px 80px rgba(0, 0, 0, 0.3);
+    max-height: calc(100vh - 40px);
+    max-height: calc(100dvh - 40px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .modal.active .modal-content {
@@ -2505,6 +2509,7 @@ footer {
     left: 0;
     width: 100vw;
     height: 100vh;
+    height: 100dvh;
     background: rgba(15, 23, 42, 0.9); /* Slate-900 with high opacity */
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
@@ -2527,6 +2532,7 @@ footer {
     height: 100%;
     max-width: 1200px;
     max-height: 95vh;
+    max-height: 95dvh;
     border-radius: var(--border-radius-lg);
     display: flex;
     flex-direction: column;
@@ -2826,6 +2832,7 @@ footer {
     .premium-post-container {
         border-radius: 0;
         max-height: 100vh;
+        max-height: 100dvh;
     }
     .premium-hero {
         padding: 80px 24px 40px;
