@@ -35,7 +35,7 @@ const staticTranslations = {
         nav_schedule: "Schedule",
         nav_about: "About Us",
         hero_tag: "North Korea Hope Broadcasting(NKHB)",
-        hero_title: "In the Night of North Korea</br>We Bring Truth and Hope",
+        hero_title: "In the Night of North Korea<br/>We Bring Truth and Hope",
         hero_subtitle: "“The truth will set you free.”",
         hero_button_about: "Learn More",
         hero_button_letter: "Send a Letter of Hope",
@@ -138,7 +138,7 @@ const staticTranslations = {
         nav_schedule: "방송시간",
         nav_about: "NKFI 소개",
         hero_tag: "뉴코리아 희망방송(NKHB)",
-        hero_title: "북한의 밤에</br>진실과 희망을 전합니다",
+        hero_title: "북한의 밤에<br/>진실과 희망을 전합니다",
         hero_subtitle: "“진리가 너희를 자유케 하리니”",
         hero_button_about: "방송소개 보기",
         hero_button_letter: "희망의 편지 보내기",
@@ -172,7 +172,7 @@ const staticTranslations = {
         effects_title: "기대 효과",
         effects_desc: "라디오 한 대가 전하는 메시지는 놀라운 변화를 일으킵니다.",
         effects_card1_title: "인식의 변화",
-        effects_card1_desc: "지금 알고 있는 세상이 전부가 아니다는 사실을 깨닫게 됩니다.",
+        effects_card1_desc: "지금 알고 있는 세상이 전부가 아니라는 사실을 깨닫게 됩니다.",
         effects_card2_title: "두려움의 약화",
         effects_card2_desc: "외부 정보를 접하면서 절대적인 두려움에서 벗어나게 됩니다.",
         effects_card3_title: "미래 준비",
@@ -218,13 +218,13 @@ const staticTranslations = {
         image_background_section: "https://cdn.imweb.me/thumbnail/20260424/ae13dd489d8ac.png",
         image_reach_map: "https://cdn.imweb.me/thumbnail/20260424/ae13dd489d8ac.png",
         about_ministry_title: "NKFI 사역",
-        about_ministry_card1_title: "동원 / Mobilization",
+        about_ministry_card1_title: "동원",
         about_ministry_card1_desc: "뉴코리아를 준비하는 사람들을 일으킵니다",
-        about_ministry_card2_title: "훈련 / Training",
+        about_ministry_card2_title: "훈련",
         about_ministry_card2_desc: "영적 재건을 위해 그리스도의 제자로 준비시킵니다",
-        about_ministry_card3_title: "네트워킹 / Networking",
+        about_ministry_card3_title: "네트워킹",
         about_ministry_card3_desc: "통일을 준비하는 단체들과 연합합니다.",
-        about_ministry_card4_title: "구호 / Relief",
+        about_ministry_card4_title: "구호",
         about_ministry_card4_desc: "북한 주민과 탈북난민들을 구출하고 구호합니다.",
         image_about_poster: "/images/poster.png",
         image_about_kenneth: "/images/kenneth-bae.png",
@@ -335,6 +335,13 @@ export const I18nProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       applyTheme(liveChanges['global_theme_settings'].styles, isMobile);
     }
   }, [liveChanges, isMobile]);
+
+  // Keep <html lang> in sync with the active language. This fixes SEO/screen-reader
+  // language reporting on /en and also activates the [lang="en"] CSS overrides in
+  // style.css (which key off the html element's lang attribute, not a class).
+  useEffect(() => {
+    document.documentElement.lang = lang;
+  }, [lang]);
 
   const getContent = useCallback((key: string): ContentData => {
     const item = dbContent.find(i => i.key === key);

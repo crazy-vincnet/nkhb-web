@@ -235,6 +235,27 @@ nav {
     height: 2px;
     background-color: var(--primary-color);
     border-radius: var(--border-radius-sm);
+    transition: transform 0.3s ease, opacity 0.2s ease;
+    transform-origin: center;
+}
+
+/* Open state: morph the three bars into an X for clear feedback. */
+.mobile-menu-btn.active span:nth-child(1) {
+    transform: translateY(8px) rotate(45deg);
+}
+
+.mobile-menu-btn.active span:nth-child(2) {
+    opacity: 0;
+}
+
+.mobile-menu-btn.active span:nth-child(3) {
+    transform: translateY(-8px) rotate(-45deg);
+}
+
+/* The compact language toggle in the header bar is desktop-hidden; it only
+   appears at the mobile breakpoint (the in-menu selector covers desktop). */
+.lang-selector-mobile {
+    display: none;
 }
 
 /* =========================================================
@@ -819,7 +840,8 @@ nav {
     color: var(--accent-color);
     text-decoration: none;
     margin: 20px 0 35px;
-    word-break: break-all;
+    word-break: break-word;
+    overflow-wrap: anywhere;
 }
 
 .contact-actions {
@@ -1615,6 +1637,12 @@ footer {
     display: flex;
     align-items: center;
     cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    font: inherit;
+    color: inherit;
 }
 
 .dropdown-menu {
@@ -1720,7 +1748,7 @@ footer {
 
 .footer-bottom p {
     font-size: 13px;
-    color: rgba(255, 255, 255, 0.3);
+    color: rgba(255, 255, 255, 0.6);
 }
 
 /* =========================================================
@@ -1729,6 +1757,23 @@ footer {
 @media (max-width: 1024px) {
     nav {
         height: 90px;
+    }
+
+    /* Header shrinks to 90px here, so match the fixed-header offsets to avoid a
+       ~10px dead gap and mis-aligned hash-anchor scrolling. */
+    html {
+        scroll-padding-top: 90px;
+    }
+
+    main {
+        padding-top: 90px;
+    }
+
+    .lang-selector-mobile {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-right: 16px;
     }
 
     .nav-container {

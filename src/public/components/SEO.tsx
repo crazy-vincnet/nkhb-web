@@ -77,6 +77,16 @@ const SEO: React.FC<SEOProps> = ({ slug }) => {
   const siteUrl = 'https://nkhb.org';
   const currentUrl = `${siteUrl}${window.location.pathname === '/' ? '' : window.location.pathname}`;
 
+  // Normalize the current pathname by stripping a leading `/en`
+  // (`/en/about` -> `/about`, `/en` -> `/`).
+  const rawPath = window.location.pathname;
+  const strippedPath = rawPath.replace(/^\/en(?=\/|$)/, '');
+  const normalizedPath = strippedPath === '' ? '/' : strippedPath;
+
+  // Korean version (no prefix) and English version (`/en` prefix).
+  const koUrl = `${siteUrl}${normalizedPath}`;
+  const enUrl = `${siteUrl}${normalizedPath === '/' ? '/en' : `/en${normalizedPath}`}`;
+
   const googleVerification = siteSettings.google_site_verification?.value_ko;
   const naverVerification = siteSettings.naver_site_verification?.value_ko;
 
@@ -103,9 +113,9 @@ const SEO: React.FC<SEOProps> = ({ slug }) => {
       {googleVerification && <meta name="google-site-verification" content={googleVerification} />}
       {naverVerification && <meta name="naver-site-verification" content={naverVerification} />}
       
-      <link rel="alternate" href={currentUrl} hrefLang="ko" />
-      <link rel="alternate" href={currentUrl} hrefLang="en" />
-      <link rel="alternate" href={currentUrl} hrefLang="x-default" />
+      <link rel="alternate" href={koUrl} hrefLang="ko" />
+      <link rel="alternate" href={enUrl} hrefLang="en" />
+      <link rel="alternate" href={koUrl} hrefLang="x-default" />
 
       <meta property="og:type" content="website" />
       <meta property="og:site_name" content={siteName} />

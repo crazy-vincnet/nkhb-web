@@ -77,7 +77,7 @@ const Header: React.FC = () => {
                     </Editable>
                 </div>
 
-                <div className={`nav-container ${isMenuOpen ? 'active' : ''}`}>
+                <div id="primary-nav" className={`nav-container ${isMenuOpen ? 'active' : ''}`}>
                     <ul className="nav-links">
                         {displayMenu.map((item) => (
                             <li 
@@ -88,15 +88,18 @@ const Header: React.FC = () => {
                             >
                                 {item.children && item.children.length > 0 ? (
                                     <>
-                                        <div 
+                                        <button
+                                            type="button"
                                             className="menu-item-wrapper"
-                                            onClick={() => isMenuOpen && setActiveDropdown(activeDropdown === item.id ? null : item.id)}
+                                            aria-haspopup="true"
+                                            aria-expanded={activeDropdown === item.id}
+                                            onClick={() => setActiveDropdown(activeDropdown === item.id ? null : item.id)}
                                         >
                                             <span className="nav-link-text">
                                                 {lang === 'ko' ? item.label_ko : item.label_en}
                                             </span>
                                             <ChevronDown className={`w-4 h-4 ml-1 opacity-50 transition-transform ${activeDropdown === item.id ? 'rotate-180' : ''}`} />
-                                        </div>
+                                        </button>
                                         <ul className={`dropdown-menu ${activeDropdown === item.id ? 'active' : ''}`}>
                                             {item.children.map(child => (
                                                 <li key={child.id}>
@@ -135,9 +138,29 @@ const Header: React.FC = () => {
                     </div>
                 </div>
 
-                <button 
-                    className="mobile-menu-btn" 
-                    aria-label="메뉴 열기"
+                <div className="lang-selector lang-selector-mobile">
+                    <a
+                        href="#"
+                        className={lang === 'ko' ? 'active' : ''}
+                        onClick={(e) => { e.preventDefault(); setLang('ko'); }}
+                    >
+                        한국어
+                    </a>
+                    <div className="lang-divider"></div>
+                    <a
+                        href="#"
+                        className={lang === 'en' ? 'active' : ''}
+                        onClick={(e) => { e.preventDefault(); setLang('en'); }}
+                    >
+                        EN
+                    </a>
+                </div>
+
+                <button
+                    className={`mobile-menu-btn ${isMenuOpen ? 'active' : ''}`}
+                    aria-label={isMenuOpen ? (lang === 'en' ? 'Close menu' : '메뉴 닫기') : (lang === 'en' ? 'Open menu' : '메뉴 열기')}
+                    aria-expanded={isMenuOpen}
+                    aria-controls="primary-nav"
                     onClick={toggleMenu}
                 >
                     <span></span>

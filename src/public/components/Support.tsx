@@ -1,7 +1,18 @@
 import React from 'react';
+import { useI18n } from '../lib/i18n';
 import { Editable } from './Editable';
 
 const Support: React.FC = () => {
+    const { getContent } = useI18n();
+    // Only render donate buttons whose label actually resolved. Without this, a
+    // missing DB row falls back to the raw key string (getContent returns the key),
+    // showing e.g. "support_regular_30k" on a CTA. We intentionally do NOT require a
+    // link here: tiers may legitimately have a label but no payment URL yet, and they
+    // already rendered (as href="#") before — hiding them would drop visible content.
+    const hasContent = (key: string) => getContent(key).text !== key;
+    const regularTiers = ['30k', '50k', '100k', '200k', '300k', '500k', '1m'].filter((tier) => hasContent(`support_regular_${tier}`));
+    const productionTiers = ['200k', '400k', '800k', '1200k', '3m', '12m'].filter((tier) => hasContent(`support_production_${tier}`));
+    const showCustom = hasContent('support_custom_amount');
     return (
         <Editable k="section_support" headless>
             {({ styles: sectionStyles }) => (
@@ -66,7 +77,7 @@ const Support: React.FC = () => {
                                     {({ text, styles }) => <h3 style={styles} dangerouslySetInnerHTML={{ __html: text }}></h3>}
                                 </Editable>
                                 <div className="tier-buttons">
-                                    {['30k', '50k', '100k', '200k', '300k', '500k', '1m'].map((tier) => (
+                                    {regularTiers.map((tier) => (
                                         <Editable k={`support_regular_${tier}`} key={tier} headless>
                                             {({ text, styles, link }) => (
                                                 <a href={link || "#"} className={`tier-btn ${tier === '30k' ? 'tier-btn-main' : ''}`} style={styles} target="_blank" rel="noopener noreferrer" dangerouslySetInnerHTML={{ __html: text }}>
@@ -75,14 +86,16 @@ const Support: React.FC = () => {
                                         </Editable>
                                     ))}
                                 </div>
-                                <div className="custom-support-wrap">
-                                    <Editable k="support_custom_amount" headless>
-                                        {({ text, styles, link }) => (
-                                            <a href={link || "#"} className="btn-custom-support" style={styles} target="_blank" rel="noopener noreferrer" dangerouslySetInnerHTML={{ __html: text }}>
-                                            </a>
-                                        )}
-                                    </Editable>
-                                </div>
+                                {showCustom && (
+                                    <div className="custom-support-wrap">
+                                        <Editable k="support_custom_amount" headless>
+                                            {({ text, styles, link }) => (
+                                                <a href={link || "#"} className="btn-custom-support" style={styles} target="_blank" rel="noopener noreferrer" dangerouslySetInnerHTML={{ __html: text }}>
+                                                </a>
+                                            )}
+                                        </Editable>
+                                    </div>
+                                )}
                             </div>
                             
                             <div className="production-support">
@@ -90,7 +103,7 @@ const Support: React.FC = () => {
                                     {({ text, styles }) => <h3 style={styles} dangerouslySetInnerHTML={{ __html: text }}></h3>}
                                 </Editable>
                                 <div className="production-grid">
-                                    {['200k', '400k', '800k', '1200k', '3m', '12m'].map((tier) => (
+                                    {productionTiers.map((tier) => (
                                         <Editable k={`support_production_${tier}`} key={tier} headless>
                                             {({ text, styles, link }) => (
                                                 <a href={link || "#"} className="prod-btn" style={styles} target="_blank" rel="noopener noreferrer">

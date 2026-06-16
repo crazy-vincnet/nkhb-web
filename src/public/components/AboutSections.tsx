@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useI18n } from '../lib/i18n';
 import { Editable } from './Editable';
 
 export const AboutHero: React.FC = () => {
@@ -139,6 +140,7 @@ export const AboutMinistry: React.FC = () => {
 };
 
 export const AboutFounder: React.FC = () => {
+    const { lang } = useI18n();
     return (
         <Editable k="section_about_founder" headless>
             {({ styles: s5, items: items5 }) => (
@@ -153,7 +155,7 @@ export const AboutFounder: React.FC = () => {
                                         </div>
                                     )}
                                 </Editable>
-                                <p className="caption">Kenneth Bae | NKFI 대표</p>
+                                <p className="caption">{lang === 'en' ? 'Kenneth Bae | President, NKFI' : '케네스 배 (Kenneth Bae) | NKFI 대표'}</p>
                             </div>
                             <div className="founder-info">
                                 <Editable k="about_founder_title" headless>

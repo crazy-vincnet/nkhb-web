@@ -113,9 +113,7 @@ const Board: React.FC<BoardProps> = ({ pageId, lang, titleKo, titleEn, subtitleK
           <div className="header-top">
             <div className="category-tag">
                 {mode === 'audio' ? <Headset size={12} className="mr-1.5" /> : <ShieldCheck size={12} className="mr-1.5" />}
-                {mode === 'audio' 
-                    ? (lang === 'ko' ? 'BROADCAST AUDIO' : 'BROADCAST AUDIO') 
-                    : 'COMMUNITY & NEWS'}
+                {mode === 'audio' ? 'BROADCAST AUDIO' : 'COMMUNITY & NEWS'}
             </div>
             <h2 className="premium-board-title">{boardTitle}</h2>
             <p className="premium-board-subtitle">{boardSubtitle}</p>
@@ -152,7 +150,7 @@ const Board: React.FC<BoardProps> = ({ pageId, lang, titleKo, titleEn, subtitleK
           {loading ? (
             <div className="py-32 text-center">
               <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto opacity-50"></div>
-              <p className="mt-4 text-gray-400 font-bold text-sm tracking-widest uppercase">Loading Contents...</p>
+              <p className="mt-4 text-gray-400 font-bold text-sm tracking-widest uppercase">{lang === 'ko' ? '콘텐츠를 불러오는 중...' : 'Loading Contents...'}</p>
             </div>
           ) : filteredPosts.length === 0 ? (
             <div className="premium-empty-state">
@@ -248,14 +246,14 @@ const Board: React.FC<BoardProps> = ({ pageId, lang, titleKo, titleEn, subtitleK
                       <PlayCircle size={32} />
                     </div>
                     <div className="flex-1 w-full text-center md:text-left">
-                      <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest mb-1">Now Playing</p>
+                      <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest mb-1">{lang === 'ko' ? '재생 중' : 'Now Playing'}</p>
                       <h4 className="font-bold text-gray-900 dark:text-white truncate max-w-md">{getPostTitle(selectedPost)}</h4>
                       <audio 
                         controls 
                         className="w-full h-10 mt-4 custom-audio-player"
                         src={getAudioSource(selectedPost.audio_url) || ''}
                       >
-                        Your browser does not support the audio element.
+                        {lang === 'ko' ? '브라우저가 오디오 재생을 지원하지 않습니다.' : 'Your browser does not support the audio element.'}
                       </audio>
                     </div>
                   </div>

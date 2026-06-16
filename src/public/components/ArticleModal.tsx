@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Editable } from './Editable';
+import { useModalBehavior } from '../lib/useModalBehavior';
 
 interface ArticleModalProps {
     isOpen: boolean;
@@ -7,16 +8,19 @@ interface ArticleModalProps {
 }
 
 const ArticleModal: React.FC<ArticleModalProps> = ({ isOpen, onClose }) => {
+    const contentRef = useRef<HTMLDivElement>(null);
+    useModalBehavior(isOpen, onClose, contentRef);
+
     if (!isOpen) return null;
 
     return (
         <div className="modal active" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-            <div className="modal-content wide">
+            <div className="modal-content wide" role="dialog" aria-modal="true" aria-labelledby="article-modal-title" ref={contentRef}>
                 <div className="modal-header">
                     <Editable k="article_modal_title">
-                        {({ text, styles }) => <h3 style={styles}>{text}</h3>}
+                        {({ text, styles }) => <h3 id="article-modal-title" style={styles}>{text}</h3>}
                     </Editable>
-                    <button className="close-modal-article" onClick={onClose}>&times;</button>
+                    <button className="close-modal-article" onClick={onClose} aria-label="Close">&times;</button>
                 </div>
                 <div className="modal-body-article">
                     <div className="article-content-inner">

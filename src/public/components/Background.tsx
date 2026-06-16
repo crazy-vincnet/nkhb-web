@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Editable } from './Editable';
 
@@ -6,7 +6,23 @@ interface BackgroundProps {
     onOpenArticle: () => void;
 }
 
+const YOUTUBE_VIDEO_ID = 'GSmBL-TYauE';
+
 const Background: React.FC<BackgroundProps> = ({ onOpenArticle }) => {
+    const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+
+    useEffect(() => {
+        const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+        setPrefersReducedMotion(mediaQuery.matches);
+
+        const handleChange = (event: MediaQueryListEvent) => {
+            setPrefersReducedMotion(event.matches);
+        };
+
+        mediaQuery.addEventListener('change', handleChange);
+        return () => mediaQuery.removeEventListener('change', handleChange);
+    }, []);
+
     return (
         <Editable k="section_background" headless>
             {({ styles: sectionStyles }) => (
@@ -58,13 +74,22 @@ const Background: React.FC<BackgroundProps> = ({ onOpenArticle }) => {
                             
                             <div className="image-content">
                                 <div className="image-placeholder" style={{ aspectRatio: '16 / 9' }}>
-                                    <iframe
-                                        src="https://www.youtube.com/embed/GSmBL-TYauE?autoplay=1&mute=1&loop=1&playlist=GSmBL-TYauE&playsinline=1&rel=0&modestbranding=1"
-                                        title="New Korea Hope Broadcasting"
-                                        style={{ width: '100%', height: '100%', border: 0, display: 'block' }}
-                                        allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-                                        allowFullScreen
-                                    />
+                                    {prefersReducedMotion ? (
+                                        <img
+                                            src={`https://img.youtube.com/vi/${YOUTUBE_VIDEO_ID}/maxresdefault.jpg`}
+                                            alt=""
+                                            style={{ width: '100%', height: '100%', border: 0, display: 'block', objectFit: 'cover' }}
+                                        />
+                                    ) : (
+                                        <iframe
+                                            src={`https://www.youtube.com/embed/${YOUTUBE_VIDEO_ID}?autoplay=1&mute=1&loop=1&playlist=${YOUTUBE_VIDEO_ID}&playsinline=1&rel=0&modestbranding=1`}
+                                            title="New Korea Hope Broadcasting"
+                                            loading="lazy"
+                                            style={{ width: '100%', height: '100%', border: 0, display: 'block' }}
+                                            allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+                                            allowFullScreen
+                                        />
+                                    )}
                                 </div>
                                 
                                 <div className="testimonial-box">

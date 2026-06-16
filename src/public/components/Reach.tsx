@@ -1,7 +1,12 @@
 import React from 'react';
+import { useI18n } from '../lib/i18n';
 import { Editable } from './Editable';
 
 const Reach: React.FC = () => {
+    const { lang } = useI18n();
+    const mapAlt = lang === 'en'
+        ? 'Map of broadcast reach spreading across North Korea and neighboring countries'
+        : '북한과 주변국으로 퍼져나가는 방송 도달 범위 지도';
     return (
         <Editable k="section_reach" headless>
             {({ styles: sectionStyles, items }) => (
@@ -12,7 +17,16 @@ const Reach: React.FC = () => {
                                 <Editable k="image_reach_map" headless>
                                     {({ link, styles }) => (
                                         <div className="map-container" style={styles}>
-                                            <img src={link} alt="map" className="map-bg" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                                            {link && (
+                                                <img
+                                                    src={link}
+                                                    alt={mapAlt}
+                                                    className="map-bg"
+                                                    loading="lazy"
+                                                    onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+                                                    style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                                                />
+                                            )}
                                             <div className="pulse-ring"></div>
                                             <div className="pulse-ring delay-1"></div>
                                             <div className="pulse-ring delay-2"></div>

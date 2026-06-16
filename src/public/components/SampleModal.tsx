@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useI18n } from '../lib/i18n';
 import { supabase } from '../lib/supabase';
+import { useModalBehavior } from '../lib/useModalBehavior';
 
 interface AudioTrack {
     id: string;
@@ -21,6 +22,8 @@ const SampleModal: React.FC<SampleModalProps> = ({ isOpen, onClose }) => {
     const [tracks, setTracks] = useState<AudioTrack[]>([]);
     const [currentTrack, setCurrentTrack] = useState<AudioTrack | null>(null);
     const audioRef = useRef<HTMLAudioElement>(null);
+    const contentRef = useRef<HTMLDivElement>(null);
+    useModalBehavior(isOpen, onClose, contentRef);
 
     useEffect(() => {
         const fetchTracks = async () => {
@@ -54,7 +57,7 @@ const SampleModal: React.FC<SampleModalProps> = ({ isOpen, onClose }) => {
         setCurrentTrack(track);
         if (audioRef.current) {
             audioRef.current.src = track.url;
-            audioRef.current.play();
+            audioRef.current.play().catch(() => { /* autoplay may be blocked; user can press play */ });
         }
     };
 
@@ -62,9 +65,9 @@ const SampleModal: React.FC<SampleModalProps> = ({ isOpen, onClose }) => {
 
     return (
         <div className="modal active" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-            <div className="modal-content">
+            <div className="modal-content" role="dialog" aria-modal="true" aria-labelledby="sample-modal-title" ref={contentRef}>
                 <div className="modal-header">
-                    <h3>{t('sample_modal_title')}</h3>
+                    <h3 id="sample-modal-title">{t('sample_modal_title')}</h3>
                     <button 
                         className="close-modal-sample" 
                         aria-label={t('alt_close')} 
@@ -81,7 +84,7 @@ const SampleModal: React.FC<SampleModalProps> = ({ isOpen, onClose }) => {
                         style={{ width: '100%', marginBottom: '20px' }}
                         src={currentTrack?.url}
                     >
-                        Your browser does not support the audio element.
+                        {lang === 'en' ? 'Your browser does not support the audio element.' : '브라우저가 오디오 재생을 지원하지 않습니다.'}
                     </audio>
                     <div id="current-track-title" style={{ marginBottom: '20px', fontWeight: 'bold', color: 'var(--primary-color)' }}>
                         {currentTrack ? (lang === 'en' ? currentTrack.title_en : currentTrack.title_ko) : ''}
