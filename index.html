@@ -26,6 +26,10 @@
     <meta name="twitter:description" content="북한 주민들에게 전하는 진실과 희망의 목소리">
     <meta name="twitter:image" content="https://cdn.imweb.me/thumbnail/20260424/16a5ea55af28a.png">
 
+    <!-- ⚡ Bolt Optimization: Preload Critical LCP Asset -->
+    <!-- This ensures the browser discovers and fetches the critical 2.1MB hero background image immediately, rather than waiting for HTML/CSS parsing and DOM/CSSOM construction, thereby significantly improving the Largest Contentful Paint (LCP) time. -->
+    <link rel="preload" as="image" href="images/main-hero.png" fetchpriority="high">
+
     <!-- Fonts -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
