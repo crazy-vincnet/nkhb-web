@@ -1,0 +1,3 @@
+## 2024-06-17 - [Optimizing Component Re-renders on Modal Triggers]
+**Learning:** In the React application, modal states (e.g., `isArticleModalOpen`) are managed at the root `App.tsx` level and can be triggered via `window.postMessage` events from deeply nested child components. This architectural pattern makes optimizing component re-renders critical.
+**Action:** By wrapping the modal container component with `React.memo` and managing modal state locally inside it (and also using `useCallback` for close handlers), we can avoid unnecessary full-page re-renders of `<Header>`, `<Routes>`, `<Footer>`, etc., whenever a modal state changes.
