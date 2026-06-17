@@ -96,4 +96,4 @@ const Guide: React.FC<GuideProps> = ({ onOpenLetter }) => {
     );
 };
 
-export default Guide;
+export default React.memo(Guide);
