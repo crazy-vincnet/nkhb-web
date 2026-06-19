@@ -1,0 +1,3 @@
+## 2024-06-19 - Extracted Modal State in React App
+**Learning:** Found an architectural pattern specific to the React setup (`src/public/App.tsx`) where three independent global modal states (`isArticleModalOpen`, `isLetterModalOpen`, `isSampleModalOpen`) were housed directly inside the root `App` component. Any `window.postMessage` to trigger a modal caused a full re-render of the entire DOM tree, including the router and heavy UI elements.
+**Action:** Always verify if global modal states are isolated from heavy routing components in similar architectures. Extracting them into a dedicated `<Modals />` component wrapped in `React.memo` effectively isolated the rendering to just the modals themselves.
