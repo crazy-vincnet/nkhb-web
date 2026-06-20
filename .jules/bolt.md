@@ -1,0 +1,3 @@
+## 2024-05-16 - [Modal State Management]
+**Learning:** This codebase isolates modal states using an event listener for `window.postMessage` to trigger rendering of root-level modal components independently, circumventing a full-page re-render on the main application tree (`App.tsx`). This reduces layout thrashing and prevents unnecessary child component re-renders when a modal is toggled.
+**Action:** When working on modal or state management in this repository, ensure isolated components are wrapped in `React.memo` and states are tightly coupled to the component to avoid top-level render cycles.
