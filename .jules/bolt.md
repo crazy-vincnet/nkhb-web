@@ -1,0 +1,3 @@
+## 2024-05-16 - Isolated Modal State to Prevent Full App Re-renders
+**Learning:** In the root `App.tsx`, maintaining state for multiple modals (`isArticleModalOpen`, etc.) combined with `window.postMessage` event listeners causes the entire application tree (including Router, Header, and Routes) to re-render whenever a modal is triggered.
+**Action:** Extract modal state and their event listeners into a separate, isolated `<Modals />` component wrapped in `React.memo()`. This ensures that triggering a modal via `window.postMessage` only re-renders the isolated component rather than the entire React tree.
