@@ -1,0 +1,3 @@
+## 2025-02-13 - Modal State Triggers Full-Page Re-renders
+**Learning:** In this codebase, modal states (`isArticleModalOpen`, etc.) were originally handled in the root `App.tsx` component and triggered by `window.postMessage` events (`NKHB_OPEN_MODAL`) from deeply nested child components. This architecture caused the entire application (including heavy routing and context providers) to re-render whenever a modal was opened or closed.
+**Action:** Always isolate root-level modal state management into a dedicated `React.memo` wrapped component (like `<Modals />`) and place it outside the main application container. This prevents full-page re-renders while still allowing child components to trigger modals via `window.postMessage`.
