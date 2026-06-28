@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Editable } from './Editable';
+import { useI18n } from '../lib/i18n';
 
 interface BackgroundProps {
     onOpenArticle: () => void;
 }
 
-const YOUTUBE_VIDEO_ID = 'GSmBL-TYauE';
-
 const Background: React.FC<BackgroundProps> = ({ onOpenArticle }) => {
+    const { t } = useI18n();
+    // Per-language YouTube video ID (key `background_youtube_id`, editable per locale).
+    const youtubeVideoId = t('background_youtube_id');
     const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
     useEffect(() => {
@@ -76,13 +78,13 @@ const Background: React.FC<BackgroundProps> = ({ onOpenArticle }) => {
                                 <div className="image-placeholder" style={{ aspectRatio: '16 / 9' }}>
                                     {prefersReducedMotion ? (
                                         <img
-                                            src={`https://img.youtube.com/vi/${YOUTUBE_VIDEO_ID}/maxresdefault.jpg`}
+                                            src={`https://img.youtube.com/vi/${youtubeVideoId}/maxresdefault.jpg`}
                                             alt=""
                                             style={{ width: '100%', height: '100%', border: 0, display: 'block', objectFit: 'cover' }}
                                         />
                                     ) : (
                                         <iframe
-                                            src={`https://www.youtube.com/embed/${YOUTUBE_VIDEO_ID}?autoplay=1&mute=1&loop=1&playlist=${YOUTUBE_VIDEO_ID}&playsinline=1&rel=0&modestbranding=1`}
+                                            src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1&mute=1&loop=1&playlist=${youtubeVideoId}&playsinline=1&rel=0&modestbranding=1`}
                                             title="New Korea Hope Broadcasting"
                                             loading="lazy"
                                             style={{ width: '100%', height: '100%', border: 0, display: 'block' }}
