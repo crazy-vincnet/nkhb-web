@@ -1,8 +1,8 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { 
-  Save, Type, Link as LinkIcon, Maximize, Palette, Smartphone, Monitor, RotateCcw, RotateCw, Loader2, X, Image as ImageIcon, ChevronLeft, Info, Layout as LayoutIcon, GripVertical, Globe, Languages, AlertCircle, Trash2, Plus, Box
+import {
+  Save, Type, Link as LinkIcon, Maximize, Palette, Smartphone, Monitor, RotateCcw, RotateCw, Loader2, X, Image as ImageIcon, ChevronLeft, Info, Layout as LayoutIcon, GripVertical, Globe, Languages, AlertCircle, Trash2, Plus, Box, Youtube
 } from 'lucide-react';
 import { useHistory } from '../lib/useHistory';
 import { optimizeImage } from '../lib/imageOptimizer';
@@ -21,6 +21,25 @@ interface StyleProps {
 }
 
 interface ContentItem { id: string; key: string; value_ko: string; value_en: string; style_props: StyleProps; }
+
+// Content key consumed by the public Background section (read per-language via t()).
+const YOUTUBE_KEY = 'background_youtube_id';
+
+// Accepts a full YouTube URL (watch / youtu.be / embed / shorts) or a raw 11-char
+// video ID and returns just the ID. Falls back to the raw input while the admin
+// is still typing so partial values aren't discarded.
+const extractYoutubeId = (input: string): string => {
+  const v = (input || '').trim();
+  if (!v) return '';
+  const patterns = [
+    /youtube\.com\/watch\?(?:.*&)?v=([\w-]{11})/,
+    /youtu\.be\/([\w-]{11})/,
+    /youtube\.com\/embed\/([\w-]{11})/,
+    /youtube\.com\/shorts\/([\w-]{11})/,
+  ];
+  for (const p of patterns) { const m = v.match(p); if (m) return m[1]; }
+  return v;
+};
 
 const SECTION_LABELS: Record<string, string> = {
     ...REGISTRY_LABELS,
@@ -41,7 +60,7 @@ const Content = () => {
   const [uploading, setUploading] = useState<boolean | string>(false);
   const [modifiedKeys, setModifiedIds] = useState<Set<string>>(new Set());
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [activeTab, setActiveTab] = useState<'properties' | 'structure' | 'theme' | 'audit' | 'popups'>('properties');
+  const [activeTab, setActiveTab] = useState<'properties' | 'structure' | 'theme' | 'audit' | 'popups' | 'media'>('properties');
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [themeSettings, setThemeSettings] = useState({
     colors: { accent: '#2563eb', primary: '#1e293b', secondary: '#64748b' },
@@ -122,6 +141,26 @@ const Content = () => {
     });
     setModifiedIds(prev => new Set(prev).add('global_theme_settings'));
     if (iframeRef.current?.contentWindow) iframeRef.current.contentWindow.postMessage({ type: 'NKHB_LIVE_THEME_UPDATE', theme: newSettings }, '*');
+  };
+
+  // Per-language YouTube video ID for the Background section. Stored on the
+  // `background_youtube_id` content row (value_ko / value_en) — creating the row
+  // if it doesn't exist yet — and live-pushed to the preview iframe.
+  const updateYoutubeId = (field: 'value_ko' | 'value_en', rawValue: string) => {
+    const value = extractYoutubeId(rawValue);
+    const current = itemsRef.current.find(i => i.key === YOUTUBE_KEY);
+    const base = current || { id: `new-yt-${Date.now()}`, key: YOUTUBE_KEY, value_ko: '', value_en: '', style_props: {} };
+    const nextItem: ContentItem = { ...base, [field]: value };
+    setItems(prev => prev.some(i => i.key === YOUTUBE_KEY)
+      ? prev.map(i => i.key === YOUTUBE_KEY ? nextItem : i)
+      : [...prev, nextItem]);
+    setModifiedIds(prev => new Set(prev).add(YOUTUBE_KEY));
+    if (iframeRef.current?.contentWindow) {
+      iframeRef.current.contentWindow.postMessage({
+        type: 'NKHB_LIVE_UPDATE', key: YOUTUBE_KEY,
+        data: { text: editorLang === 'ko' ? nextItem.value_ko : nextItem.value_en, styles: {}, link: '' }
+      }, '*');
+    }
   };
 
   const updateItem = (key: string, updates: Partial<ContentItem>) => {
@@ -344,6 +383,7 @@ const Content = () => {
                 <button onClick={() => setActiveTab('structure')} className={`flex-1 py-2 px-1 rounded-lg text-[9px] font-black transition-all whitespace-nowrap ${activeTab === 'structure' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}>STRUCTURE</button>
                 <button onClick={() => setActiveTab('theme')} className={`flex-1 py-2 px-1 rounded-lg text-[9px] font-black transition-all whitespace-nowrap ${activeTab === 'theme' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}>THEME</button>
                 <button onClick={() => setActiveTab('popups')} className={`flex-1 py-2 px-1 rounded-lg text-[9px] font-black transition-all whitespace-nowrap ${activeTab === 'popups' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}>POPUPS</button>
+                <button onClick={() => setActiveTab('media')} className={`flex-1 py-2 px-1 rounded-lg text-[9px] font-black transition-all whitespace-nowrap ${activeTab === 'media' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}>MEDIA</button>
                 <button onClick={() => setActiveTab('audit')} className={`flex-1 py-2 px-1 rounded-lg text-[9px] font-black transition-all relative whitespace-nowrap ${activeTab === 'audit' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}>
                     AUDIT
                     {untranslatedItems.length > 0 && (
@@ -632,7 +672,49 @@ const Content = () => {
                         </p>
                     </div>
                 </div>
-            ) : (
+            ) : activeTab === 'media' ? (() => {
+                const youtubeItem = items.find(i => i.key === YOUTUBE_KEY);
+                const koId = youtubeItem?.value_ko || '';
+                const enId = youtubeItem?.value_en || '';
+                const renderVideoField = (
+                    label: string, dotClass: string, field: 'value_ko' | 'value_en', id: string
+                ) => (
+                    <div className="space-y-3">
+                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1 flex items-center gap-2"><span className={`w-2 h-2 rounded-full ${dotClass}`} /> {label}</span>
+                        <div className="relative group">
+                            <input
+                                type="text"
+                                value={id}
+                                placeholder="https://youtu.be/... 또는 영상 ID"
+                                onChange={(e) => updateYoutubeId(field, e.target.value)}
+                                onBlur={handlePushHistory}
+                                className="w-full p-4 bg-gray-50 border-none rounded-2xl text-xs font-mono focus:ring-2 focus:ring-red-500 shadow-inner"
+                            />
+                            <Youtube className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 group-focus-within:text-red-500" />
+                        </div>
+                        <div className="w-full aspect-video bg-gray-50 rounded-2xl overflow-hidden border border-gray-100 flex items-center justify-center">
+                            {id ? (
+                                <img src={`https://img.youtube.com/vi/${id}/hqdefault.jpg`} alt={`${label} preview`} className="w-full h-full object-cover" />
+                            ) : (
+                                <Youtube className="text-gray-200 w-12 h-12" />
+                            )}
+                        </div>
+                    </div>
+                );
+                return (
+                    <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
+                        <label className="text-[11px] font-black text-red-600 flex items-center gap-2 bg-red-50 px-3 py-1.5 rounded-full w-fit"><Youtube className="w-3.5 h-3.5" /> BACKGROUND VIDEO</label>
+                        <div className="p-4 bg-red-50 rounded-2xl border border-red-100 flex gap-3">
+                            <Info className="w-4 h-4 text-red-500 shrink-0" />
+                            <p className="text-[10px] font-medium text-red-700 leading-relaxed">
+                                Background 섹션 동영상을 한국어/영어 버전에서 다르게 설정합니다. 유튜브 주소를 그대로 붙여넣으면 영상 ID가 자동으로 추출됩니다. 비워두면 기본 영상이 표시됩니다.
+                            </p>
+                        </div>
+                        {renderVideoField('한국어 (KO)', 'bg-red-400', 'value_ko', koId)}
+                        {renderVideoField('English (EN)', 'bg-blue-400', 'value_en', enId)}
+                    </div>
+                );
+            })() : (
                 <div className="space-y-10 animate-in fade-in slide-in-from-right-4 duration-300">
                     <div className="space-y-6">
                         <label className="text-[11px] font-black text-blue-600 flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-full w-fit"><Palette className="w-3.5 h-3.5" /> BRAND COLORS</label>
