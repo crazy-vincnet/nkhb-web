@@ -1,0 +1,3 @@
+## 2024-07-01 - Moving Modal State Down To Prevent Re-renders
+**Learning:** In a React application, defining state at the root (`App.tsx`) to manage deep child components (like modals triggered via global events) causes the entire application tree (including Router, Headers, Footers) to re-render unnecessarily on every state toggle.
+**Action:** Extract global or widely-used state elements (like floating modals) into their own isolated wrapper components (e.g., `<Modals />`) and wrap them in `React.memo()`. Mount this new component inside the Router to preserve routing context while preventing state updates from bubbling up and forcing full app re-renders.
