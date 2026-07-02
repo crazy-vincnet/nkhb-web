@@ -1,0 +1,3 @@
+## 2024-07-02 - Isolate Modal State to Prevent Full App Re-renders
+**Learning:** Managing modal state (isArticleModalOpen, isLetterModalOpen, isSampleModalOpen) directly in the root App.tsx component causes unnecessary re-renders of the entire application and all child routes whenever a modal is toggled. This is highly inefficient in React.
+**Action:** Encapsulate page-level modals into an isolated <Modals /> wrapper component that manages its own state and message listeners. Render this component independently inside the root so that toggling modals only re-renders the Modals component, not the entire app tree.
