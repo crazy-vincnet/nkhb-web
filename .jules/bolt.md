@@ -1,0 +1,3 @@
+## 2024-05-23 - Root Level Modals Re-rendering the Entire App
+**Learning:** In a React application, placing global modal states (`isModalOpen`) at the root `App.tsx` level (especially when listening to `window.postMessage` events) causes the entire application tree (including all nested routes) to re-render every time a modal is opened or closed.
+**Action:** When implementing global overlays or modals triggered by events, isolate their state into a dedicated `<Modals />` wrapper component and wrap it in `React.memo()`. Render this component at the top level so that modal state changes only re-render the modals themselves, saving significant render time.
