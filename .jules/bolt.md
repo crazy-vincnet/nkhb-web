@@ -1,0 +1,3 @@
+## 2024-07-06 - Isolate Modal State to Prevent Full Page Re-renders
+**Learning:** Placing globally triggered modal state (`window.postMessage` listeners) directly in the root `App.tsx` component causes unnecessary full-page re-renders across the entire React application whenever a modal is toggled. Even though modals are conceptually "app level," their state should be isolated.
+**Action:** Always extract top-level modal state management into a dedicated wrapper component (e.g., `<Modals />`), wrap it in `React.memo`, and render it within the router context to ensure modal toggles do not force the main application content to re-render.
