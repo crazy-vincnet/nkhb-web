@@ -1,0 +1,3 @@
+## 2024-05-20 - Extract Modals component to prevent full-page re-renders
+**Learning:** Managing global modal state in the root `App.tsx` component alongside the main `Routes` causes unnecessary full-page re-renders (including `Header`, `Routes`, `Footer`) whenever a modal is opened or closed via `window.postMessage`. This codebase triggers modals via postMessage events from child components, but handling them at the root level degrades performance.
+**Action:** Extract the modal state and message listeners into an isolated `<Modals />` component wrapped in `React.memo`. Place it inside the Router context to prevent the rest of the application from re-rendering on modal state changes.
