@@ -1,0 +1,3 @@
+## 2024-05-24 - React Router + Top-Level Modals Anti-Pattern
+**Learning:** In a `react-router-dom` setup, placing isolated states (like modal toggles) inside the same top-level component that houses the `<Router>` (e.g., `App.tsx`) forces unnecessary re-renders of the entire routing tree and all un-memoized nested components whenever the modal state changes.
+**Action:** Extract top-level generic modals into a separate `<Modals />` component, place it adjacent to or outside the routing tree where appropriate, and wrap it in `React.memo` so that it isolates its own state updates without re-rendering the surrounding app shell.
