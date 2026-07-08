@@ -1,0 +1,3 @@
+## 2024-07-08 - Extract Modal State to Prevent Full-Page Re-renders
+**Learning:** Root-level state management for modals in `App.tsx` caused the entire application (including router logic and main layouts) to unnecessarily re-render whenever a modal was opened or closed. In this app's architecture, event dispatch is handled via `window.postMessage`, making state abstraction clean without needing extensive prop drilling or Context API logic.
+**Action:** Extract isolated UI elements (like Modals) into a standalone wrapper component wrapped in `React.memo`, maintaining state independent of the main app container layout, thus optimizing rendering workflows.
