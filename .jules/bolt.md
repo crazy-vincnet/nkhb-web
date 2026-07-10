@@ -1,0 +1,4 @@
+
+## 2024-07-10 - Extracted Modals to prevent App re-renders
+**Learning:** Extracting modal state from a top-level parent (like `App.tsx`) to its own isolated wrapper `<Modals />` prevents full-page re-renders whenever any modal opens or closes, which is especially important for complex, content-heavy single-page applications. The modals listen to global events (`window.postMessage`) and can thus be decoupled from the main app render tree. We use `React.memo` to further optimize the wrapper, preventing unneeded top-level checks.
+**Action:** When an app features global modals triggered by scattered components, extract their states into a dedicated `<Modals />` component outside the main route structure but inside the Router, and utilize `React.memo` and event listeners instead of prop-drilling or context when dealing with simple boolean states.
