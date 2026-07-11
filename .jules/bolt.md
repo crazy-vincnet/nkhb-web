@@ -1,0 +1,3 @@
+## 2024-07-11 - Isolate Global Modal State to Prevent Full-Page Re-renders
+**Learning:** In React applications with a top-level `App` component that includes `Routes`, `Header`, and `Footer`, managing global modal states directly in the `App` component causes a full-page re-render every time a modal is opened or closed. This is because state changes at the top level cascade down to all children.
+**Action:** Extract global UI states, like modals, into their own separate components (e.g., `<Modals />`). Place this component as a sibling to the main layout or inside the context provider (like `<Router>`), and use `React.memo()` or context to ensure state changes within the isolated component don't trigger unnecessary re-renders in the rest of the application tree.
