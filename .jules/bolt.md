@@ -1,0 +1,3 @@
+## 2025-02-12 - Prevent Top-Level Router Re-renders by Extracting Modal States
+**Learning:** In the React application structure (`src/public/App.tsx`), managing isolated modal visibility states (`isArticleModalOpen`, etc.) at the top level caused unnecessary re-renders of the entire `Router` and its child routes whenever a modal was opened or closed via `window.postMessage`.
+**Action:** Always extract isolated, globally-triggered UI components (like modals or toasts) into their own wrapper components (e.g., `<Modals />`) wrapped in `React.memo()`. This prevents state changes in these localized overlays from triggering a re-render cascade down the main component tree.
