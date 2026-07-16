@@ -1,0 +1,3 @@
+## 2024-05-19 - Isolate postMessage modal triggers
+**Learning:** In this application, modals triggered by deeply nested components use `window.postMessage` (with `NKHB_OPEN_MODAL`) which was listened to at the top-level `App` component. Because the state was kept in `App.tsx`, opening any modal caused a full React tree re-render, blocking the main thread and slowing down interactions.
+**Action:** Always isolate top-level component state that relies on global event listeners (like postMessage) into a separate, memoized component (e.g. `<Modals />` wrapped in `React.memo()`) to prevent cascading re-renders down the main component tree.
