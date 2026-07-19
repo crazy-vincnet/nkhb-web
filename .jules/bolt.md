@@ -1,0 +1,3 @@
+## 2026-07-19 - Extracting Modal State to Prevent Top-Level App Re-renders
+**Learning:** In the Vite React structure, having state like `isArticleModalOpen`, `isLetterModalOpen`, etc., directly in `App.tsx` forces the entire component tree (including `<Header />`, `<Routes />`, `<Footer />`) to re-render whenever a modal opens or closes via `window.postMessage`. This architecture unnecessarily slows down modal interactions because large unaffected sections are evaluated on every change.
+**Action:** Isolate global modal states by extracting them into a dedicated `<Modals />` component wrapped with `React.memo()`. Mount this component near the top level instead, preventing unrelated route changes or layout components from rendering unnecessarily on modal toggle.
