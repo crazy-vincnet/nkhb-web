@@ -1,0 +1,3 @@
+## 2024-06-25 - Extracted Modals from App.tsx
+**Learning:** Attaching global event listeners (like window.postMessage) and deeply nested state in the root App.tsx component for isolated features (like Modals) causes the entire DOM tree (Router, Header, Routes, Footer) to re-render needlessly when state toggles. The loading state logic in App.tsx also shifts when extracting these components, meaning event listeners attach *after* initial load rather than concurrently.
+**Action:** Extract isolated UI features that rely on their own event-driven state into separate components wrapped in React.memo() placed inside the application structure but outside the heavy, changing Routes block to ensure they only re-render themselves.
