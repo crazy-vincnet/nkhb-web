@@ -1,0 +1,3 @@
+## 2024-05-30 - Prevent top-level re-renders via modal state isolation
+**Learning:** In React applications routing via `react-router-dom`, placing highly volatile global state (like modal toggles triggered via `window.postMessage`) inside the root component (`App.tsx`) causes unnecessary full-page re-renders, recalculating the entire DOM tree (including stationary headers, footers, and complex static route components).
+**Action:** When a global listener modifies UI state that isn't shared across the main page flow, extract the state and listener into an isolated, sibling component (e.g., `<Modals />`), wrapped in `React.memo()`. This ensures that updating the modal state only re-renders the modals themselves, keeping the main application container and routes untouched.
