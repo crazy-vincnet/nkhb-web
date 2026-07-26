@@ -1,0 +1,3 @@
+## 2024-05-18 - Isolated global UI state to prevent root component re-renders
+**Learning:** In a React application, placing global modal state variables (`isOpen`) directly in the root `App.tsx` component forces a complete re-render of the entire application and all its un-memoized children every time a modal is opened or closed. This is a common performance bottleneck specific to SPAs that heavily rely on global overlays.
+**Action:** Extract global overlay state (like Modals) into a dedicated wrapper component (e.g., `<Modals />`), wrap it in `React.memo()`, and place it at the root level alongside the main content layout. This isolates the state updates and limits the re-render scope exclusively to the modal components themselves.
