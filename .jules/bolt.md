@@ -1,0 +1,3 @@
+## 2024-11-20 - Prevent Full Page Re-renders on Modal Interactions
+**Learning:** In a React application built with `react-router-dom`, placing application-wide modal states (`useState`) inside the root component (`App.tsx`) forces a complete application re-render (including headers, footers, and all active routes) every time a modal is opened or closed via `window.postMessage`.
+**Action:** Always isolate global UI overlay states (like modals, toasts, or tooltips) into a dedicated wrapper component (e.g., `<Modals />`), wrap it in `React.memo`, and manage their event listeners internally. Keep the root entry point free of volatile local state.
