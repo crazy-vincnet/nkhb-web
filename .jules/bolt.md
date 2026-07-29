@@ -1,0 +1,3 @@
+## 2023-10-27 - Isolating Modal State in React Router Setup
+**Learning:** In a `react-router-dom` setup, placing modal state and message event listeners in the root `App` component is a significant performance anti-pattern. Every time a `window.postMessage` triggers a modal toggle, it updates the state in `App`, causing the entire React tree (including `BrowserRouter` and all nested `Routes`) to undergo the commit phase, even if they visually do not change.
+**Action:** Always isolate global UI states (like modals, toasts, or sidebars) into their own dedicated components (e.g., `<Modals />`). Wrap these components in `React.memo` and use `useCallback` for their internal handlers to fully bypass rendering the rest of the application tree.
