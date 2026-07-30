@@ -1,0 +1,3 @@
+## 2024-05-24 - Isolate Modal State to Prevent Full-Page Re-renders
+**Learning:** In a React application, placing global modal visibility state (`useState` + `useEffect` for `window.postMessage`) at the top level (e.g., `App.tsx`) causes the entire component tree to re-render whenever a modal opens or closes. This creates severe performance issues, especially when nested child components trigger the modal.
+**Action:** Isolate generic, cross-cutting concerns like modals into a separate wrapper component (e.g., `<Modals />`), wrapped in `React.memo`. This ensures only the modal container re-renders when state changes, leaving the rest of the app untouched.
