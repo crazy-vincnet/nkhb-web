@@ -1,0 +1,3 @@
+## 2024-05-18 - Extract Modals to prevent full-page re-renders
+**Learning:** In a React application with a centralized message listener for modals (e.g., `App.tsx` listening for `window.postMessage`), triggering a modal can cause the entire application tree (including complex components like `Header`, `Footer`, `Routes`) to re-render if the state is kept at the top level.
+**Action:** When modals are triggered globally via events (like `postMessage`) from deeply nested children that cannot accept props, move the modal state and the event listener down into a dedicated `<Modals />` component. Wrap this component in `React.memo` and use `useCallback` for close handlers to isolate the re-renders entirely away from the main application shell.
