@@ -1,0 +1,3 @@
+## 2026-08-01 - [React Architecture] Modal State Root Leak
+**Learning:** In the Vite React application, placing global UI states (like `isArticleModalOpen`) and event listeners within the root component (`App.tsx`) caused the entire application (including the router and all top-level components) to re-render unnecessarily every time a modal was opened or closed via `window.postMessage`.
+**Action:** Extract global, top-level UI features that manage isolated state (like Modals) into their own standalone components wrapped in `React.memo`, placing them alongside route structures to prevent full-page render thrashing.
