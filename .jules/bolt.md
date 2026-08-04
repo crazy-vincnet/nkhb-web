@@ -1,0 +1,3 @@
+## 2024-06-26 - Modals and Full-Page Re-Renders
+**Learning:** In the React application architecture for this specific codebase, modal states (e.g., `isArticleModalOpen`) managed at the root `App.tsx` level cause unintended full-page re-renders. Because these modals are triggered globally via `window.postMessage` events from deeply nested components, setting state in the root component forces the entire app, including heavy route structures, to re-render needlessly.
+**Action:** Always isolate root-level modal state management in a separate `<Modals />` component wrapped in `React.memo` (without `React.FC` typing due to TS constraints) to prevent full-page re-renders. Additionally, wrap prop functions like `onClose` with `useCallback` when passed to child components.
