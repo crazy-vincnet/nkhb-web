@@ -1,0 +1,3 @@
+## 2024-06-18 - Extracted App-level modal state management
+**Learning:** In this Vite/React architecture, a global `window.postMessage` event listener for modals (`NKHB_OPEN_MODAL`) was defined at the very root level (`App.tsx`), managing states like `isArticleModalOpen`. Because this state changed, triggering any modal forced a full re-render of the entire App tree, including React Router and all heavy child pages.
+**Action:** Always isolate app-wide state bindings (like modals or toasts controlled by global events) into dedicated components at the edge of the render tree (e.g., `<Modals />`), wrapping them in `React.memo()`. This entirely decouples modal rendering from main content routing and rendering cycles.
