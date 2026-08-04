@@ -1,0 +1,3 @@
+## 2024-05-28 - Moving State Down to Prevent Root Re-renders
+**Learning:** In a React application using `react-router-dom` and nested components, keeping global UI state (like modals toggled via `window.postMessage`) at the very top level (`App.tsx`) causes the entire component tree (Router, Routes, all pages) to unnecessarily re-render on every state change, even when the rest of the application remains static.
+**Action:** Always move isolated state, such as modal visibility, down into a dedicated sibling component (e.g., `<Modals />`). Place it within the required context (like `<BrowserRouter>`) but outside the main routing logic, and apply `React.memo` and `useCallback` to prevent cascading renders when that specific state updates.
