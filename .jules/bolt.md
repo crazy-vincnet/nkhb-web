@@ -1,0 +1,3 @@
+## 2026-06-23 - Prevent Full-Page Re-renders from Deeply Nested Modal Triggers via postMessage
+**Learning:** In a multi-page Vite React SPA that coordinates modals via `window.postMessage('NKHB_OPEN_MODAL')`, keeping the modal state and the `useEffect` listener at the root `App.tsx` level forces the entire app tree (including Routers, Headers, and complex sub-pages) to unnecessarily re-render every time a modal is opened or closed.
+**Action:** Extract isolated state boundaries. By moving the state hooks and the window event listener into a dedicated `<Modals />` component wrapped in `React.memo()`, opening a modal will only trigger a render for the modals themselves, saving substantial UI computation.
