@@ -1,0 +1,3 @@
+## 2024-08-08 - Extract Modal State to Avoid Full-Page Re-renders
+**Learning:** In the React application (`src/public`), placing modal states and their `window.postMessage` listeners directly in the root `App.tsx` caused the entire application (including router, header, footer, and page content) to re-render whenever a modal was opened or closed. This is a common bottleneck in this architecture.
+**Action:** Isolate global modal states into a separate `<Modals />` component wrapped in `React.memo()`. Mount this component inside the `BrowserRouter` to prevent top-level route re-renders while still maintaining access to router context if needed.
