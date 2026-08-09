@@ -1,0 +1,3 @@
+## 2024-05-18 - [Prevent unnecessary full-page re-renders]
+**Learning:** Managing modal states at the page level (e.g., `Home.tsx` handling modal opening functions dynamically without memoization) can trigger unnecessary full-page re-renders, recalculating heavy child components whenever navigation or state changes. Passing new inline function references (like `() => window.postMessage(...)`) downwards invalidates any potential child memoization.
+**Action:** When mapping layout components dynamically, explicitly define memoized callbacks (using `useCallback`) for modal triggers and apply `React.memo` to static child section components (like `Background.tsx`, `Composition.tsx`, `Guide.tsx`) to prevent deep re-rendering.
