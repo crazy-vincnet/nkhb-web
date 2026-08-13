@@ -1,0 +1,3 @@
+## 2024-05-17 - React Modal State Optimization
+**Learning:** In a `react-router-dom` setup, placing modal state (`isOpen`) and event listeners inside the root `App.tsx` component forces the entire component tree (including `Router`, `Routes`, and pages) to re-render whenever a modal opens or closes.
+**Action:** Extract application-wide floating UI state (like modals or toasts) into dedicated wrapper components (e.g., `<Modals />`), wrapped in `React.memo()`, and place them alongside the main `<Routes>` (or within them, if they require router hooks) to isolate re-renders from the main page content.
