@@ -1,0 +1,3 @@
+## 2024-05-24 - Isolate Modal State to Prevent Re-renders
+**Learning:** Placing global modal state (e.g., `isOpen` variables updated via `window.addEventListener`) in the root application component (`App.tsx`) causes unnecessary full application re-renders (including Header, Routes, and Footer) every time a modal is toggled.
+**Action:** Extract application-wide, overlay-like state (like Modals, Toasts) into their own isolated components wrapped in `React.memo()`, and render them near the root. This contains the state updates to only the overlay component itself, significantly improving interaction performance on pages with complex dom trees.
