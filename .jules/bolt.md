@@ -1,0 +1,3 @@
+## 2024-05-24 - Extract Modal State to Prevent Full Page Re-renders
+**Learning:** In a React application, placing global modal state (`useState`) at the top-level route component (`App.tsx`) causes the entire application tree to re-render whenever a modal is toggled. Even if child components are optimized, the reconciliation process for a large page still carries a performance cost.
+**Action:** Extract application-wide, isolated state (like modals) into a separate, dedicated component (e.g., `<Modals />`) wrapped in `React.memo`, and place it alongside the main app routes. This ensures that state changes (like opening a modal via `window.postMessage`) only trigger a re-render of the `<Modals />` component, leaving the underlying page undisturbed.
