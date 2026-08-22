@@ -1,0 +1,3 @@
+## 2024-11-20 - Extract global event listener state to leaf components
+**Learning:** Attaching a `window.postMessage` event listener and its associated `useState` directly in the root `<App />` component causes the entire application (including the `<Router>` and all current views) to re-render whenever the global state changes. This is extremely inefficient in a Single Page Application.
+**Action:** Always extract isolated, page-level states (like Modals) and their global event listeners into a dedicated leaf component (e.g., `<Modals />`), wrapping it in `React.memo()`. Placing this wrapper inside the necessary contexts (like `<Router>`) ensures the state updates are contained and full app re-renders are prevented.
