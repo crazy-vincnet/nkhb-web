@@ -1,0 +1,3 @@
+## 2024-11-20 - Global State Colocation to Prevent App Re-renders
+**Learning:** In a `react-router-dom` based React architecture, setting top-level state via generic global event listeners (`window.addEventListener('message')`) in the root `<App />` component will cause the entire application route tree to needlessly re-render every time the event is fired, which is extremely detrimental to performance when used for frequently toggled UI elements like modals.
+**Action:** Always colocate state specific to isolated components (like modals or overlays) as deep in the tree as possible or in a dedicated wrapper component (e.g., `<Modals />`), and memoize that wrapper, so that state toggles do not trigger full-page DOM reconciliation cycles.
