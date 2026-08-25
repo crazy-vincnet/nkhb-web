@@ -71,6 +71,8 @@ const Schedule: React.FC = () => {
         fetchSchedule();
     }, []);
 
+    const visibleSchedule = scheduleData.slice(0, boxCount);
+
     return (
         <section className="section schedule" id="schedule">
             <div className="container">
@@ -82,8 +84,8 @@ const Schedule: React.FC = () => {
                     <p className="description">{t('schedule_desc')}</p>
                 </div>
 
-                <div className={`schedule-modern-grid ${boxCount === 1 ? 'is-single' : ''}`} id="schedule-container">
-                    {scheduleData.slice(0, boxCount).map((item) => (
+                <div className={`schedule-modern-grid ${visibleSchedule.length === 1 ? 'is-single' : ''}`} id="schedule-container">
+                    {visibleSchedule.map((item) => (
                         <div key={item.id} className="schedule-modern-card">
                             <div className="card-bg-glow"></div>
                             <div className="card-content">
