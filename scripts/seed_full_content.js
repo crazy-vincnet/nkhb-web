@@ -218,7 +218,7 @@ const translations = {
         about_cta_home: "Back to Main Page",
         // Images (Fallbacks)
         image_hero_bg: "/images/main-hero.png",
-        image_logo: "https://cdn.imweb.me/thumbnail/20260424/16a5ea55af28a.png",
+        image_logo: "https://urhnvxswnjgjorezqpnk.supabase.co/storage/v1/object/public/assets/cms/logo_url-value_en-ztnld9kqurg.webp",
         image_background_section: "https://cdn.imweb.me/thumbnail/20260424/ae13dd489d8ac.png",
         image_reach_map: "https://cdn.imweb.me/thumbnail/20260424/ae13dd489d8ac.png",
         image_about_poster: "/images/poster.png",
@@ -436,7 +436,7 @@ const translations = {
         about_cta_home: "메인 페이지로 돌아가기",
         // Images (Fallbacks)
         image_hero_bg: "/images/main-hero.png",
-        image_logo: "https://cdn.imweb.me/thumbnail/20260424/16a5ea55af28a.png",
+        image_logo: "https://urhnvxswnjgjorezqpnk.supabase.co/storage/v1/object/public/assets/cms/logo_url-value_ko-rwcfafca77.webp",
         image_background_section: "https://cdn.imweb.me/thumbnail/20260424/ae13dd489d8ac.png",
         image_reach_map: "https://cdn.imweb.me/thumbnail/20260424/ae13dd489d8ac.png",
         image_about_poster: "/images/poster.png",

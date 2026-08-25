@@ -22,6 +22,9 @@ const Schedule = () => {
   const [newTime, setNewTime] = useState('');
   const [newFreq, setNewFreq] = useState('');
   const [adding, setAdding] = useState(false);
+  const [boxCount, setBoxCount] = useState<1 | 2>(1);
+  const [boxCountEffectiveFrom, setBoxCountEffectiveFrom] = useState('2026-08-31');
+  const [savingDisplay, setSavingDisplay] = useState(false);
 
   // Inline editing state
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -34,17 +37,46 @@ const Schedule = () => {
 
   const fetchSchedule = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from('schedule')
-      .select('*')
-      .order('day_ko', { ascending: true });
+    const [{ data, error }, { data: settingData }] = await Promise.all([
+      supabase
+        .from('schedule')
+        .select('*')
+        .order('created_at', { ascending: true }),
+      supabase
+        .from('sites_settings')
+        .select('key, value_ko')
+        .in('key', ['schedule_box_count', 'schedule_box_count_effective_from']),
+    ]);
 
     if (error) {
       console.error('Error fetching schedule:', error);
     } else {
       setSchedule(data || []);
     }
+    const settings = new Map((settingData || []).map(setting => [setting.key, setting.value_ko || '']));
+    const savedCount = Number(settings.get('schedule_box_count') || 1);
+    setBoxCount(savedCount === 2 ? 2 : 1);
+    setBoxCountEffectiveFrom(settings.get('schedule_box_count_effective_from') || '2026-08-31');
     setLoading(false);
+  };
+
+  const saveDisplaySettings = async () => {
+    setSavingDisplay(true);
+    const updatedAt = new Date().toISOString();
+    const { error } = await supabase
+      .from('sites_settings')
+      .upsert([
+        { key: 'schedule_box_count', value_ko: String(boxCount), value_en: String(boxCount), updated_at: updatedAt },
+        { key: 'schedule_box_count_effective_from', value_ko: boxCountEffectiveFrom, value_en: boxCountEffectiveFrom, updated_at: updatedAt },
+      ], { onConflict: 'key' });
+
+    if (error) {
+      console.error('Error saving schedule display settings:', error);
+      alert('노출 설정 저장 실패: ' + error.message);
+    } else {
+      alert('공개 사이트 노출 설정을 저장했습니다.');
+    }
+    setSavingDisplay(false);
   };
 
   const addItem = async (e: React.FormEvent) => {
@@ -155,6 +187,50 @@ const Schedule = () => {
       <div>
         <h2 className="text-2xl font-bold">방송 편성표 (Broadcast Schedule)</h2>
         <p className="text-sm text-gray-500 mt-1">방송 요일·시간·주파수를 추가하고 수정하세요. 공개 사이트에는 활성 항목만 표시됩니다.</p>
+      </div>
+
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+          <div>
+            <h3 className="text-lg font-semibold">공개 사이트 박스 노출 설정</h3>
+            <p className="text-sm text-gray-500 mt-1">
+              지정한 날짜부터 활성 편성 중 위에서부터 선택한 개수만 노출됩니다. 적용일을 비우면 저장 즉시 반영됩니다.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-[160px_190px_auto] gap-3 w-full lg:w-auto">
+            <div>
+              <label className="block text-xs font-bold text-gray-500 mb-1">노출 박스 수</label>
+              <select
+                value={boxCount}
+                onChange={(e) => setBoxCount(Number(e.target.value) === 2 ? 2 : 1)}
+                className={inputClass}
+              >
+                <option value={1}>1개</option>
+                <option value={2}>2개</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-500 mb-1">적용 시작일 (한국시간)</label>
+              <input
+                type="date"
+                value={boxCountEffectiveFrom}
+                onChange={(e) => setBoxCountEffectiveFrom(e.target.value)}
+                className={inputClass}
+              />
+            </div>
+            <div className="flex items-end">
+              <button
+                type="button"
+                onClick={saveDisplaySettings}
+                disabled={savingDisplay}
+                className="w-full bg-gray-900 text-white px-5 py-2 rounded-lg hover:bg-black transition-colors flex items-center justify-center font-bold disabled:opacity-50"
+              >
+                {savingDisplay ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Check className="w-4 h-4 mr-2" />}
+                설정 저장
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Add new entry */}

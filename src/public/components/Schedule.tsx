@@ -13,9 +13,21 @@ interface ScheduleItem {
     is_active: boolean;
 }
 
+const DEFAULT_BOX_COUNT = 1;
+const DEFAULT_EFFECTIVE_FROM = '2026-08-31';
+
+const getKoreanDate = () =>
+    new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Asia/Seoul',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+    }).format(new Date());
+
 const Schedule: React.FC = () => {
     const { t, lang } = useI18n();
     const [scheduleData, setScheduleData] = useState<ScheduleItem[]>([]);
+    const [boxCount, setBoxCount] = useState(2);
 
     // Pick the day label for the active language, falling back across the
     // bilingual columns and the legacy single `day` (pre-migration safety).
@@ -24,15 +36,35 @@ const Schedule: React.FC = () => {
 
     useEffect(() => {
         const fetchSchedule = async () => {
-            const { data, error } = await supabase
-                .from('schedule')
-                .select('*')
-                .eq('is_active', true);
+            const [scheduleResult, settingsResult] = await Promise.all([
+                supabase
+                    .from('schedule')
+                    .select('*')
+                    .eq('is_active', true)
+                    .order('created_at', { ascending: true }),
+                supabase
+                    .from('sites_settings')
+                    .select('key, value_ko')
+                    .in('key', ['schedule_box_count', 'schedule_box_count_effective_from']),
+            ]);
+
+            const { data, error } = scheduleResult;
             
             if (error) {
                 console.error('Error fetching schedule:', error);
             } else if (data) {
                 setScheduleData(data);
+            }
+
+            const settings = new Map(
+                (settingsResult.data || []).map((setting) => [setting.key, setting.value_ko || ''])
+            );
+            const configuredCount = Number(settings.get('schedule_box_count') || DEFAULT_BOX_COUNT);
+            const effectiveFrom = settings.get('schedule_box_count_effective_from') || DEFAULT_EFFECTIVE_FROM;
+            const isEffective = !effectiveFrom || getKoreanDate() >= effectiveFrom;
+
+            if (isEffective && (configuredCount === 1 || configuredCount === 2)) {
+                setBoxCount(configuredCount);
             }
         };
 
@@ -50,8 +82,8 @@ const Schedule: React.FC = () => {
                     <p className="description">{t('schedule_desc')}</p>
                 </div>
 
-                <div className="schedule-modern-grid" id="schedule-container">
-                    {scheduleData.map((item) => (
+                <div className={`schedule-modern-grid ${boxCount === 1 ? 'is-single' : ''}`} id="schedule-container">
+                    {scheduleData.slice(0, boxCount).map((item) => (
                         <div key={item.id} className="schedule-modern-card">
                             <div className="card-bg-glow"></div>
                             <div className="card-content">

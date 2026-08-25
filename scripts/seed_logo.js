@@ -21,8 +21,8 @@ async function seedLogo() {
     .upsert([
       { 
         key: 'logo_url', 
-        value_ko: 'https://cdn.imweb.me/thumbnail/20260424/16a5ea55af28a.png', 
-        value_en: 'https://cdn.imweb.me/thumbnail/20260424/16a5ea55af28a.png' 
+        value_ko: 'https://urhnvxswnjgjorezqpnk.supabase.co/storage/v1/object/public/assets/cms/logo_url-value_ko-rwcfafca77.webp',
+        value_en: 'https://urhnvxswnjgjorezqpnk.supabase.co/storage/v1/object/public/assets/cms/logo_url-value_en-ztnld9kqurg.webp'
       }
     ], { onConflict: 'key' });
 

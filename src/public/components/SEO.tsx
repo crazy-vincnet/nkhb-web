@@ -17,6 +17,8 @@ interface SEOData {
   og_image_url?: string;
 }
 
+const DEFAULT_OG_IMAGE = 'https://nkhb.org/images/nkhb-social-logo-20260825.png';
+
 const SEO: React.FC<SEOProps> = ({ slug }) => {
   const { lang } = useI18n();
   const [data, setData] = useState<SEOData | null>(null);
@@ -73,7 +75,11 @@ const SEO: React.FC<SEOProps> = ({ slug }) => {
   const description = lang === 'ko' ? data.description_ko : data.description_en;
   const keywords = lang === 'ko' ? data.keywords_ko : data.keywords_en;
   
-  const ogImage = data.og_image_url || siteSettings.default_og_image?.value_ko || 'https://cdn.imweb.me/thumbnail/20260424/16a5ea55af28a.png';
+  // The homepage social preview must stay in sync with the current main logo.
+  // Other pages can continue to use their page-specific/admin-configured image.
+  const ogImage = slug === 'home'
+    ? DEFAULT_OG_IMAGE
+    : data.og_image_url || siteSettings.default_og_image?.value_ko || DEFAULT_OG_IMAGE;
   const siteUrl = 'https://nkhb.org';
   const currentUrl = `${siteUrl}${window.location.pathname === '/' ? '' : window.location.pathname}`;
 
@@ -122,6 +128,10 @@ const SEO: React.FC<SEOProps> = ({ slug }) => {
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />
       <meta property="og:image" content={ogImage} />
+      {ogImage === DEFAULT_OG_IMAGE && <meta property="og:image:type" content="image/png" />}
+      {ogImage === DEFAULT_OG_IMAGE && <meta property="og:image:width" content="1200" />}
+      {ogImage === DEFAULT_OG_IMAGE && <meta property="og:image:height" content="630" />}
+      <meta property="og:image:alt" content={`${siteName} 로고`} />
       <meta property="og:url" content={currentUrl} />
       <meta property="og:locale" content={lang === 'ko' ? 'ko_KR' : 'en_US'} />
 
@@ -129,6 +139,7 @@ const SEO: React.FC<SEOProps> = ({ slug }) => {
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={ogImage} />
+      <meta name="twitter:image:alt" content={`${siteName} 로고`} />
 
       <script type="application/ld+json">
         {JSON.stringify(structuredData)}

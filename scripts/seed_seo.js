@@ -17,7 +17,7 @@ async function seedSEO() {
       title_en: 'New Korea Hope Broadcasting (NKHB)',
       description_ko: '라디오 전파를 통해 북한 주민들에게 희망과 진실을 전합니다.',
       description_en: 'Delivering hope and truth to North Korean people through radio waves.',
-      og_image_url: 'https://cdn.imweb.me/thumbnail/20260424/16a5ea55af28a.png'
+      og_image_url: 'https://nkhb.org/images/nkhb-social-logo-20260825.png'
     },
     {
       page_slug: 'about',
@@ -25,7 +25,7 @@ async function seedSEO() {
       title_en: 'About NKFI | NKHB',
       description_ko: '뉴코리아 파운데이션 인터내셔널(NKFI) 사역 소개입니다.',
       description_en: 'Learn about New Korea Foundation International (NKFI) ministries.',
-      og_image_url: 'https://cdn.imweb.me/thumbnail/20260424/16a5ea55af28a.png'
+      og_image_url: 'https://nkhb.org/images/nkhb-social-logo-20260825.png'
     }
   ];
 

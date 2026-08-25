@@ -1203,6 +1203,11 @@ nav {
     margin-top: 50px;
 }
 
+.schedule-modern-grid.is-single {
+    grid-template-columns: minmax(0, 760px);
+    justify-content: center;
+}
+
 .schedule-modern-card {
     position: relative;
     background: #ffffff;
@@ -2975,4 +2980,3 @@ footer {
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
 }
-
