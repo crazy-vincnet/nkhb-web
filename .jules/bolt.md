@@ -1,0 +1,3 @@
+## 2024-05-19 - Isolate global state to prevent unnecessary top-level re-renders
+**Learning:** In the React application, attaching heavy top-level modal states (like `isArticleModalOpen`) directly inside `App.tsx` forces the entire React component tree (including router and structural elements) to re-render whenever any modal is toggled.
+**Action:** Always isolate application-wide UI states into dedicated wrapper components (like `<Modals />`) using `React.memo`, placing them inside the main context (e.g., `<Router>`) without letting their frequent state updates cascade into unrelated parts of the app.
