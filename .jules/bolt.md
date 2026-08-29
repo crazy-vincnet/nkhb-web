@@ -1,0 +1,3 @@
+## 2024-05-19 - [Centralized Modal State Architecture]
+**Learning:** In a multi-page React setup using react-router-dom, centralizing modal states (like `isArticleModalOpen`) and global event listeners in the root `App.tsx` component causes unnecessary full-page re-renders across the entire routing tree (including all nested Route components) whenever a modal is toggled.
+**Action:** Always extract shared/global modal states and their associated event listeners into isolated child components (e.g., `<Modals />`) wrapped with `React.memo()`. This ensures that triggering a global modal state update only re-renders the isolated component rather than the entire React application.
