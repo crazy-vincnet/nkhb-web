@@ -1,0 +1,3 @@
+## 2024-05-15 - Isolate Global Modals to Prevent Router Re-renders
+**Learning:** In a React application using `react-router-dom`, placing application-wide modal state and modal components directly inside the top-level `App` component forces the entire component tree (including the `<Router>` and all nested routes) to re-render every time a modal is toggled. This is especially problematic when modals are triggered via global event listeners (like `window.postMessage`).
+**Action:** Extract global modal state and components into a dedicated wrapper component (e.g., `<Modals />`), wrap it in `React.memo()`, and place it alongside the route definitions. This isolates state changes and prevents costly full-page re-renders.
