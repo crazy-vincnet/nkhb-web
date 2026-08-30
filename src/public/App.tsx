@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import Header from './components/Header';
@@ -7,29 +7,11 @@ import Home from './pages/Home';
 import About from './pages/About';
 import DynamicPage from './pages/DynamicPage';
 import ScrollToTop from './components/ScrollToTop';
-import ArticleModal from './components/ArticleModal';
-import LetterModal from './components/LetterModal';
-import SampleModal from './components/SampleModal';
+import Modals from './components/Modals';
 import { useI18n } from './lib/i18n';
 
 const App: React.FC = () => {
     const { lang, loading } = useI18n();
-    const [isArticleModalOpen, setIsArticleModalOpen] = useState(false);
-    const [isLetterModalOpen, setIsLetterModalOpen] = useState(false);
-    const [isSampleModalOpen, setIsSampleModalOpen] = useState(false);
-
-    useEffect(() => {
-        const handleMessage = (event: MessageEvent) => {
-            if (event.data?.type === 'NKHB_OPEN_MODAL') {
-                const { modalType } = event.data;
-                if (modalType === 'article') setIsArticleModalOpen(true);
-                if (modalType === 'letter') setIsLetterModalOpen(true);
-                if (modalType === 'sample') setIsSampleModalOpen(true);
-            }
-        };
-        window.addEventListener('message', handleMessage);
-        return () => window.removeEventListener('message', handleMessage);
-    }, []);
 
     if (loading) {
         return (
@@ -63,19 +45,7 @@ const App: React.FC = () => {
                     </Routes>
                     <Footer />
                 </div>
-
-                <ArticleModal 
-                    isOpen={isArticleModalOpen} 
-                    onClose={() => setIsArticleModalOpen(false)} 
-                />
-                <LetterModal 
-                    isOpen={isLetterModalOpen} 
-                    onClose={() => setIsLetterModalOpen(false)} 
-                />
-                <SampleModal 
-                    isOpen={isSampleModalOpen} 
-                    onClose={() => setIsSampleModalOpen(false)} 
-                />
+                <Modals />
             </Router>
         </HelmetProvider>
     );
