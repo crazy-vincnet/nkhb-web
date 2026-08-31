@@ -1,0 +1,3 @@
+## 2024-05-24 - [Isolate Modal State to prevent root re-renders]
+**Learning:** In this specific architecture where global modals are triggered via `window.postMessage` from deeply nested child components, storing the modal state (`useState`) and listener (`useEffect`) in the root `App.tsx` layout caused full-page re-renders whenever a modal opened or closed.
+**Action:** Extract global modal state and `postMessage` listeners into an isolated `<Modals />` component wrapped in `React.memo`, placing it alongside child routes without wrapping them. This confines state updates to the isolated component, bypassing expensive top-level tree reconciliations.
