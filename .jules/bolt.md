@@ -1,0 +1,3 @@
+## 2024-05-19 - [Isolate modal states to prevent full app re-renders]
+**Learning:** In the React application, keeping modal visibility state (e.g., `isArticleModalOpen`, `isLetterModalOpen`) inside the root `App.tsx` component forces a full application re-render every time a modal is opened or closed, even if the modal logic is independent of the main app layout.
+**Action:** Always extract isolated UI states, such as modal visibility managed via global events (like `window.postMessage`), into their own memoized components (e.g., `<Modals />` wrapped in `React.memo`) to bypass unnecessary top-level re-renders and improve performance.
