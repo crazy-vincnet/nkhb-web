@@ -11,7 +11,17 @@ interface ScheduleItem {
     time: string;
     frequency: string;
     is_active: boolean;
+    visible_from?: string | null;
+    visible_until?: string | null;
 }
+
+// Per-item exposure window set in the admin. Either bound may be null,
+// meaning "no limit in that direction".
+const isWithinWindow = (item: ScheduleItem, now: number) => {
+    if (item.visible_from && now < new Date(item.visible_from).getTime()) return false;
+    if (item.visible_until && now > new Date(item.visible_until).getTime()) return false;
+    return true;
+};
 
 const DEFAULT_BOX_COUNT = 1;
 const DEFAULT_EFFECTIVE_FROM = '2026-08-31';
@@ -53,7 +63,8 @@ const Schedule: React.FC = () => {
             if (error) {
                 console.error('Error fetching schedule:', error);
             } else if (data) {
-                setScheduleData(data);
+                const now = Date.now();
+                setScheduleData(data.filter((item) => isWithinWindow(item, now)));
             }
 
             const settings = new Map(

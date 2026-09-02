@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
+import { isoToKstInput, kstInputToIso, formatKstLabel } from '../lib/kstDatetime';
 import { Plus, Trash2, Pencil, Check, X, Loader2 } from 'lucide-react';
 
 interface ScheduleItem {
@@ -10,9 +11,39 @@ interface ScheduleItem {
   time: string;
   frequency: string;
   is_active: boolean;
+  visible_from?: string | null;
+  visible_until?: string | null;
 }
 
-type EditForm = { day_ko: string; day_en: string; time: string; frequency: string };
+type EditForm = {
+  day_ko: string;
+  day_en: string;
+  time: string;
+  frequency: string;
+  visible_from: string;
+  visible_until: string;
+};
+
+const EMPTY_EDIT_FORM: EditForm = {
+  day_ko: '',
+  day_en: '',
+  time: '',
+  frequency: '',
+  visible_from: '',
+  visible_until: '',
+};
+
+// Mirrors the public site's filter so admins can see what is live right now.
+const isWithinWindow = (item: Pick<ScheduleItem, 'visible_from' | 'visible_until'>) => {
+  const now = Date.now();
+  if (item.visible_from && now < new Date(item.visible_from).getTime()) return false;
+  if (item.visible_until && now > new Date(item.visible_until).getTime()) return false;
+  return true;
+};
+
+// Both bounds are optional, but a reversed window would silently hide the card.
+const isWindowInvalid = (from: string, until: string) =>
+  Boolean(from && until && from >= until);
 
 const Schedule = () => {
   const [schedule, setSchedule] = useState<ScheduleItem[]>([]);
@@ -21,6 +52,8 @@ const Schedule = () => {
   const [newDayEn, setNewDayEn] = useState('');
   const [newTime, setNewTime] = useState('');
   const [newFreq, setNewFreq] = useState('');
+  const [newVisibleFrom, setNewVisibleFrom] = useState('');
+  const [newVisibleUntil, setNewVisibleUntil] = useState('');
   const [adding, setAdding] = useState(false);
   const [boxCount, setBoxCount] = useState<1 | 2>(1);
   const [boxCountEffectiveFrom, setBoxCountEffectiveFrom] = useState('2026-08-31');
@@ -28,7 +61,7 @@ const Schedule = () => {
 
   // Inline editing state
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState<EditForm>({ day_ko: '', day_en: '', time: '', frequency: '' });
+  const [editForm, setEditForm] = useState<EditForm>(EMPTY_EDIT_FORM);
   const [savingEdit, setSavingEdit] = useState(false);
 
   useEffect(() => {
@@ -85,6 +118,10 @@ const Schedule = () => {
       alert('요일(한국어 또는 영어)을 입력하세요.');
       return;
     }
+    if (isWindowInvalid(newVisibleFrom, newVisibleUntil)) {
+      alert('노출 종료 시간은 시작 시간보다 뒤여야 합니다.');
+      return;
+    }
     setAdding(true);
     const { error } = await supabase
       .from('schedule')
@@ -93,6 +130,8 @@ const Schedule = () => {
         day_en: newDayEn.trim(),
         time: newTime.trim(),
         frequency: newFreq.trim(),
+        visible_from: kstInputToIso(newVisibleFrom),
+        visible_until: kstInputToIso(newVisibleUntil),
         is_active: true,
       }]);
 
@@ -104,6 +143,8 @@ const Schedule = () => {
       setNewDayEn('');
       setNewTime('');
       setNewFreq('');
+      setNewVisibleFrom('');
+      setNewVisibleUntil('');
       await fetchSchedule();
     }
     setAdding(false);
@@ -116,17 +157,23 @@ const Schedule = () => {
       day_en: item.day_en || item.day || '',
       time: item.time,
       frequency: item.frequency || '',
+      visible_from: isoToKstInput(item.visible_from),
+      visible_until: isoToKstInput(item.visible_until),
     });
   };
 
   const cancelEdit = () => {
     setEditingId(null);
-    setEditForm({ day_ko: '', day_en: '', time: '', frequency: '' });
+    setEditForm(EMPTY_EDIT_FORM);
   };
 
   const saveEdit = async (id: string) => {
     if ((!editForm.day_ko.trim() && !editForm.day_en.trim()) || !editForm.time.trim()) {
       alert('요일(한국어 또는 영어)과 시간은 필수입니다.');
+      return;
+    }
+    if (isWindowInvalid(editForm.visible_from, editForm.visible_until)) {
+      alert('노출 종료 시간은 시작 시간보다 뒤여야 합니다.');
       return;
     }
     setSavingEdit(true);
@@ -137,6 +184,8 @@ const Schedule = () => {
         day_en: editForm.day_en.trim(),
         time: editForm.time.trim(),
         frequency: editForm.frequency.trim(),
+        visible_from: kstInputToIso(editForm.visible_from),
+        visible_until: kstInputToIso(editForm.visible_until),
       })
       .eq('id', id);
 
@@ -236,7 +285,10 @@ const Schedule = () => {
       {/* Add new entry */}
       <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
         <h3 className="text-lg font-semibold mb-4">새 편성 추가</h3>
-        <form onSubmit={addItem} className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <p className="text-sm text-gray-500 -mt-3 mb-4">
+          노출 시작/종료 시간을 비우면 해당 방향으로 제한 없이 계속 노출됩니다. 모든 시간은 한국시간(KST) 기준입니다.
+        </p>
+        <form onSubmit={addItem} className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-xs font-bold text-gray-500 mb-1">요일 (한국어)</label>
             <input
@@ -278,6 +330,24 @@ const Schedule = () => {
               placeholder="예: 5920 kHz"
             />
           </div>
+          <div>
+            <label className="block text-xs font-bold text-gray-500 mb-1">노출 시작 (KST, 선택)</label>
+            <input
+              type="datetime-local"
+              value={newVisibleFrom}
+              onChange={(e) => setNewVisibleFrom(e.target.value)}
+              className={inputClass}
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-gray-500 mb-1">노출 종료 (KST, 선택)</label>
+            <input
+              type="datetime-local"
+              value={newVisibleUntil}
+              onChange={(e) => setNewVisibleUntil(e.target.value)}
+              className={inputClass}
+            />
+          </div>
           <div className="flex items-end">
             <button
               type="submit"
@@ -309,6 +379,7 @@ const Schedule = () => {
                 <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">요일 (EN)</th>
                 <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">시간 (KST)</th>
                 <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">주파수</th>
+                <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">노출 기간 (KST)</th>
                 <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">상태</th>
                 <th className="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">작업</th>
               </tr>
@@ -354,6 +425,24 @@ const Schedule = () => {
                             className={inputClass}
                           />
                         </td>
+                        <td className="px-6 py-3">
+                          <div className="flex flex-col gap-2 min-w-[210px]">
+                            <input
+                              type="datetime-local"
+                              value={editForm.visible_from}
+                              onChange={(e) => setEditForm(f => ({ ...f, visible_from: e.target.value }))}
+                              className={inputClass}
+                              aria-label="노출 시작 (KST)"
+                            />
+                            <input
+                              type="datetime-local"
+                              value={editForm.visible_until}
+                              onChange={(e) => setEditForm(f => ({ ...f, visible_until: e.target.value }))}
+                              className={inputClass}
+                              aria-label="노출 종료 (KST)"
+                            />
+                          </div>
+                        </td>
                         <td className="px-6 py-3 whitespace-nowrap text-sm text-gray-400">
                           {item.is_active ? '활성' : '비활성'}
                         </td>
@@ -384,6 +473,19 @@ const Schedule = () => {
                         <td className="px-6 py-4 whitespace-nowrap text-sm">{item.day_en || <span className="text-gray-300">—</span>}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">{item.time}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">{item.frequency}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                          {item.visible_from || item.visible_until ? (
+                            <div className="flex flex-col leading-tight">
+                              <span>{formatKstLabel(item.visible_from) || '제한 없음'}</span>
+                              <span className="text-gray-400">~ {formatKstLabel(item.visible_until) || '제한 없음'}</span>
+                              {!isWithinWindow(item) && (
+                                <span className="mt-1 text-xs font-bold text-amber-600">기간 외 (현재 미노출)</span>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-gray-300">상시 노출</span>
+                          )}
+                        </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
                           <button
                             onClick={() => toggleActive(item.id, item.is_active)}
