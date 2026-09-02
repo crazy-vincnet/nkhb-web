@@ -1204,8 +1204,32 @@ nav {
 }
 
 .schedule-modern-grid.is-single {
-    grid-template-columns: minmax(0, 760px);
+    grid-template-columns: minmax(0, 560px);
     justify-content: center;
+}
+
+/* A lone card has no neighbour to balance against, so it reads as oversized at
+   the two-card scale. Tighten it above the point where the grid stacks. */
+@media (min-width: 993px) {
+    .schedule-modern-grid.is-single .schedule-modern-card {
+        padding: 34px;
+    }
+
+    .schedule-modern-grid.is-single .card-header {
+        margin-bottom: 28px;
+    }
+
+    .schedule-modern-grid.is-single .day-text {
+        font-size: 18px;
+    }
+
+    .schedule-modern-grid.is-single .info-group {
+        margin-bottom: 20px;
+    }
+
+    .schedule-modern-grid.is-single .info-value {
+        font-size: 22px;
+    }
 }
 
 .schedule-modern-card {
