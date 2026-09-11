@@ -1,0 +1,3 @@
+## 2024-09-11 - Isolate Global Event Listeners to Prevent Route Re-renders
+**Learning:** In a single-page React application, attaching a global `window.postMessage` event listener for modal states at the root component level (like `App.tsx`) causes the entire page route tree to re-render whenever a modal opens or closes.
+**Action:** Extract application-wide event listeners and their associated UI states (like modal overlays) into separate, isolated components (e.g., `<Modals />`). Wrap these isolated components in `React.memo` and place them alongside the main application structure to ensure updates only trigger re-renders where necessary, preserving main content performance.
