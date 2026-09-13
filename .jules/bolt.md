@@ -1,0 +1,3 @@
+## 2024-05-24 - Isolate top-level modal state to prevent full-page re-renders
+**Learning:** In a React router app (especially Vite multi-page setups like this one), managing global modal visibility state (e.g., `isArticleModalOpen`) at the root component level (`App.tsx`) causes the entire application component tree to unnecessarily re-render whenever a modal is toggled.
+**Action:** Extract UI-layer global states (like modals, toasts, or overlays) into their own isolated, memoized components (e.g., `<Modals />`) and manage cross-component communication via `window.postMessage` or context. This isolates the re-render solely to the modal container, bypassing the expensive root rendering cycle.
