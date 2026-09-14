@@ -1,0 +1,3 @@
+## 2025-02-18 - Isolate Top-Level Modal State to Prevent Full-Page Re-renders
+**Learning:** In a multi-page Vite/React application, managing globally accessible UI components (like Modals) in the root `App.tsx` via `useState` causes the entire component tree—including nested routing logic—to re-render on state changes. This is a common performance anti-pattern.
+**Action:** Extract such state-heavy components into a standalone wrapper (e.g., `<Modals />`), handle their state internally, and wrap the export in `React.memo` to isolate updates. This ensures that opening a modal only re-renders the modal layer, not the entire application structure.
