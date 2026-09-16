@@ -1,0 +1,3 @@
+## 2024-09-16 - Modal Trigger Re-renders
+**Learning:** This codebase uses `window.postMessage` with payload type `NKHB_OPEN_MODAL` as a global event bus to trigger modals across the React application. Keeping the state and event listener for these modals at the root `App.tsx` level was an anti-pattern because any modal opening triggered a full-page re-render, affecting all route components.
+**Action:** Always verify if a global event listener that changes state is at the highest component level; if so, isolate its state in a dedicated memoized component (like a `<Modals />` wrapper) to localize re-renders.
