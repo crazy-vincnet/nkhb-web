@@ -1,0 +1,3 @@
+## 2024-05-24 - Isolate Modal State to Prevent Full-Page Re-renders
+**Learning:** In the React application, keeping modal state variables (like `isArticleModalOpen`) and `window.postMessage` listeners directly inside `App.tsx` forces the entire component tree—including routes and headers—to re-render every time a modal is opened or closed, hurting performance.
+**Action:** Extract application-wide floating UI elements (such as modals) and their associated states into isolated wrapper components (e.g., `<Modals />`), wrapped in `React.memo`, inside the main layout but outside the core routing tree.
