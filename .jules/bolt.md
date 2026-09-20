@@ -1,0 +1,3 @@
+## 2024-09-20 - Extracting State from Top-level Route Context
+**Learning:** In a typical React SPA using `react-router-dom`, placing local state (like modal visibility) directly within the `App` component that also renders the `<Router>` and `<Routes>` can cause unintended full-page re-renders. When the state changes, the entire routing tree and all child pages re-render, leading to noticeable performance degradation.
+**Action:** Always extract top-level non-routing state into separate, isolated components (e.g., `<Modals />`). Wrap these components in `React.memo` and use `useCallback` for their event handlers to prevent them from triggering unnecessary renders across the rest of the application context.
