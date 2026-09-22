@@ -1,0 +1,3 @@
+## 2024-10-24 - Isolated modal states to prevent full-page re-renders
+**Learning:** In a multi-page Vite application using React and `window.postMessage` for component-level communication, handling deeply-nested modal state at the root level (`App.tsx`) causes expensive, unnecessary re-renders of the entire router/page component tree on every modal open/close action.
+**Action:** Always decouple volatile UI states (like modals, sidebars) into their own independent React components and wrap them in `React.memo` (e.g., `<Modals />`), particularly when they only act as overlays and do not need to share state linearly down the main content tree.
