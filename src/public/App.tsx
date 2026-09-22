@@ -12,8 +12,8 @@ import LetterModal from './components/LetterModal';
 import SampleModal from './components/SampleModal';
 import { useI18n } from './lib/i18n';
 
-const App: React.FC = () => {
-    const { lang, loading } = useI18n();
+// ⚡ Bolt Optimization: Isolated modal states to prevent full-page re-renders when toggling modals.
+const Modals = React.memo(() => {
     const [isArticleModalOpen, setIsArticleModalOpen] = useState(false);
     const [isLetterModalOpen, setIsLetterModalOpen] = useState(false);
     const [isSampleModalOpen, setIsSampleModalOpen] = useState(false);
@@ -30,6 +30,27 @@ const App: React.FC = () => {
         window.addEventListener('message', handleMessage);
         return () => window.removeEventListener('message', handleMessage);
     }, []);
+
+    return (
+        <>
+            <ArticleModal
+                isOpen={isArticleModalOpen}
+                onClose={() => setIsArticleModalOpen(false)}
+            />
+            <LetterModal
+                isOpen={isLetterModalOpen}
+                onClose={() => setIsLetterModalOpen(false)}
+            />
+            <SampleModal
+                isOpen={isSampleModalOpen}
+                onClose={() => setIsSampleModalOpen(false)}
+            />
+        </>
+    );
+});
+
+const App: React.FC = () => {
+    const { lang, loading } = useI18n();
 
     if (loading) {
         return (
@@ -64,18 +85,7 @@ const App: React.FC = () => {
                     <Footer />
                 </div>
 
-                <ArticleModal 
-                    isOpen={isArticleModalOpen} 
-                    onClose={() => setIsArticleModalOpen(false)} 
-                />
-                <LetterModal 
-                    isOpen={isLetterModalOpen} 
-                    onClose={() => setIsLetterModalOpen(false)} 
-                />
-                <SampleModal 
-                    isOpen={isSampleModalOpen} 
-                    onClose={() => setIsSampleModalOpen(false)} 
-                />
+                <Modals />
             </Router>
         </HelmetProvider>
     );
