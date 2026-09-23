@@ -1,0 +1,3 @@
+## 2024-05-18 - Isolate Global Modal States
+**Learning:** In this Vite React application, managing global modal states directly in `App.tsx` and triggering them via `window.postMessage` events causes the entire application to re-render whenever any modal is opened or closed. This is a significant bottleneck as all top-level components and routes re-render unnecessarily.
+**Action:** Extract global modal states (like `isArticleModalOpen`) and their associated event listeners into an isolated `<Modals />` component. Wrap this component in `React.memo` and place it inside the application router context. This ensures only the modal container re-renders when a `postMessage` event fires.
