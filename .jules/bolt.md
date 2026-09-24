@@ -1,0 +1,3 @@
+## 2024-09-24 - Isolate top-level modal state in React
+**Learning:** In a multi-page React application managing global or multi-route modals (like Article, Letter, Sample overlays) through `window.postMessage`, maintaining this state in the top-level `App` component forces the entire route tree and static components to re-render unnecessarily on every modal toggle.
+**Action:** Always extract top-level modal state management into a dedicated, isolated component (e.g., `<Modals />`) and wrap it in `React.memo`. Place this component inside the application context (like `<Router>`) to ensure it still functions correctly while preventing the rest of the application from re-rendering when modal states change.
