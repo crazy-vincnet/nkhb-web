@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useMemo } from 'react';
 import { supabase } from './supabase';
 
 type Language = 'ko' | 'en';
@@ -345,8 +345,21 @@ export const I18nProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     document.documentElement.lang = lang;
   }, [lang]);
 
+  /*
+   * ⚡ Bolt Optimization:
+   * Memoize dbContent into a Map for O(1) lookups.
+   * `getContent` is called frequently (e.g., for every translated string on the page).
+   * By changing the O(N) array search `dbContent.find(...)` to an O(1) Map lookup `dbContentMap.get(...)`,
+   * we improve rendering performance, especially when there are many translated elements.
+   */
+  const dbContentMap = useMemo(() => {
+    const map = new Map<string, any>();
+    dbContent.forEach(item => map.set(item.key, item));
+    return map;
+  }, [dbContent]);
+
   const getContent = useCallback((key: string): ContentData => {
-    const item = dbContent.find(i => i.key === key);
+    const item = dbContentMap.get(key);
     const live = liveChanges[key];
     const dbValue = lang === 'ko' ? item?.value_ko : item?.value_en;
     const staticValue = lang === 'ko' ? (staticTranslations as any).ko?.[key] : (staticTranslations as any).en?.[key];
@@ -381,7 +394,7 @@ export const I18nProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const items = Array.isArray(resolvedStyles.items) ? resolvedStyles.items : undefined;
 
     return { text: (live?.text ?? baseText), styles, link: finalLink, order, items };
-  }, [dbContent, liveChanges, lang, isMobile]);
+  }, [dbContentMap, liveChanges, lang, isMobile]);
 
   const t = (key: string): string => getContent(key).text;
 
