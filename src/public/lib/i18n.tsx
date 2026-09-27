@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useMemo } from 'react';
 import { supabase } from './supabase';
 
 type Language = 'ko' | 'en';
@@ -338,6 +338,16 @@ export const I18nProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }, [liveChanges, isMobile]);
 
+  /*
+   * ⚡ Bolt Optimization:
+   * Memoized the `dbContent` array into a Map (`dbContentMap`).
+   * Previously, `getContent` used `dbContent.find()` which is an O(N) array lookup.
+   * Since `getContent` is called frequently (often multiple times per component during render),
+   * this was causing redundant linear searches. This Map allows O(1) property lookup,
+   * significantly improving rendering performance, especially on heavily localized pages.
+   */
+  const dbContentMap = useMemo(() => new Map(dbContent.map(item => [item.key, item])), [dbContent]);
+
   // Keep <html lang> in sync with the active language. This fixes SEO/screen-reader
   // language reporting on /en and also activates the [lang="en"] CSS overrides in
   // style.css (which key off the html element's lang attribute, not a class).
@@ -346,7 +356,7 @@ export const I18nProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, [lang]);
 
   const getContent = useCallback((key: string): ContentData => {
-    const item = dbContent.find(i => i.key === key);
+    const item = dbContentMap.get(key);
     const live = liveChanges[key];
     const dbValue = lang === 'ko' ? item?.value_ko : item?.value_en;
     const staticValue = lang === 'ko' ? (staticTranslations as any).ko?.[key] : (staticTranslations as any).en?.[key];
@@ -381,7 +391,7 @@ export const I18nProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const items = Array.isArray(resolvedStyles.items) ? resolvedStyles.items : undefined;
 
     return { text: (live?.text ?? baseText), styles, link: finalLink, order, items };
-  }, [dbContent, liveChanges, lang, isMobile]);
+  }, [dbContentMap, liveChanges, lang, isMobile]);
 
   const t = (key: string): string => getContent(key).text;
 
