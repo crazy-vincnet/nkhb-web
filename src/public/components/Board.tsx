@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { supabase } from '../lib/supabase';
 import { ShieldCheck, X, Calendar, User, Music, PlayCircle, Headset } from 'lucide-react';
 import DOMPurify from 'dompurify';
@@ -67,9 +67,18 @@ const Board: React.FC<BoardProps> = ({ pageId, lang, titleKo, titleEn, subtitleK
     setLoading(false);
   };
 
-  const filteredPosts = activeCategory === '전체' || activeCategory === 'All'
-    ? posts 
-    : posts.filter(p => p.category === activeCategory);
+  /*
+   * ⚡ Bolt Optimization:
+   * Memoized the `filteredPosts` derivation to prevent unnecessary O(n) array
+   * filtering on every render of the Board component. It now only re-evaluates
+   * when `posts` or `activeCategory` changes.
+   * Expected Impact: Reduces CPU work on re-renders, especially when interacting with modals.
+   */
+  const filteredPosts = useMemo(() => {
+    return activeCategory === '전체' || activeCategory === 'All'
+      ? posts
+      : posts.filter(p => p.category === activeCategory);
+  }, [posts, activeCategory]);
 
   const getAudioSource = (url: string | null) => {
     if (!url) return null;
