@@ -1,3 +1,6 @@
 ## 2024-09-27 - [Optimize i18n lookup]
 **Learning:** Found an O(n) array search inside a high-frequency render loop hook (`getContent` calling `dbContent.find`). In highly localized React apps, this O(n) lookup occurs for every translated string on the page during render, becoming a performance bottleneck.
 **Action:** Always memoize dictionary-like arrays into a `Map` structure for O(1) lookups when they are frequently accessed during render cycles.
+## 2024-11-20 - [Optimize Static Component Rendering]
+**Learning:** In a React application, passing inline arrow functions as props (e.g., `onOpenArticle = () => window.postMessage(...)`) within a rendering loop or map (`Home.tsx`) causes a new function reference to be created on every render. If the child components receiving these props (e.g., `Background.tsx`, `Composition.tsx`) are large sections, they will re-render unnecessarily, degrading performance on route changes or context updates.
+**Action:** Extract inline arrow functions into memoized callbacks using `useCallback` and wrap large, static child components with `React.memo` to ensure they can take advantage of the stable prop references and skip unnecessary re-renders. Avoid typing `React.memo` assignments with `React.FC` to satisfy TypeScript.
