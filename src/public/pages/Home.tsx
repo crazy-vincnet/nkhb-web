@@ -1,9 +1,16 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import SEO from '../components/SEO';
 import { useI18n } from '../lib/i18n';
 import { HOME_SECTION_MAP, HOME_DEFAULT_LAYOUT } from '../lib/registry';
 
+/*
+ * ⚡ Bolt Optimization:
+ * Extracted inline arrow functions for modal triggering (`onOpenArticle`, `onOpenSample`, `onOpenLetter`)
+ * into memoized functions using `useCallback`. This prevents new function instances from being created
+ * on every render of the `Home` component, which in turn allows child components wrapped in `React.memo`
+ * (like `Background`, `Composition`, and `Guide`) to successfully skip unnecessary re-renders.
+ */
 const Home: React.FC = () => {
     const { getContent, lang } = useI18n();
     const location = useLocation();
@@ -12,6 +19,18 @@ const Home: React.FC = () => {
     const layout = Array.isArray(layoutData.order)
         ? layoutData.order
         : HOME_DEFAULT_LAYOUT;
+
+    const handleOpenArticle = useCallback(() => {
+        window.postMessage({ type: 'NKHB_OPEN_MODAL', modalType: 'article' }, '*');
+    }, []);
+
+    const handleOpenSample = useCallback(() => {
+        window.postMessage({ type: 'NKHB_OPEN_MODAL', modalType: 'sample' }, '*');
+    }, []);
+
+    const handleOpenLetter = useCallback(() => {
+        window.postMessage({ type: 'NKHB_OPEN_MODAL', modalType: 'letter' }, '*');
+    }, []);
 
     useEffect(() => {
         // Handle smooth scrolling for hash links whenever location changes
@@ -41,9 +60,9 @@ const Home: React.FC = () => {
                     if (!Component) return null;
 
                     const props: any = {};
-                    if (key === 'background') props.onOpenArticle = () => window.postMessage({ type: 'NKHB_OPEN_MODAL', modalType: 'article' }, '*');
-                    if (key === 'composition') props.onOpenSample = () => window.postMessage({ type: 'NKHB_OPEN_MODAL', modalType: 'sample' }, '*');
-                    if (key === 'guide') props.onOpenLetter = () => window.postMessage({ type: 'NKHB_OPEN_MODAL', modalType: 'letter' }, '*');
+                    if (key === 'background') props.onOpenArticle = handleOpenArticle;
+                    if (key === 'composition') props.onOpenSample = handleOpenSample;
+                    if (key === 'guide') props.onOpenLetter = handleOpenLetter;
 
                     return <Component key={key} {...props} />;
                 })}
