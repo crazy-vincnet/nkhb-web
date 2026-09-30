@@ -7,7 +7,14 @@ interface BackgroundProps {
     onOpenArticle: () => void;
 }
 
-const Background: React.FC<BackgroundProps> = ({ onOpenArticle }) => {
+/*
+ * ⚡ Bolt Optimization:
+ * Wrapped `Background` in `React.memo` to prevent unnecessary re-renders.
+ * Because the parent `Home` component now passes a memoized `onOpenArticle` prop
+ * and this component has no local state that changes rapidly, it can safely skip
+ * rendering when its parent re-renders (e.g. during i18n state updates or layout changes).
+ */
+const Background = React.memo(({ onOpenArticle }: BackgroundProps) => {
     const { t } = useI18n();
     // Per-language YouTube video ID (key `background_youtube_id`, editable per locale).
     const youtubeVideoId = t('background_youtube_id');
@@ -109,6 +116,8 @@ const Background: React.FC<BackgroundProps> = ({ onOpenArticle }) => {
             )}
         </Editable>
     );
-};
+});
+
+Background.displayName = 'Background';
 
 export default Background;
