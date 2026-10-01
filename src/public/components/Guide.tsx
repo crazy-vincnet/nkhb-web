@@ -5,7 +5,13 @@ interface GuideProps {
     onOpenLetter: () => void;
 }
 
-const Guide: React.FC<GuideProps> = ({ onOpenLetter }) => {
+/*
+ * ⚡ Bolt Optimization:
+ * Wrapped `Guide` with `React.memo` to prevent unnecessary re-renders.
+ * Now that `onOpenLetter` is memoized in the parent (`Home.tsx`), this component
+ * correctly bails out of re-rendering when the parent updates.
+ */
+const Guide = React.memo(({ onOpenLetter }: GuideProps) => {
     return (
         <Editable k="section_guide" headless>
             {({ styles: sectionStyles, items }) => (
@@ -94,6 +100,6 @@ const Guide: React.FC<GuideProps> = ({ onOpenLetter }) => {
             )}
         </Editable>
     );
-};
+});
 
 export default Guide;
