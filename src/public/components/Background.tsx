@@ -7,7 +7,13 @@ interface BackgroundProps {
     onOpenArticle: () => void;
 }
 
-const Background: React.FC<BackgroundProps> = ({ onOpenArticle }) => {
+/*
+ * ⚡ Bolt Optimization:
+ * Wrapped `Background` with `React.memo` to prevent unnecessary re-renders.
+ * Now that `onOpenArticle` is memoized in the parent (`Home.tsx`), this component
+ * will correctly bail out of re-rendering when parent state (like location hash) changes.
+ */
+const Background = React.memo(({ onOpenArticle }: BackgroundProps) => {
     const { t } = useI18n();
     // Per-language YouTube video ID (key `background_youtube_id`, editable per locale).
     const youtubeVideoId = t('background_youtube_id');
@@ -109,6 +115,6 @@ const Background: React.FC<BackgroundProps> = ({ onOpenArticle }) => {
             )}
         </Editable>
     );
-};
+});
 
 export default Background;

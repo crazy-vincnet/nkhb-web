@@ -5,7 +5,13 @@ interface CompositionProps {
     onOpenSample: () => void;
 }
 
-const Composition: React.FC<CompositionProps> = ({ onOpenSample }) => {
+/*
+ * ⚡ Bolt Optimization:
+ * Wrapped `Composition` with `React.memo` to prevent unnecessary re-renders.
+ * Since `onOpenSample` is memoized in the parent (`Home.tsx`), this component
+ * will bail out of re-rendering when the parent updates (e.g., location hash changes).
+ */
+const Composition = React.memo(({ onOpenSample }: CompositionProps) => {
     return (
         <Editable k="section_composition" headless>
             {({ styles: sectionStyles }) => (
@@ -50,6 +56,6 @@ const Composition: React.FC<CompositionProps> = ({ onOpenSample }) => {
             )}
         </Editable>
     );
-};
+});
 
 export default Composition;
