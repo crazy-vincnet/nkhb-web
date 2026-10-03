@@ -52,4 +52,4 @@ const Composition: React.FC<CompositionProps> = ({ onOpenSample }) => {
     );
 };
 
-export default Composition;
+export default React.memo(Composition);
