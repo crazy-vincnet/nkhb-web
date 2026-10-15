@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { supabase } from '../lib/supabase';
 import { ShieldCheck, X, Calendar, User, Music, PlayCircle, Headset } from 'lucide-react';
 import DOMPurify from 'dompurify';
@@ -67,9 +67,15 @@ const Board: React.FC<BoardProps> = ({ pageId, lang, titleKo, titleEn, subtitleK
     setLoading(false);
   };
 
-  const filteredPosts = activeCategory === '전체' || activeCategory === 'All'
-    ? posts 
-    : posts.filter(p => p.category === activeCategory);
+  // ⚡ Bolt Optimization: Wrap filteredPosts calculation in useMemo to prevent O(N) recalculations on every render cycle.
+  // This is especially important because opening a post modal triggers a state update (`selectedPost`),
+  // which previously caused the entire posts array to be unnecessarily re-filtered.
+  // Expected Impact: Eliminates redundant array filtering operations, improving render performance when interacting with modal states.
+  const filteredPosts = useMemo(() => {
+    return activeCategory === '전체' || activeCategory === 'All'
+      ? posts
+      : posts.filter(p => p.category === activeCategory);
+  }, [activeCategory, posts]);
 
   const getAudioSource = (url: string | null) => {
     if (!url) return null;
