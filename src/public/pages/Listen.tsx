@@ -122,7 +122,6 @@ const Listen: React.FC = () => {
                 </div>
 
                 <section className={`radio ${isPlaying ? 'is-playing' : ''}`} aria-label={t('라디오 플레이어', 'Radio player')}>
-                    <div className="radio-handle" aria-hidden="true" />
                     <div className="radio-body">
                         <div className="radio-speaker" aria-hidden="true">
                             <div className="radio-grille" />
@@ -159,6 +158,7 @@ const Listen: React.FC = () => {
                                 onChange={e => seek(Number(e.target.value))}
                                 aria-label={t('재생 위치', 'Seek')}
                                 disabled={!duration}
+                                style={{ '--p': `${duration ? (time / duration) * 100 : 0}%` } as React.CSSProperties}
                             />
 
                             <div className="radio-controls">
@@ -181,12 +181,12 @@ const Listen: React.FC = () => {
                                         value={volume}
                                         onChange={e => setVolume(Number(e.target.value))}
                                         aria-label={t('음량', 'Volume')}
+                                        style={{ '--p': `${volume * 100}%` } as React.CSSProperties}
                                     />
                                 </label>
                             </div>
                         </div>
                     </div>
-                    <div className="radio-feet" aria-hidden="true"><span /><span /></div>
 
                     <audio
                         ref={audioRef}
