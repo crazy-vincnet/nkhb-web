@@ -22,10 +22,6 @@ const Home: React.FC = () => {
         window.postMessage({ type: 'NKHB_OPEN_MODAL', modalType: 'article' }, '*');
     }, []);
 
-    const handleOpenSample = useCallback(() => {
-        window.postMessage({ type: 'NKHB_OPEN_MODAL', modalType: 'sample' }, '*');
-    }, []);
-
     const handleOpenLetter = useCallback(() => {
         window.postMessage({ type: 'NKHB_OPEN_MODAL', modalType: 'letter' }, '*');
     }, []);
@@ -64,7 +60,6 @@ const Home: React.FC = () => {
 
                     const props: any = {};
                     if (key === 'background') props.onOpenArticle = handleOpenArticle;
-                    if (key === 'composition') props.onOpenSample = handleOpenSample;
                     if (key === 'guide') props.onOpenLetter = handleOpenLetter;
 
                     return <Component key={key} {...props} />;

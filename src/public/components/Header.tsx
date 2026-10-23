@@ -52,7 +52,7 @@ const Header: React.FC = () => {
 
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
-    const displayMenu = menuItems.length > 0 ? menuItems : [
+    const baseMenu: MenuItem[] = menuItems.length > 0 ? menuItems : [
         { id: '1', label_ko: 'NKFI 소개', label_en: 'About Us', path: '/about', order: 1, parent_id: null },
         { id: '2', label_ko: '방송안내', label_en: 'Broadcast', path: '#', order: 2, parent_id: null, children: [
             { id: '2-1', label_ko: '방송배경', label_en: 'Background', path: '/#background', order: 1, parent_id: '2' },
@@ -62,6 +62,12 @@ const Header: React.FC = () => {
         { id: '3', label_ko: '참여 안내', label_en: 'Get Involved', path: '/#guide', order: 3, parent_id: null },
         { id: '4', label_ko: '후원하기', label_en: 'Donate', path: '/#support', order: 4, parent_id: null },
         { id: '5', label_ko: '방송시간', label_en: 'Schedule', path: '/#schedule', order: 5, parent_id: null },
+    ];
+    // The listen page is a core feature: always show it unless the CMS menu already links it.
+    const hasListen = baseMenu.some(i => i.path === '/listen' || i.children?.some(c => c.path === '/listen'));
+    const displayMenu = hasListen ? baseMenu : [
+        ...baseMenu,
+        { id: 'listen', label_ko: '방송듣기', label_en: 'Listen', path: '/listen', order: 99, parent_id: null },
     ];
 
     return (

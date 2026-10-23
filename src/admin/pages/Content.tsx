@@ -649,8 +649,7 @@ const Content = () => {
                     <div className="space-y-3">
                         {[
                             { key: 'modal_article', label: '상세 기사 (Article)', id: 'article' },
-                            { key: 'modal_letter', label: '희망의 편지 (Letter)', id: 'letter' },
-                            { key: 'modal_sample', label: '샘플 듣기 (Sample)', id: 'sample' }
+                            { key: 'modal_letter', label: '희망의 편지 (Letter)', id: 'letter' }
                         ].map(modal => (
                             <button 
                                 key={modal.id}

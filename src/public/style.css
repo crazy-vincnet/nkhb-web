@@ -2267,11 +2267,20 @@ footer {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Sample-listen modal track list (moved off inline styles so the mobile
-   override below can take effect). Desktop keeps the original look. */
-.modal-body-sample {
-    padding: 40px;
+/* Broadcast listen page (/listen). Top padding clears the fixed header. */
+.listen-page {
+    padding: 140px 0 100px;
+    min-height: 70vh;
+}
+
+.listen-container {
+    max-width: 720px;
     text-align: center;
+}
+
+.listen-page h1 {
+    font-size: 32px;
+    margin-bottom: 32px;
 }
 
 .track-list {
@@ -2284,8 +2293,13 @@ footer {
 
 /* Mobile: a slim full-width playlist instead of ragged, two-line pills. */
 @media (max-width: 768px) {
-    .modal-body-sample {
-        padding: 24px 18px;
+    .listen-page {
+        padding: 110px 0 60px;
+    }
+
+    .listen-page h1 {
+        font-size: 24px;
+        margin-bottom: 24px;
     }
 
     .track-list {

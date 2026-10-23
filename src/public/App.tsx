@@ -6,13 +6,14 @@ import Footer from './components/Footer';
 import Home from './pages/Home';
 import About from './pages/About';
 import DynamicPage from './pages/DynamicPage';
+import Listen from './pages/Listen';
 import ScrollToTop from './components/ScrollToTop';
 import Modals from './components/Modals';
 import { useI18n } from './lib/i18n';
 
 /*
  * ⚡ Bolt Optimization:
- * Extracted `ArticleModal`, `LetterModal`, and `SampleModal` states
+ * Extracted `ArticleModal` and `LetterModal` states
  * into a separate `<Modals />` component. This prevents full-page re-renders
  * of `App` (and all its children) whenever a modal is opened or closed.
  */
@@ -37,11 +38,13 @@ const App: React.FC = () => {
                         {/* Standard Routes (Korean) */}
                         <Route path="/" element={<Home />} />
                         <Route path="/about" element={<About />} />
+                        <Route path="/listen" element={<Listen />} />
                         <Route path="/p/:slug" element={<DynamicPage />} />
 
                         {/* English Routes (Prefix matching) */}
                         <Route path="/en" element={<Home />} />
                         <Route path="/en/about" element={<About />} />
+                        <Route path="/en/listen" element={<Listen />} />
                         <Route path="/en/p/:slug" element={<DynamicPage />} />
                         
                         {/* Fallback English Catch-all */}

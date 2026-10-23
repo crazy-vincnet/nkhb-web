@@ -1,11 +1,9 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Editable } from './Editable';
 
-interface CompositionProps {
-    onOpenSample: () => void;
-}
-
-const Composition: React.FC<CompositionProps> = ({ onOpenSample }) => {
+const Composition: React.FC = () => {
+    const navigate = useNavigate();
     return (
         <Editable k="section_composition" headless>
             {({ styles: sectionStyles }) => (
@@ -40,7 +38,7 @@ const Composition: React.FC<CompositionProps> = ({ onOpenSample }) => {
                         <div className="composition-action">
                             <Editable k="composition_button_sample" headless>
                                 {({ text, styles }) => (
-                                    <button className="btn-sample-wide" style={styles} onClick={onOpenSample} dangerouslySetInnerHTML={{ __html: text }}>
+                                    <button className="btn-sample-wide" style={styles} onClick={() => navigate('/listen')} dangerouslySetInnerHTML={{ __html: text }}>
                                     </button>
                                 )}
                             </Editable>

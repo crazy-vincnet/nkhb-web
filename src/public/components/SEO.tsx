@@ -5,6 +5,8 @@ import { useI18n } from '../lib/i18n';
 
 interface SEOProps {
   slug: string;
+  // Used when neither seo_settings nor pages has a row for this slug.
+  fallback?: SEOData;
 }
 
 interface SEOData {
@@ -19,7 +21,7 @@ interface SEOData {
 
 const DEFAULT_OG_IMAGE = 'https://nkhb.org/images/nkhb-social-logo-20260825.png';
 
-const SEO: React.FC<SEOProps> = ({ slug }) => {
+const SEO: React.FC<SEOProps> = ({ slug, fallback }) => {
   const { lang } = useI18n();
   const [data, setData] = useState<SEOData | null>(null);
   const [siteSettings, setSiteSettings] = useState<any>({});
@@ -59,6 +61,8 @@ const SEO: React.FC<SEOProps> = ({ slug }) => {
             description_ko: pageData.content_ko?.substring(0, 160).replace(/<[^>]*>/g, '') || '',
             description_en: pageData.content_en?.substring(0, 160).replace(/<[^>]*>/g, '') || '',
           });
+        } else if (fallback) {
+          setData(fallback);
         }
       }
     };

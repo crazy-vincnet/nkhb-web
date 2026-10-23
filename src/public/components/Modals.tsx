@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import ArticleModal from './ArticleModal';
 import LetterModal from './LetterModal';
-import SampleModal from './SampleModal';
 
 /*
  * ⚡ Bolt Optimization:
- * Extracted modal states (`isArticleModalOpen`, `isLetterModalOpen`, `isSampleModalOpen`)
+ * Extracted modal states (`isArticleModalOpen`, `isLetterModalOpen`)
  * and the `window.postMessage` event listener from `App.tsx` into this isolated `Modals` component.
  *
  * Reasoning: Previously, whenever a modal was opened or closed, the state change occurred in the
@@ -19,7 +18,6 @@ import SampleModal from './SampleModal';
 const Modals = React.memo(() => {
     const [isArticleModalOpen, setIsArticleModalOpen] = useState(false);
     const [isLetterModalOpen, setIsLetterModalOpen] = useState(false);
-    const [isSampleModalOpen, setIsSampleModalOpen] = useState(false);
 
     useEffect(() => {
         const handleMessage = (event: MessageEvent) => {
@@ -27,7 +25,6 @@ const Modals = React.memo(() => {
                 const { modalType } = event.data;
                 if (modalType === 'article') setIsArticleModalOpen(true);
                 if (modalType === 'letter') setIsLetterModalOpen(true);
-                if (modalType === 'sample') setIsSampleModalOpen(true);
             }
         };
         window.addEventListener('message', handleMessage);
@@ -43,10 +40,6 @@ const Modals = React.memo(() => {
             <LetterModal
                 isOpen={isLetterModalOpen}
                 onClose={() => setIsLetterModalOpen(false)}
-            />
-            <SampleModal
-                isOpen={isSampleModalOpen}
-                onClose={() => setIsSampleModalOpen(false)}
             />
         </>
     );
