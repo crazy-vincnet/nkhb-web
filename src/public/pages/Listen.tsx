@@ -33,6 +33,15 @@ const formatTime = (sec: number) => {
     return h > 0 ? `${h}:${mm}:${ss}` : `${mm}:${ss}`;
 };
 
+// CMS titles look like "자유시리즈 01_자유란 무엇입니까?" or "02_말할 자유":
+// show the part before "_" as a small label and the rest as the title.
+const splitTitle = (raw: string) => {
+    const i = raw.indexOf('_');
+    if (i <= 0) return { label: '', title: raw.trim() };
+    const label = raw.slice(0, i).trim();
+    return { label: /^\d+$/.test(label) ? `EP ${label}` : label, title: raw.slice(i + 1).trim() };
+};
+
 const Listen: React.FC = () => {
     const { lang } = useI18n();
     const [tracks, setTracks] = useState<AudioTrack[]>([]);
@@ -143,8 +152,10 @@ const Listen: React.FC = () => {
                             </div>
 
                             <div className="radio-display" aria-live="polite">
-                                <div className="radio-channel">CH {String(index + 1).padStart(2, '0')}</div>
-                                <div className="radio-title">{current ? titleOf(current) : t('채널을 불러오는 중…', 'Tuning in…')}</div>
+                                <div className="radio-channel">
+                                    CH {String(index + 1).padStart(2, '0')}{current && splitTitle(titleOf(current)).label && ` · ${splitTitle(titleOf(current)).label}`}
+                                </div>
+                                <div className="radio-title">{current ? splitTitle(titleOf(current)).title : t('채널을 불러오는 중…', 'Tuning in…')}</div>
                                 <div className="radio-time">{formatTime(time)} / {formatTime(duration)}</div>
                             </div>
 
@@ -203,19 +214,29 @@ const Listen: React.FC = () => {
                 <section className="radio-channels" aria-label={t('채널 목록', 'Channels')}>
                     <h2>{t('채널 목록', 'Channels')} <small>{tracks.length}</small></h2>
                     <ol>
-                        {tracks.map((track, i) => (
-                            <li key={track.id}>
-                                <button
-                                    className={i === index ? 'active' : ''}
-                                    onClick={() => selectTrack(i)}
-                                    aria-current={i === index ? 'true' : undefined}
-                                >
-                                    <span className="ch-num">{String(i + 1).padStart(2, '0')}</span>
-                                    <span className="ch-title">{titleOf(track)}</span>
-                                    {i === index && isPlaying && <span className="ch-eq" aria-hidden="true"><i /><i /><i /></span>}
-                                </button>
-                            </li>
-                        ))}
+                        {tracks.map((track, i) => {
+                            const { label, title } = splitTitle(titleOf(track));
+                            return (
+                                <li key={track.id}>
+                                    <button
+                                        className={i === index ? 'active' : ''}
+                                        onClick={() => selectTrack(i)}
+                                        aria-current={i === index ? 'true' : undefined}
+                                    >
+                                        <span className="ch-num">{String(i + 1).padStart(2, '0')}</span>
+                                        <span className="ch-text">
+                                            {label && <span className="ch-label">{label}</span>}
+                                            <span className="ch-title">{title}</span>
+                                        </span>
+                                        <span className="ch-state">
+                                            {i === index && isPlaying
+                                                ? <span className="ch-eq" aria-label={t('재생 중', 'Playing')}><i /><i /><i /></span>
+                                                : <Play size={14} aria-hidden="true" />}
+                                        </span>
+                                    </button>
+                                </li>
+                            );
+                        })}
                     </ol>
                 </section>
             </div>

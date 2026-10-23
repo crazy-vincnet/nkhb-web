@@ -2586,9 +2586,14 @@ footer {
     list-style: none;
     padding: 0;
     margin: 0;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    background: var(--bg-white);
+    overflow: hidden;
+}
+
+.radio-channels li + li {
+    border-top: 1px solid var(--border-color);
 }
 
 .radio-channels li button {
@@ -2596,32 +2601,42 @@ footer {
     width: 100%;
     display: flex;
     align-items: center;
-    gap: 14px;
-    padding: 16px 18px;
-    border-radius: var(--border-radius-md);
-    border: 1px solid var(--border-color);
-    background: var(--bg-white);
+    gap: 18px;
+    padding: 16px 22px;
+    border: none;
+    background: transparent;
     color: var(--text-main);
-    font-size: 15px;
     text-align: left;
     cursor: pointer;
-    transition: var(--transition);
+    transition: background-color 0.2s ease;
 }
 
 .radio-channels li button:hover {
-    border-color: var(--accent-color);
-    box-shadow: 0 8px 20px -10px rgba(0, 74, 153, 0.35);
+    background: var(--bg-light);
 }
 
 .radio-channels li button.active {
-    border-color: var(--accent-color);
     background: var(--accent-light);
-    color: var(--accent-dark);
-    font-weight: 700;
+}
+
+.radio-channels li button.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--accent-color);
+}
+
+.radio-channels li button:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: -2px;
 }
 
 .ch-num {
-    font-size: 12px;
+    width: 26px;
+    font-size: 14px;
     font-weight: 700;
     font-variant-numeric: tabular-nums;
     color: var(--text-muted);
@@ -2632,12 +2647,54 @@ footer {
     color: var(--accent-color);
 }
 
-.ch-title {
+.ch-text {
     flex: 1;
     min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.ch-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent-color);
+    letter-spacing: 0.02em;
+}
+
+.ch-title {
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.45;
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+}
+
+.radio-channels li button.active .ch-title {
+    color: var(--accent-dark);
+    font-weight: 700;
+}
+
+.ch-state {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    background: var(--bg-light);
+    transition: var(--transition);
+}
+
+.radio-channels li button:hover .ch-state {
+    color: #fff;
+    background: var(--accent-color);
+}
+
+.radio-channels li button.active .ch-state {
+    background: var(--bg-white);
 }
 
 .ch-eq {
@@ -2714,8 +2771,13 @@ footer {
         margin-left: 0;
     }
 
-    .radio-channels ol {
-        grid-template-columns: 1fr;
+    .radio-channels li button {
+        gap: 14px;
+        padding: 14px 16px;
+    }
+
+    .ch-title {
+        font-size: 15px;
     }
 }
 
