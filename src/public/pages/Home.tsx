@@ -19,11 +19,11 @@ const Home: React.FC = () => {
      * and navigation performance on the Home page.
      */
     const handleOpenArticle = useCallback(() => {
-        window.postMessage({ type: 'NKHB_OPEN_MODAL', modalType: 'article' }, '*');
+        window.postMessage({ type: 'NKHB_OPEN_MODAL', modalType: 'article' }, window.location.origin);
     }, []);
 
     const handleOpenLetter = useCallback(() => {
-        window.postMessage({ type: 'NKHB_OPEN_MODAL', modalType: 'letter' }, '*');
+        window.postMessage({ type: 'NKHB_OPEN_MODAL', modalType: 'letter' }, window.location.origin);
     }, []);
 
     const layoutData = getContent('page_layout_home');

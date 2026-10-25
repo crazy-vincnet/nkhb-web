@@ -21,6 +21,8 @@ const Modals = React.memo(() => {
 
     useEffect(() => {
         const handleMessage = (event: MessageEvent) => {
+          // Only trust messages from our own origin (admin preview / same page).
+          if (event.origin !== window.location.origin) return;
             if (event.data?.type === 'NKHB_OPEN_MODAL') {
                 const { modalType } = event.data;
                 if (modalType === 'article') setIsArticleModalOpen(true);

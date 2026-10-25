@@ -5,12 +5,18 @@
  * server-only and we avoid DeepL's browser CORS restriction.
  */
 
+import { supabase } from './supabase';
+
 export async function translateText(text: string, targetLang: 'KO' | 'EN'): Promise<string> {
     if (!text || text.trim() === '') return '';
 
+    const { data: { session } } = await supabase.auth.getSession();
     const response = await fetch('/api/translate', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${session?.access_token ?? ''}`,
+        },
         body: JSON.stringify({ text, targetLang }),
     });
 

@@ -101,9 +101,9 @@ const Content = () => {
           iframeRef.current?.contentWindow?.postMessage({
             type: 'NKHB_LIVE_UPDATE', key: item.key,
             data: { text: editorLang === 'ko' ? item.value_ko : item.value_en, styles: item.style_props, link: item.style_props?.link }
-          }, '*');
+          }, window.location.origin);
         });
-        iframeRef.current?.contentWindow?.postMessage({ type: 'NKHB_LIVE_THEME_UPDATE', theme: historyState.themeSettings }, '*');
+        iframeRef.current?.contentWindow?.postMessage({ type: 'NKHB_LIVE_THEME_UPDATE', theme: historyState.themeSettings }, window.location.origin);
     }
   }, [historyState, editorLang]);
 
@@ -114,6 +114,7 @@ const Content = () => {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [handleUndo, handleRedo]);
 
   const fetchContent = async () => {
@@ -140,7 +141,7 @@ const Content = () => {
         return [...prev, { id: `new-theme-${Date.now()}`, key: 'global_theme_settings', value_ko: '', value_en: '', style_props: newSettings as any }];
     });
     setModifiedIds(prev => new Set(prev).add('global_theme_settings'));
-    if (iframeRef.current?.contentWindow) iframeRef.current.contentWindow.postMessage({ type: 'NKHB_LIVE_THEME_UPDATE', theme: newSettings }, '*');
+    if (iframeRef.current?.contentWindow) iframeRef.current.contentWindow.postMessage({ type: 'NKHB_LIVE_THEME_UPDATE', theme: newSettings }, window.location.origin);
   };
 
   // Per-language YouTube video ID for the Background section. Stored on the
@@ -159,7 +160,7 @@ const Content = () => {
       iframeRef.current.contentWindow.postMessage({
         type: 'NKHB_LIVE_UPDATE', key: YOUTUBE_KEY,
         data: { text: editorLang === 'ko' ? nextItem.value_ko : nextItem.value_en, styles: {}, link: '' }
-      }, '*');
+      }, window.location.origin);
     }
   };
 
@@ -179,7 +180,7 @@ const Content = () => {
             styles: nextItem.style_props,
             link: isImageKey ? (editorLang === 'en' ? nextItem.value_en : nextItem.value_ko) : (nextItem.style_props?.link || nextItem.value_ko || nextItem.value_en)
         }
-      }, '*');
+      }, window.location.origin);
     }
   };
 
@@ -235,6 +236,8 @@ const Content = () => {
   useEffect(() => {
     fetchContent();
     const handleMessage = (event: MessageEvent) => {
+      // Only trust messages from our own origin (admin preview / same page).
+      if (event.origin !== window.location.origin) return;
       if (event.data?.type === 'NKHB_ELEMENT_SELECTED') {
         const { key, computedStyles: cs, link, innerText } = event.data;
         // Use the live language (effect-synced ref) and derive the image flag from the
@@ -268,6 +271,7 @@ const Content = () => {
     };
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const currentLayoutKey = currentPage === '/' ? 'page_layout_home' : 'page_layout_about';
@@ -321,7 +325,7 @@ const Content = () => {
 
   const handleOpenModal = (modalType: string) => {
     if (iframeRef.current?.contentWindow) {
-      iframeRef.current.contentWindow.postMessage({ type: 'NKHB_OPEN_MODAL', modalType }, '*');
+      iframeRef.current.contentWindow.postMessage({ type: 'NKHB_OPEN_MODAL', modalType }, window.location.origin);
     }
   };
 
@@ -467,7 +471,7 @@ const Content = () => {
                         <div className="space-y-6 pt-4 border-t border-gray-100">
                             <div className="flex items-center justify-between">
                                 <label className="text-[11px] font-black text-orange-600 flex items-center gap-2 bg-orange-50 px-3 py-1.5 rounded-full w-fit"><Smartphone className="w-3.5 h-3.5" /> MOBILE STYLE</label>
-                                <button onClick={() => { const { mobile, ...rest } = selectedItem.style_props; updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, mobile: { ...rest } } }); handlePushHistory(); }} className="text-[9px] font-black text-orange-500 hover:bg-orange-100 px-2 py-1 rounded transition-colors uppercase">Copy from Desktop</button>
+                                <button onClick={() => { const { mobile: _mobile, ...rest } = selectedItem.style_props; updateItem(selectedKey!, { style_props: { ...selectedItem.style_props, mobile: { ...rest } } }); handlePushHistory(); }} className="text-[9px] font-black text-orange-500 hover:bg-orange-100 px-2 py-1 rounded transition-colors uppercase">Copy from Desktop</button>
                             </div>
                             <div className={`p-6 rounded-3xl border-2 transition-all ${previewMode === 'mobile' ? 'bg-orange-50/50 border-orange-200' : 'bg-gray-50 border-transparent opacity-60'}`}>
                                 <div className="grid grid-cols-2 gap-6">

@@ -67,6 +67,7 @@ const SEO: React.FC<SEOProps> = ({ slug, fallback }) => {
       }
     };
     fetchSEO();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug]);
 
   if (!data) return null;

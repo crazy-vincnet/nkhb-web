@@ -1,4 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { createClient } from '@supabase/supabase-js';
 
 /**
  * Server-side DeepL proxy.
@@ -13,6 +14,21 @@ export default async function handler(
 ) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  // Admin-only: otherwise anyone could burn the DeepL quota through this proxy.
+  const token = (req.headers.authorization || '').replace(/^Bearer /i, '');
+  const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+  const anonKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+  if (!token || !supabaseUrl || !anonKey) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  const { data: isAdmin, error: authError } = await createClient(supabaseUrl, anonKey, {
+    global: { headers: { Authorization: `Bearer ${token}` } },
+    auth: { persistSession: false },
+  }).rpc('is_admin');
+  if (authError || isAdmin !== true) {
+    return res.status(403).json({ error: 'Forbidden' });
   }
 
   const { text, targetLang } = req.body || {};
@@ -66,6 +82,6 @@ export default async function handler(
     return res.status(200).json({ text: translated });
   } catch (error: any) {
     console.error('Translation error:', error);
-    return res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: '번역 중 오류가 발생했습니다.' });
   }
 }

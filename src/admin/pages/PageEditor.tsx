@@ -77,12 +77,14 @@ const PageEditor = () => {
 
   useEffect(() => {
     fetchPageAndSEO();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   useEffect(() => {
     if (showSettings && settingsTab === 'board' && page) {
       fetchPosts();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showSettings, settingsTab, page]);
 
   const fetchPageAndSEO = async () => {

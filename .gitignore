@@ -6,3 +6,6 @@ dist/
 build/
 .gstack/
 .env.local
+.env
+.env.*
+!.env.example

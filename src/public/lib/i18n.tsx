@@ -314,6 +314,8 @@ export const I18nProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     window.addEventListener('resize', handleResize);
     
     const handleMessage = (event: MessageEvent) => {
+      // Only trust messages from our own origin (admin preview / same page).
+      if (event.origin !== window.location.origin) return;
       if (event.data?.type === 'NKHB_LIVE_UPDATE') {
         const { key, data } = event.data;
         setLiveChanges(prev => ({ ...prev, [key]: { ...prev[key], ...data } }));
@@ -384,6 +386,13 @@ export const I18nProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         else if (activeStyles.link) finalLink = activeStyles.link;
         else if (staticValue && (staticValue.startsWith('http') || staticValue.startsWith('/') || staticValue.startsWith('#'))) finalLink = staticValue;
     }
+    // React 18 doesn't block script URLs in href; drop them before they reach a link.
+    // Parse like the browser does so whitespace/control-char tricks can't hide the scheme.
+    if (finalLink) {
+        try {
+            if (['javascript:', 'data:', 'vbscript:'].includes(new URL(finalLink, window.location.href).protocol)) finalLink = undefined;
+        } catch { finalLink = undefined; }
+    }
 
     // Expose non-CSS layout metadata separately so it isn't filtered out above.
     // `order` drives page section ordering; `items` drives repeatable item counts.
@@ -411,6 +420,7 @@ export const I18nProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useI18n = () => {
   const context = useContext(I18nContext);
   if (!context) throw new Error('useI18n must be used within an I18nProvider');

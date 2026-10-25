@@ -164,6 +164,7 @@ const GrapesEditor = ({ initialData, onReady }: GrapesEditorProps) => {
         grapesInstance.current = null;
       }
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

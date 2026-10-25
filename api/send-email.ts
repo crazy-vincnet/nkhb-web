@@ -1,12 +1,32 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import nodemailer from 'nodemailer';
 
+// ponytail: per-instance memory, so the limit is per warm function instance, not global.
+// Add a Vercel Firewall rate-limit rule on /api/send-email for a hard global cap.
+const RATE_WINDOW_MS = 10 * 60 * 1000;
+const RATE_MAX = 5;
+const hits = new Map<string, number[]>();
+
+const isRateLimited = (ip: string) => {
+  const now = Date.now();
+  const recent = (hits.get(ip) || []).filter((t) => now - t < RATE_WINDOW_MS);
+  recent.push(now);
+  hits.set(ip, recent);
+  if (hits.size > 10000) hits.clear();
+  return recent.length > RATE_MAX;
+};
+
 export default async function handler(
   req: VercelRequest,
   res: VercelResponse
 ) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  const ip = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim() || 'unknown';
+  if (isRateLimited(ip)) {
+    return res.status(429).json({ error: 'Too many requests' });
   }
 
   const { name, email, location, reason, message } = req.body || {};
@@ -20,6 +40,15 @@ export default async function handler(
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (typeof email !== 'string' || !emailRegex.test(email)) {
     return res.status(400).json({ error: 'Invalid email address' });
+  }
+
+  // Mirror the DB limits so oversized payloads are rejected before hitting SMTP.
+  const tooLong = (v: unknown, max: number) => v != null && String(v).length > max;
+  if (
+    tooLong(name, 100) || tooLong(email, 320) || tooLong(location, 200) ||
+    tooLong(reason, 1000) || tooLong(message, 10000)
+  ) {
+    return res.status(400).json({ error: 'Field too long' });
   }
 
   // Escape user-provided values before interpolating into the HTML body to prevent injection.
@@ -42,8 +71,6 @@ export default async function handler(
   const pass = process.env.SMTP_PASS;
   const adminEmail = process.env.SMTP_TO || user;
 
-  console.log(`Email request received from: ${email} to: ${adminEmail}`);
-
   if (!user || !pass) {
     console.error('SMTP credentials missing');
     return res.status(500).json({ error: 'Server configuration error' });
@@ -56,9 +83,11 @@ export default async function handler(
 
   const mailOptions = {
     from: `"NKHB Website" <${user}>`,
-    to: [adminEmail, email].join(', '), // Send to both admin and sender
+    // Admin only: sending a copy to the submitted address would let anyone use
+    // this endpoint to mail arbitrary content to arbitrary people.
+    to: adminEmail,
     replyTo: email,
-    subject: `[NKHB] ${name}님이 보낸 새로운 메시지`,
+    subject: `[NKHB] ${String(name).replace(/[\r\n]+/g, ' ')}님이 보낸 새로운 메시지`,
     text: `
 이름: ${name}
 이메일: ${email}
@@ -148,6 +177,6 @@ ${message}
     return res.status(200).json({ success: true });
   } catch (error: any) {
     console.error('Nodemailer Error:', error);
-    return res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: 'Failed to send email' });
   }
 }

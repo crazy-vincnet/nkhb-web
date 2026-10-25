@@ -127,7 +127,7 @@ export const Editable: React.FC<EditableProps> = ({ k, children, className = '',
             computedStyles,
             link: currentLink,
             innerText: targetEl.innerText || ''
-        }, '*');
+        }, window.location.origin);
       }
     }
   };

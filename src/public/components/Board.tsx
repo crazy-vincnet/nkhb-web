@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { ShieldCheck, X, Calendar, User, Music, PlayCircle, Headset } from 'lucide-react';
-import DOMPurify from 'dompurify';
+import { sanitizeCmsHtml } from '../lib/sanitize';
 
 interface Post {
   id: string;
@@ -37,6 +37,7 @@ const Board: React.FC<BoardProps> = ({ pageId, lang, titleKo, titleEn, subtitleK
 
   useEffect(() => {
     fetchPosts();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageId, mode]);
 
   const fetchPosts = async () => {
@@ -302,10 +303,7 @@ const Board: React.FC<BoardProps> = ({ pageId, lang, titleKo, titleEn, subtitleK
                   <div 
                     className="prose prose-xl dark:prose-invert max-w-none"
                     dangerouslySetInnerHTML={{ 
-                      __html: DOMPurify.sanitize(getPostContent(selectedPost), {
-                        ADD_TAGS: ['iframe', 'style'],
-                        ADD_ATTR: ['allow', 'allowfullscreen', 'frameborder', 'scrolling']
-                      }) 
+                      __html: sanitizeCmsHtml(getPostContent(selectedPost)) 
                     }}
                   />
                   

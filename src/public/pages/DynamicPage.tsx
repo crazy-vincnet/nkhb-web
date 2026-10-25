@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useI18n } from '../lib/i18n';
-import DOMPurify from 'dompurify';
+import { sanitizeCmsHtml } from '../lib/sanitize';
 import SEO from '../components/SEO';
 import Board from '../components/Board';
 
@@ -81,11 +81,7 @@ const DynamicPage = () => {
       <div 
         className={`grapesjs-content-wrapper ${!isVisualDesign ? 'container mx-auto px-4 max-w-4xl pb-20' : ''}`}
         dangerouslySetInnerHTML={{ 
-          __html: DOMPurify.sanitize(content || '', {
-            ADD_TAGS: ['style', 'iframe'], 
-            ADD_ATTR: ['allow', 'allowfullscreen', 'frameborder', 'scrolling'],
-            FORCE_BODY: true
-          }) 
+          __html: sanitizeCmsHtml(content || '') 
         }}
       />
 
