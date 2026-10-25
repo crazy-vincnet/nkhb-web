@@ -14,8 +14,7 @@ import {
   AlertCircle,
   Clock,
   Globe,
-  ChevronUp,
-  ChevronDown
+  Radio
 } from 'lucide-react';
 
 interface AudioTrack {
@@ -24,9 +23,15 @@ interface AudioTrack {
   title_en: string;
   url: string;
   is_active: boolean;
-  order: number;
+  publish_at: string;
   created_at: string;
 }
+
+// ISO timestamp -> value for <input type="datetime-local"> in the admin's local time.
+const toLocalInput = (iso: string) => {
+  const d = new Date(iso);
+  return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+};
 
 const Audio = () => {
   const [tracks, setTracks] = useState<AudioTrack[]>([]);
@@ -39,13 +44,21 @@ const Audio = () => {
   const [titleKo, setTitleKo] = useState('');
   const [titleEn, setTitleEn] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  
+  const [publishNow, setPublishNow] = useState(true);
+  const [publishAt, setPublishAt] = useState('');
+
+  // Current shortwave frequency shown on the public radio (kHz).
+  const [freqKhz, setFreqKhz] = useState('');
+  const [freqSaved, setFreqSaved] = useState(false);
+
   // Audio Player State
   const [playingId, setPlayingId] = useState<string | null>(null);
   const audioInstance = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     fetchTracks();
+    supabase.from('sites_settings').select('value_ko').eq('key', 'radio_freq_khz').maybeSingle()
+      .then(({ data }) => setFreqKhz(data?.value_ko || ''));
     return () => {
       if (audioInstance.current) {
         audioInstance.current.pause();
@@ -59,7 +72,7 @@ const Audio = () => {
     const { data, error } = await supabase
       .from('audio_tracks')
       .select('*')
-      .order('order', { ascending: true });
+      .order('publish_at', { ascending: false });
 
     if (error) {
       console.error('Error fetching tracks:', error);
@@ -69,41 +82,22 @@ const Audio = () => {
     setLoading(false);
   };
 
-  const moveTrack = async (index: number, direction: 'up' | 'down') => {
-    const newIndex = direction === 'up' ? index - 1 : index + 1;
-    if (newIndex < 0 || newIndex >= tracks.length) return;
-
-    // 1. Create a copy of current state and swap
-    const updatedTracks = [...tracks];
-    [updatedTracks[index], updatedTracks[newIndex]] = [updatedTracks[newIndex], updatedTracks[index]];
-    
-    // 2. Assign new sequential order values to ALL tracks to ensure uniqueness
-    const tracksWithNewOrders = updatedTracks.map((track, i) => ({
-      ...track,
-      order: i + 1
-    }));
-
-    // 3. Update local state immediately (Optimistic UI)
-    setTracks(tracksWithNewOrders);
-
-    // 4. Persist to DB using UPSERT with full objects to avoid NOT NULL constraint issues
-    try {
-        const { error } = await supabase.from('audio_tracks').upsert(
-          tracksWithNewOrders.map(t => ({
-            id: t.id,
-            title_ko: t.title_ko,
-            title_en: t.title_en,
-            url: t.url,
-            is_active: t.is_active,
-            order: t.order
-          }))
-        );
-
-        if (error) throw error;
-    } catch (err) {
-        console.error('Failed to update order in DB:', err);
-        fetchTracks(); // Revert to server state on failure
+  const saveFreq = async () => {
+    const khz = Number(freqKhz);
+    if (!Number.isFinite(khz) || khz < 1000 || khz > 30000) {
+      alert('주파수를 kHz 단위로 입력해 주세요. (예: 9445)');
+      return;
     }
+    const { error } = await supabase.from('sites_settings').upsert(
+      [{ key: 'radio_freq_khz', value_ko: String(khz), value_en: String(khz), updated_at: new Date().toISOString() }],
+      { onConflict: 'key' }
+    );
+    if (error) {
+      alert(error.message);
+      return;
+    }
+    setFreqSaved(true);
+    setTimeout(() => setFreqSaved(false), 2000);
   };
 
   const openAddModal = () => {
@@ -111,6 +105,8 @@ const Audio = () => {
     setTitleKo('');
     setTitleEn('');
     setSelectedFile(null);
+    setPublishNow(true);
+    setPublishAt(toLocalInput(new Date().toISOString()));
     setShowModal(true);
   };
 
@@ -119,6 +115,9 @@ const Audio = () => {
     setTitleKo(track.title_ko);
     setTitleEn(track.title_en);
     setSelectedFile(null);
+    // Editing keeps the existing publish time unless the admin changes it.
+    setPublishNow(false);
+    setPublishAt(toLocalInput(track.publish_at));
     setShowModal(true);
   };
 
@@ -149,26 +148,29 @@ const Audio = () => {
 
       if (!finalUrl && !selectedFile) throw new Error('오디오 파일을 선택해주세요.');
 
+      // datetime-local is read in the admin's local time zone (KST in practice).
+      const publish_at = publishNow ? new Date().toISOString() : new Date(publishAt).toISOString();
+
       if (editingId) {
         const { error: dbError } = await supabase
           .from('audio_tracks')
-          .update({ 
-            title_ko: titleKo, 
-            title_en: titleEn, 
-            url: finalUrl 
+          .update({
+            title_ko: titleKo,
+            title_en: titleEn,
+            url: finalUrl,
+            publish_at
           })
           .eq('id', editingId);
         if (dbError) throw dbError;
       } else {
-        const maxOrder = tracks.length > 0 ? Math.max(...tracks.map(t => t.order || 0)) : 0;
         const { error: dbError } = await supabase
           .from('audio_tracks')
-          .insert([{ 
-            title_ko: titleKo, 
-            title_en: titleEn, 
-            url: finalUrl, 
+          .insert([{
+            title_ko: titleKo,
+            title_en: titleEn,
+            url: finalUrl,
             is_active: true,
-            order: maxOrder + 1
+            publish_at
           }]);
         if (dbError) throw dbError;
       }
@@ -235,6 +237,10 @@ const Audio = () => {
     setPlayingId(null);
   };
 
+  // Tracks are sorted by publish_at desc, so the first published active one is on air.
+  const now = Date.now();
+  const onAirId = tracks.find(t => t.is_active && new Date(t.publish_at).getTime() <= now)?.id;
+
   if (loading) return (
     <div className="flex items-center justify-center h-96">
       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -249,7 +255,7 @@ const Audio = () => {
             <Music className="w-8 h-8 text-blue-600" />
             Audio Tracks
           </h2>
-          <p className="text-gray-500 font-medium mt-1">방송 음원의 노출 순서 및 정보를 관리합니다.</p>
+          <p className="text-gray-500 font-medium mt-1">공개 시각이 지난 가장 최근 방송 1건이 메인과 방송듣기 페이지에 「오늘의 방송」으로 노출됩니다.</p>
         </div>
         <button 
           onClick={openAddModal}
@@ -260,35 +266,47 @@ const Audio = () => {
         </button>
       </div>
 
+      <div className="bg-white dark:bg-gray-900 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col md:flex-row md:items-center gap-4">
+        <div className="flex items-center gap-3 flex-1">
+          <Radio className="w-6 h-6 text-blue-600 shrink-0" />
+          <div>
+            <h3 className="font-black text-gray-900 dark:text-white">현재 송출 주파수</h3>
+            <p className="text-sm text-gray-500 font-medium">라디오 이미지의 빨간 바늘과 우상단 MHz 숫자가 이 값으로 표시됩니다.</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <input
+            type="number"
+            min={1000}
+            max={30000}
+            value={freqKhz}
+            onChange={(e) => setFreqKhz(e.target.value)}
+            className="w-32 px-4 py-3 bg-gray-50 dark:bg-gray-800 border-none rounded-xl focus:ring-2 focus:ring-blue-500 font-bold text-right"
+            placeholder="9445"
+            aria-label="주파수 (kHz)"
+          />
+          <span className="font-bold text-gray-500">kHz</span>
+          <button
+            onClick={saveFreq}
+            className="ml-2 bg-gray-900 text-white px-5 py-3 rounded-xl font-black hover:bg-black transition-all flex items-center gap-2"
+          >
+            {freqSaved ? <CheckCircle2 className="w-4 h-4" /> : <Save className="w-4 h-4" />}
+            {freqSaved ? '저장됨' : '저장'}
+          </button>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 gap-4">
-        {tracks.map((track, index) => (
-          <div 
-            key={track.id} 
+        {tracks.map((track) => {
+          const scheduled = new Date(track.publish_at).getTime() > now;
+          return (
+          <div
+            key={track.id}
             className={`bg-white dark:bg-gray-900 p-6 rounded-[2rem] border transition-all flex flex-col md:flex-row items-center gap-6 ${
               track.is_active ? 'border-gray-100 dark:border-gray-800 shadow-sm' : 'border-gray-100 opacity-60 grayscale bg-gray-50'
-            }`}
+            } ${track.id === onAirId ? 'ring-2 ring-red-400' : ''}`}
           >
-            {/* Reorder Buttons */}
-            <div className="flex md:flex-col gap-2 shrink-0">
-                <button 
-                  onClick={() => moveTrack(index, 'up')}
-                  disabled={index === 0}
-                  className="w-10 h-10 flex items-center justify-center bg-gray-50 dark:bg-gray-800 hover:bg-blue-600 hover:text-white rounded-xl text-gray-400 disabled:opacity-20 transition-all shadow-sm active:scale-90"
-                  title="위로 이동"
-                >
-                    <ChevronUp size={20} />
-                </button>
-                <button 
-                  onClick={() => moveTrack(index, 'down')}
-                  disabled={index === tracks.length - 1}
-                  className="w-10 h-10 flex items-center justify-center bg-gray-50 dark:bg-gray-800 hover:bg-blue-600 hover:text-white rounded-xl text-gray-400 disabled:opacity-20 transition-all shadow-sm active:scale-90"
-                  title="아래로 이동"
-                >
-                    <ChevronDown size={20} />
-                </button>
-            </div>
-
-            <button 
+            <button
               onClick={() => togglePlay(track)}
               className={`w-16 h-16 rounded-2xl flex items-center justify-center transition-all ${
                 playingId === track.id 
@@ -301,11 +319,17 @@ const Audio = () => {
 
             <div className="flex-1 min-w-0 w-full text-center md:text-left">
               <div className="flex items-center justify-center md:justify-start gap-3 mb-1">
+                {track.id === onAirId && (
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-red-100 text-red-700">On Air · 오늘의 방송</span>
+                )}
+                {scheduled && (
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-100 text-amber-700">예약됨</span>
+                )}
                 <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${track.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-500'}`}>
                   {track.is_active ? 'Active' : 'Inactive'}
                 </span>
-                <span className="flex items-center gap-1 text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-                  <Clock className="w-3 h-3" /> {new Date(track.created_at).toLocaleDateString()}
+                <span className="flex items-center gap-1 text-[10px] text-gray-400 font-bold uppercase tracking-widest" title="공개 시각">
+                  <Clock className="w-3 h-3" /> {new Date(track.publish_at).toLocaleString('ko-KR', { dateStyle: 'medium', timeStyle: 'short' })}
                 </span>
               </div>
               <h3 className="text-xl font-black text-gray-900 dark:text-white truncate">{track.title_ko}</h3>
@@ -336,7 +360,8 @@ const Audio = () => {
               </button>
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
 
       {showModal && (
@@ -418,6 +443,34 @@ const Audio = () => {
                       <AlertCircle className="w-3 h-3" /> 이미 업로드된 파일이 있습니다.
                     </div>
                   )}
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest px-1 flex items-center gap-2">
+                    <Clock className="w-3 h-3" /> 공개 시각
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[true, false].map(immediate => (
+                      <button
+                        key={String(immediate)}
+                        type="button"
+                        onClick={() => setPublishNow(immediate)}
+                        className={`py-3 rounded-2xl font-black text-sm transition-all ${publishNow === immediate ? 'bg-blue-600 text-white' : 'bg-gray-50 dark:bg-gray-800 text-gray-500'}`}
+                      >
+                        {immediate ? '즉시 공개' : '공개 시각 지정 (예약)'}
+                      </button>
+                    ))}
+                  </div>
+                  {!publishNow && (
+                    <input
+                      type="datetime-local"
+                      required
+                      value={publishAt}
+                      onChange={(e) => setPublishAt(e.target.value)}
+                      className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all font-bold"
+                    />
+                  )}
+                  <p className="text-[11px] text-gray-400 font-medium px-1">지정한 시각이 되면 메인의 「오늘의 방송」이 자동으로 이 파일로 바뀝니다.</p>
                 </div>
               </div>
 

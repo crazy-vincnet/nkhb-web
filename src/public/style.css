@@ -2248,12 +2248,15 @@ footer {
 /* =========================================================
    LISTEN PAGE (/listen) - RADIO PLAYER
    ========================================================= */
-.listen-page {
+.radio {
     --radio-body: #062b56;
     --radio-body-dark: #031a35;
     --radio-line: rgba(255, 255, 255, 0.1);
     --radio-dim: rgba(255, 255, 255, 0.6);
     --radio-signal: #e63946;
+}
+
+.listen-page {
     padding: 140px 0 100px;
     background:
         radial-gradient(1000px 420px at 50% 0%, var(--accent-light) 0%, transparent 70%),
@@ -2409,10 +2412,10 @@ footer {
     overflow: hidden;
 }
 
-.radio-scale {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px 16px 0;
+.radio-scale span {
+    position: absolute;
+    top: 10px;
+    transform: translateX(-50%);
     font-size: 11px;
     font-weight: 600;
     font-variant-numeric: tabular-nums;
@@ -2425,9 +2428,10 @@ footer {
     right: 16px;
     bottom: 10px;
     height: 20px;
+    /* Major tick per 1 MHz, minor per 0.2 MHz; the "- 1px" keeps the last tick inside. */
     background:
-        repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.25) 0 1px, transparent 1px 6px) bottom / 100% 8px no-repeat,
-        repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.5) 0 1px, transparent 1px 30px) bottom / 100% 18px no-repeat;
+        linear-gradient(90deg, rgba(255, 255, 255, 0.5) 1px, transparent 1px) left bottom / calc((100% - 1px) / 6) 18px repeat-x,
+        linear-gradient(90deg, rgba(255, 255, 255, 0.25) 1px, transparent 1px) left bottom / calc((100% - 1px) / 30) 8px repeat-x;
 }
 
 .radio-needle {
@@ -2510,29 +2514,14 @@ footer {
     gap: 14px;
 }
 
-.radio-key,
 .radio-knob {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
     border-radius: 50%;
     cursor: pointer;
     transition: var(--transition);
-}
-
-.radio-key {
-    width: 48px;
-    height: 48px;
-    border: 1px solid var(--radio-line);
-    background: rgba(255, 255, 255, 0.06);
-    color: #fff;
-}
-
-.radio-key:hover {
-    background: rgba(255, 255, 255, 0.14);
-}
-
-.radio-knob {
     width: 68px;
     height: 68px;
     border: none;
@@ -2545,7 +2534,6 @@ footer {
     transform: scale(1.05);
 }
 
-.radio-key:focus-visible,
 .radio-knob:focus-visible,
 .radio-seek:focus-visible,
 .radio-volume input:focus-visible {
@@ -2563,166 +2551,15 @@ footer {
     color: var(--radio-dim);
 }
 
-.radio-channels {
-    margin-top: 64px;
-}
-
-.radio-channels h2 {
-    display: flex;
-    align-items: baseline;
-    gap: 10px;
-    font-size: 22px;
-    font-weight: 800;
-    margin-bottom: 16px;
-}
-
-.radio-channels h2 small {
-    font-size: 14px;
-    color: var(--text-muted);
-    font-weight: 600;
-}
-
-.radio-channels ol {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius-md);
-    background: var(--bg-white);
-    overflow: hidden;
-}
-
-.radio-channels li + li {
-    border-top: 1px solid var(--border-color);
-}
-
-.radio-channels li button {
-    position: relative;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    gap: 18px;
-    padding: 16px 22px;
-    border: none;
-    background: transparent;
-    color: var(--text-main);
-    text-align: left;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-}
-
-.radio-channels li button:hover {
-    background: var(--bg-light);
-}
-
-.radio-channels li button.active {
-    background: var(--accent-light);
-}
-
-.radio-channels li button.active::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 4px;
-    background: var(--accent-color);
-}
-
-.radio-channels li button:focus-visible {
-    outline: 2px solid var(--accent-color);
-    outline-offset: -2px;
-}
-
-.ch-num {
-    width: 26px;
-    font-size: 14px;
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-    color: var(--text-muted);
-    flex-shrink: 0;
-}
-
-.radio-channels li button.active .ch-num {
-    color: var(--accent-color);
-}
-
-.ch-text {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-}
-
-.ch-label {
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--accent-color);
-    letter-spacing: 0.02em;
-}
-
-.ch-title {
-    font-size: 16px;
-    font-weight: 600;
-    line-height: 1.45;
-    word-break: keep-all;
-    overflow-wrap: anywhere;
-}
-
-.radio-channels li button.active .ch-title {
-    color: var(--accent-dark);
-    font-weight: 700;
-}
-
-.ch-state {
-    flex-shrink: 0;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-muted);
-    background: var(--bg-light);
-    transition: var(--transition);
-}
-
-.radio-channels li button:hover .ch-state {
-    color: #fff;
-    background: var(--accent-color);
-}
-
-.radio-channels li button.active .ch-state {
-    background: var(--bg-white);
-}
-
-.ch-eq {
-    display: inline-flex;
-    align-items: flex-end;
-    gap: 2px;
-    height: 14px;
-}
-
-.ch-eq i {
-    width: 3px;
-    border-radius: 2px;
-    background: var(--accent-color);
-    animation: ch-eq 0.9s ease-in-out infinite;
-}
-
-.ch-eq i:nth-child(2) { animation-delay: 0.2s; }
-.ch-eq i:nth-child(3) { animation-delay: 0.4s; }
-
-@keyframes ch-eq {
-    0%, 100% { height: 4px; }
-    50% { height: 14px; }
+.radio-knob:disabled {
+    opacity: 0.5;
+    cursor: default;
+    transform: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
     .radio.is-playing .radio-grille::after,
-    .radio.is-playing .radio-onair i,
-    .ch-eq i {
+    .radio.is-playing .radio-onair i {
         animation: none;
     }
 }
@@ -2767,17 +2604,7 @@ footer {
     }
 
     .radio-volume {
-        flex-basis: 100%;
-        margin-left: 0;
-    }
-
-    .radio-channels li button {
-        gap: 14px;
-        padding: 14px 16px;
-    }
-
-    .ch-title {
-        font-size: 15px;
+        margin-left: 4px;
     }
 }
 

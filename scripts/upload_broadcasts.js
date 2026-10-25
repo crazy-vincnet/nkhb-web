@@ -22,7 +22,7 @@ const { data: existing, error: listError } = await supabase.from('audio_tracks')
 if (listError) throw listError;
 const known = new Set(existing.map(t => t.url));
 
-for (const [i, file] of files.entries()) {
+for (const file of files) {
   const path = `broadcasts/${file}`;
   const { data: { publicUrl } } = supabase.storage.from('audio').getPublicUrl(path);
   if (known.has(publicUrl)) {
@@ -39,12 +39,12 @@ for (const [i, file] of files.entries()) {
   }
 
   const [, y, m, d] = file.match(/(\d{4})(\d{2})(\d{2})/);
-  // Negative order puts these ahead of the existing 1..N tracks, newest first.
+  // Each broadcast becomes "today's broadcast" at 00:00 KST on its date (future dates are scheduled).
   const { error } = await supabase.from('audio_tracks').insert({
     title_ko: `희망방송 ${y}년 ${Number(m)}월 ${Number(d)}일`,
     title_en: `NKHB Broadcast – ${y}.${m}.${d}`,
     url: publicUrl,
-    order: i - files.length,
+    publish_at: `${y}-${m}-${d}T00:00:00+09:00`,
     is_active: true,
   });
   console.log(error ? `insert failed ${file}: ${error.message}` : `ok ${file}`);

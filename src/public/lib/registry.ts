@@ -8,6 +8,7 @@ import Guide from '../components/Guide';
 import Support from '../components/Support';
 import SupportEn from '../components/SupportEn';
 import Schedule from '../components/Schedule';
+import TodayBroadcast from '../components/TodayBroadcast';
 import { 
     AboutHero, 
     AboutIntro, 
@@ -19,6 +20,7 @@ import {
 
 export const HOME_SECTION_MAP: Record<string, any> = {
     hero: Hero,
+    today_radio: TodayBroadcast,
     background: Background,
     composition: Composition,
     effects: Effects,
@@ -31,7 +33,7 @@ export const HOME_SECTION_MAP: Record<string, any> = {
 };
 
 export const HOME_DEFAULT_LAYOUT = [
-    "hero", "background", "composition", "effects", "quote", "reach", "guide", "support", "schedule"
+    "hero", "today_radio", "background", "composition", "effects", "quote", "reach", "guide", "support", "schedule"
 ];
 
 export const ABOUT_SECTION_MAP: Record<string, any> = {
