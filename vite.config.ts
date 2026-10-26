@@ -9,6 +9,13 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['@ffmpeg/ffmpeg', '@ffmpeg/util'],
   },
+  // Workers take their CSP from their own response, and Vercel's 304 omits headers, so a
+  // browser that cached a worker under an older CSP keeps it. Bump the suffix when the CSP changes.
+  worker: {
+    rollupOptions: {
+      output: { entryFileNames: 'assets/[name]-[hash]-csp2.js' },
+    },
+  },
   build: {
     rollupOptions: {
       input: {
