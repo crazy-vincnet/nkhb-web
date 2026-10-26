@@ -39,6 +39,9 @@ export const fitAudioForUpload = async (file: File, onProgress?: (ratio: number)
     const out = new File([data.slice().buffer], file.name.replace(/\.[^.]+$/, '') + '.mp3', { type: 'audio/mpeg' });
     if (out.size > MAX_UPLOAD_BYTES) throw new Error('압축 후에도 50MB를 넘습니다. 파일을 나눠서 업로드해 주세요.');
     return out;
+  } catch (e) {
+    // ffmpeg.wasm rejects with plain strings from its worker; wrap so callers can read .message.
+    throw e instanceof Error ? e : new Error(`오디오 압축 실패: ${String(e)}`);
   } finally {
     ffmpeg.terminate();
   }
