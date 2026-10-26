@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { supabase } from '../lib/supabase';
+import { fitAudioForUpload, MAX_UPLOAD_BYTES } from '../lib/audioCompressor';
 import { 
   Trash2, 
   Plus, 
@@ -37,6 +38,7 @@ const Audio = () => {
   const [tracks, setTracks] = useState<AudioTrack[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [compressProgress, setCompressProgress] = useState<number | null>(null);
   const [showModal, setShowModal] = useState(false);
   
   // Form State
@@ -129,13 +131,15 @@ const Audio = () => {
       let finalUrl = tracks.find(t => t.id === editingId)?.url || '';
 
       if (selectedFile) {
-        const fileExt = selectedFile.name.split('.').pop();
+        const file = await fitAudioForUpload(selectedFile, setCompressProgress);
+        setCompressProgress(null);
+        const fileExt = file.name.split('.').pop();
         const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
         const filePath = `broadcasts/${fileName}`;
 
         const { error: uploadError } = await supabase.storage
           .from('audio')
-          .upload(filePath, selectedFile);
+          .upload(filePath, file, { contentType: file.type });
 
         if (uploadError) throw uploadError;
 
@@ -181,6 +185,7 @@ const Audio = () => {
       alert(error.message);
     } finally {
       setUploading(false);
+      setCompressProgress(null);
     }
   };
 
@@ -429,6 +434,10 @@ const Audio = () => {
                       <div className="flex flex-col items-center gap-2">
                         <CheckCircle2 className="w-10 h-10 text-emerald-500" />
                         <span className="text-sm font-black text-gray-900 dark:text-white truncate max-w-xs">{selectedFile.name}</span>
+                        <span className="text-[10px] font-bold text-gray-400">
+                          {(selectedFile.size / (1024 * 1024)).toFixed(1)} MB
+                          {selectedFile.size > MAX_UPLOAD_BYTES && ' · 50MB 초과 — 업로드 시 자동으로 용량을 줄입니다'}
+                        </span>
                       </div>
                     ) : (
                       <div className="flex flex-col items-center gap-2 text-gray-400">
@@ -483,7 +492,7 @@ const Audio = () => {
                   {uploading ? (
                     <>
                       <div className="w-5 h-5 border-4 border-white/30 border-t-white rounded-full animate-spin" />
-                      처리 중...
+                      {compressProgress !== null ? `용량 줄이는 중... ${Math.round(compressProgress * 100)}%` : '처리 중...'}
                     </>
                   ) : (
                     <>

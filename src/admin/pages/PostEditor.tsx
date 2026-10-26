@@ -15,6 +15,7 @@ import {
   X
 } from 'lucide-react';
 import TiptapEditor from '../components/TiptapEditor';
+import { fitAudioForUpload, MAX_UPLOAD_BYTES } from '../lib/audioCompressor';
 
 interface Page {
   id: string;
@@ -43,6 +44,7 @@ const PostEditor = () => {
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [compressProgress, setCompressProgress] = useState<number | null>(null);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [activeTab, setActiveTab] = useState<'ko' | 'en'>('ko');
 
@@ -101,13 +103,15 @@ const PostEditor = () => {
       // Upload audio file if selected
       if (selectedFile) {
         setUploading(true);
-        const fileExt = selectedFile.name.split('.').pop();
+        const file = await fitAudioForUpload(selectedFile, setCompressProgress);
+        setCompressProgress(null);
+        const fileExt = file.name.split('.').pop();
         const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
         const filePath = `posts/${fileName}`;
 
         const { error: uploadError } = await supabase.storage
           .from('audio')
-          .upload(filePath, selectedFile);
+          .upload(filePath, file, { contentType: file.type });
 
         if (uploadError) throw uploadError;
 
@@ -160,6 +164,7 @@ const PostEditor = () => {
     } finally {
       setSaving(false);
       setUploading(false);
+      setCompressProgress(null);
     }
   };
 
@@ -257,7 +262,9 @@ const PostEditor = () => {
                       {selectedFile ? selectedFile.name : (audioUrl ? '기존 파일 유지됨' : '파일 선택 (MP3, WAV 등)')}
                     </p>
                     <p className="text-[10px] text-gray-400 font-medium">
-                      {selectedFile ? `${(selectedFile.size / (1024 * 1024)).toFixed(2)} MB` : (audioUrl ? audioUrl.split('/').pop() : '최대 50MB 권장')}
+                      {selectedFile
+                        ? `${(selectedFile.size / (1024 * 1024)).toFixed(2)} MB${selectedFile.size > MAX_UPLOAD_BYTES ? ' · 50MB 초과 — 저장 시 자동으로 용량을 줄입니다' : ''}`
+                        : (audioUrl ? audioUrl.split('/').pop() : '50MB 초과 시 자동 압축')}
                     </p>
                   </div>
                 </label>
@@ -277,7 +284,7 @@ const PostEditor = () => {
               {uploading && (
                 <div className="px-1 space-y-1.5">
                   <div className="flex items-center justify-between text-[10px] font-black text-indigo-600 uppercase tracking-widest">
-                    <span>Uploading...</span>
+                    <span>{compressProgress !== null ? `용량 줄이는 중... ${Math.round(compressProgress * 100)}%` : 'Uploading...'}</span>
                   </div>
                   <div className="h-1.5 w-full bg-indigo-100 dark:bg-indigo-900/30 rounded-full overflow-hidden">
                     <div className="h-full bg-indigo-600 animate-pulse w-full"></div>
