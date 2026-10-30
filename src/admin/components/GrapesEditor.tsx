@@ -5,6 +5,7 @@ import webpagePreset from 'grapesjs-preset-webpage';
 import { initNKHBBlocks } from '../lib/grapes-blocks';
 import { grapesKo } from '../lib/grapes-ko';
 import { supabase } from '../lib/supabase';
+import { uploadFile, listFiles } from '../lib/storage';
 
 interface GrapesEditorProps {
   initialData: any;
@@ -78,7 +79,7 @@ const GrapesEditor = ({ initialData, onReady }: GrapesEditorProps) => {
           if (modalContent && !modalContent.querySelector('.nkhb-upload-btn')) {
             const uploadBtn = document.createElement('button');
             uploadBtn.className = 'nkhb-upload-btn gjs-btn-prim';
-            uploadBtn.innerHTML = '새 이미지 업로드 (Supabase)';
+            uploadBtn.innerHTML = '새 이미지 업로드';
             uploadBtn.style.margin = '10px';
             uploadBtn.style.width = 'calc(100% - 20px)';
             const fileInput = document.createElement('input');
@@ -88,14 +89,10 @@ const GrapesEditor = ({ initialData, onReady }: GrapesEditorProps) => {
               const file = e.target.files?.[0]; if (!file) return;
               try {
                 uploadBtn.innerHTML = '업로드 중...'; uploadBtn.disabled = true;
-                const fileExt = file.name.split('.').pop();
-                const fileName = `cms/${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
-                const { error: uploadError } = await supabase.storage.from('assets').upload(fileName, file);
-                if (uploadError) throw uploadError;
-                const { data: { publicUrl } } = supabase.storage.from('assets').getPublicUrl(fileName);
+                const publicUrl = await uploadFile('assets/cms/', file, file.name.split('.').pop() || '');
                 editor.AssetManager.add(publicUrl);
                 uploadBtn.innerHTML = '업로드 완료!';
-                setTimeout(() => { uploadBtn.innerHTML = '새 이미지 업로드 (Supabase)'; uploadBtn.disabled = false; }, 2000);
+                setTimeout(() => { uploadBtn.innerHTML = '새 이미지 업로드'; uploadBtn.disabled = false; }, 2000);
               } catch (err: any) {
                 alert('업로드 실패: ' + err.message);
                 uploadBtn.innerHTML = '다시 시도'; uploadBtn.disabled = false;
@@ -121,6 +118,8 @@ const GrapesEditor = ({ initialData, onReady }: GrapesEditorProps) => {
                 });
               editor.AssetManager.add(assets);
             }
+            const r2Assets = await listFiles('assets/cms/');
+            if (isMounted && grapesInstance.current) editor.AssetManager.add(r2Assets);
           } catch (err) {
             console.error('Failed to load assets:', err);
           }

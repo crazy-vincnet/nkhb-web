@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { fitAudioForUpload, MAX_UPLOAD_BYTES } from '../lib/audioCompressor';
+import { uploadFile, deleteFile } from '../lib/storage';
 import { 
   Trash2, 
   Plus, 
@@ -133,21 +134,7 @@ const Audio = () => {
       if (selectedFile) {
         const file = await fitAudioForUpload(selectedFile, setCompressProgress);
         setCompressProgress(null);
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
-        const filePath = `broadcasts/${fileName}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from('audio')
-          .upload(filePath, file, { contentType: file.type });
-
-        if (uploadError) throw uploadError;
-
-        const { data: { publicUrl } } = supabase.storage
-          .from('audio')
-          .getPublicUrl(filePath);
-        
-        finalUrl = publicUrl;
+        finalUrl = await uploadFile('audio/broadcasts/', file, file.name.split('.').pop() || '');
       }
 
       if (!finalUrl && !selectedFile) throw new Error('오디오 파일을 선택해주세요.');
@@ -206,9 +193,13 @@ const Audio = () => {
     if (!confirm('정말 이 트랙을 삭제하시겠습니까? 관련 파일도 모두 삭제됩니다.')) return;
 
     try {
-      const urlParts = url.split('/');
-      const fileName = urlParts[urlParts.length - 1];
-      await supabase.storage.from('audio').remove([`broadcasts/${fileName}`]);
+      // Tracks uploaded before the R2 move still live in Supabase Storage.
+      if (url.includes('/storage/v1/object/public/audio/')) {
+        const fileName = url.split('/').pop();
+        await supabase.storage.from('audio').remove([`broadcasts/${fileName}`]);
+      } else if (url) {
+        await deleteFile(url);
+      }
 
       const { error: dbError } = await supabase.from('audio_tracks').delete().eq('id', id);
       if (dbError) throw dbError;

@@ -32,6 +32,7 @@
     "@tiptap/pm": "^3.32.0",
     "@tiptap/react": "^3.32.0",
     "@tiptap/starter-kit": "^3.32.0",
+    "aws4fetch": "^1.0.20",
     "dompurify": "^3.4.2",
     "grapesjs": "^0.22.16",
     "grapesjs-preset-webpage": "^1.0.3",

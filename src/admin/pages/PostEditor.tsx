@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import TiptapEditor from '../components/TiptapEditor';
 import { fitAudioForUpload, MAX_UPLOAD_BYTES } from '../lib/audioCompressor';
+import { uploadFile } from '../lib/storage';
 
 interface Page {
   id: string;
@@ -105,21 +106,7 @@ const PostEditor = () => {
         setUploading(true);
         const file = await fitAudioForUpload(selectedFile, setCompressProgress);
         setCompressProgress(null);
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
-        const filePath = `posts/${fileName}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from('audio')
-          .upload(filePath, file, { contentType: file.type });
-
-        if (uploadError) throw uploadError;
-
-        const { data: { publicUrl } } = supabase.storage
-          .from('audio')
-          .getPublicUrl(filePath);
-        
-        finalAudioUrl = publicUrl;
+        finalAudioUrl = await uploadFile('audio/posts/', file, file.name.split('.').pop() || '');
         setAudioUrl(finalAudioUrl);
         setUploading(false);
       }

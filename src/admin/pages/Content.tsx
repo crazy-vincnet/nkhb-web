@@ -7,6 +7,7 @@ import {
 import { useHistory } from '../lib/useHistory';
 import { optimizeImage } from '../lib/imageOptimizer';
 import { translateText } from '../lib/translation';
+import { uploadFile } from '../lib/storage';
 import { 
     HOME_DEFAULT_LAYOUT, 
     ABOUT_DEFAULT_LAYOUT, 
@@ -206,11 +207,7 @@ const Content = () => {
         setUploading('UPLOADING...');
         const isOptimized = result.type === 'image/webp';
         const fileExt = isOptimized ? 'webp' : file.name.split('.').pop();
-        const fileName = `${selectedKey}-${field}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-        const filePath = `cms/${fileName}`;
-        const { error: uploadError } = await supabase.storage.from('assets').upload(filePath, result, { contentType: result.type, upsert: true });
-        if (uploadError) throw uploadError;
-        const { data: { publicUrl } } = supabase.storage.from('assets').getPublicUrl(filePath);
+        const publicUrl = await uploadFile('assets/cms/', result, fileExt || '');
         updateItem(selectedKey, { [field]: publicUrl });
         setTimeout(handlePushHistory, 0);
         alert(`${field === 'value_ko' ? '한국어' : '영어'} 이미지가 업로드되었습니다.`);
