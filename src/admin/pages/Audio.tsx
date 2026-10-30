@@ -193,13 +193,7 @@ const Audio = () => {
     if (!confirm('정말 이 트랙을 삭제하시겠습니까? 관련 파일도 모두 삭제됩니다.')) return;
 
     try {
-      // Tracks uploaded before the R2 move still live in Supabase Storage.
-      if (url.includes('/storage/v1/object/public/audio/')) {
-        const fileName = url.split('/').pop();
-        await supabase.storage.from('audio').remove([`broadcasts/${fileName}`]);
-      } else if (url) {
-        await deleteFile(url);
-      }
+      if (url) await deleteFile(url);
 
       const { error: dbError } = await supabase.from('audio_tracks').delete().eq('id', id);
       if (dbError) throw dbError;

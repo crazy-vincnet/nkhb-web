@@ -4,7 +4,6 @@ import 'grapesjs/dist/css/grapes.min.css';
 import webpagePreset from 'grapesjs-preset-webpage';
 import { initNKHBBlocks } from '../lib/grapes-blocks';
 import { grapesKo } from '../lib/grapes-ko';
-import { supabase } from '../lib/supabase';
 import { uploadFile, listFiles } from '../lib/storage';
 
 interface GrapesEditorProps {
@@ -104,22 +103,11 @@ const GrapesEditor = ({ initialData, onReady }: GrapesEditorProps) => {
 
         initNKHBBlocks(editor);
 
-        // Fetch and load existing assets from Supabase
+        // Fetch and load existing assets from R2
         const loadAssets = async () => {
           try {
-            const { data: files, error } = await supabase.storage.from('assets').list('cms');
-            if (error) throw error;
-            if (files && isMounted && grapesInstance.current) {
-              const assets = files
-                .filter(file => file.name !== '.emptyFolderPlaceholder')
-                .map(file => {
-                  const { data: { publicUrl } } = supabase.storage.from('assets').getPublicUrl(`cms/${file.name}`);
-                  return publicUrl;
-                });
-              editor.AssetManager.add(assets);
-            }
-            const r2Assets = await listFiles('assets/cms/');
-            if (isMounted && grapesInstance.current) editor.AssetManager.add(r2Assets);
+            const assets = await listFiles('assets/cms/');
+            if (isMounted && grapesInstance.current) editor.AssetManager.add(assets);
           } catch (err) {
             console.error('Failed to load assets:', err);
           }
