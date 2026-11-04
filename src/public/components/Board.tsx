@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { supabase } from '../lib/supabase';
 import { ShieldCheck, X, Calendar, User, Music, PlayCircle, Headset } from 'lucide-react';
 import { sanitizeCmsHtml } from '../lib/sanitize';
@@ -68,9 +68,13 @@ const Board: React.FC<BoardProps> = ({ pageId, lang, titleKo, titleEn, subtitleK
     setLoading(false);
   };
 
-  const filteredPosts = activeCategory === '전체' || activeCategory === 'All'
-    ? posts 
-    : posts.filter(p => p.category === activeCategory);
+  // ⚡ Bolt Optimization: Memoize the filtered posts array to prevent O(N) recalculation
+  // on every render cycle triggered by unrelated state updates (like opening a post modal or other local state changes).
+  const filteredPosts = useMemo(() => {
+    return activeCategory === '전체' || activeCategory === 'All'
+      ? posts
+      : posts.filter(p => p.category === activeCategory);
+  }, [activeCategory, posts]);
 
   const getAudioSource = (url: string | null) => {
     if (!url) return null;
