@@ -4,3 +4,7 @@
 ## 2024-11-20 - [Optimize Home Component Rendering]
 **Learning:** In React Router setups, components relying on `useLocation` will re-render whenever the URL changes, including hash navigation (e.g., clicking anchor links). If these components pass inline functions down to large child sections, those sections will unnecessarily re-render as well.
 **Action:** When top-level components depend on `useLocation` for scroll behaviors or routing but also render static structural sections, always extract event handlers using `useCallback` and wrap the child sections in `React.memo` to break the rendering chain.
+
+## 2024-11-21 - [Optimize Interactive List Filtering]
+**Learning:** In React components that render large lists and have interactive local state (like `Board.tsx` with modal toggles), unmemoized array operations like `.filter()` cause O(N) recalculations on every render cycle triggered by unrelated state updates.
+**Action:** Always wrap computationally expensive array operations in `useMemo` when the component also handles local interactive state, ensuring dependencies are strictly defined to prevent unnecessary recalculations.
