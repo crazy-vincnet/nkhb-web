@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { supabase } from '../lib/supabase';
 import { ShieldCheck, X, Calendar, User, Music, PlayCircle, Headset } from 'lucide-react';
 import { sanitizeCmsHtml } from '../lib/sanitize';
@@ -68,9 +68,15 @@ const Board: React.FC<BoardProps> = ({ pageId, lang, titleKo, titleEn, subtitleK
     setLoading(false);
   };
 
-  const filteredPosts = activeCategory === '전체' || activeCategory === 'All'
-    ? posts 
-    : posts.filter(p => p.category === activeCategory);
+  // ⚡ Bolt Optimization: Use useMemo to avoid O(N) array recalculations on every render.
+  // This computationally expensive operation previously ran on every component re-render
+  // (e.g., when modals toggle or selectedPost changes). Memoizing this array ensures
+  // we only filter when the active category or posts array actually changes.
+  const filteredPosts = useMemo(() => {
+    return activeCategory === '전체' || activeCategory === 'All'
+      ? posts
+      : posts.filter(p => p.category === activeCategory);
+  }, [posts, activeCategory]);
 
   const getAudioSource = (url: string | null) => {
     if (!url) return null;
