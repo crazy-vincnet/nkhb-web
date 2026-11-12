@@ -3386,3 +3386,198 @@ footer {
     background: var(--bg-white);
 }
 .broadcast-schedule img { display: block; width: 100%; height: auto; }
+
+/* =========================================================
+   RADIO - vintage tabletop skin (overrides the base radio rules above)
+   ========================================================= */
+.radio {
+    --radio-wood: #6b3a1e;
+    --radio-wood-dark: #3f200e;
+    --radio-brass: #c9a24b;
+    --radio-brass-dark: #8a6a22;
+    --radio-cream: #f1e4c3;
+    --radio-amber: #ffbf5e;
+    --radio-line: rgba(0, 0, 0, 0.35);
+    --radio-dim: rgba(241, 228, 195, 0.7);
+    --radio-signal: #d62828;
+    position: relative;
+    margin-top: 34px;
+}
+
+/* telescopic antenna */
+.radio::before {
+    content: '';
+    position: absolute;
+    top: -30px;
+    right: 14%;
+    width: 4px;
+    height: 70px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, #8d8d8d, #e6e6e6, #8d8d8d);
+    transform: rotate(14deg);
+    transform-origin: bottom center;
+}
+
+.radio-body {
+    position: relative;
+    gap: 30px;
+    padding: 30px;
+    border-radius: 28px 28px 22px 22px;
+    background:
+        repeating-linear-gradient(92deg, rgba(0, 0, 0, 0.07) 0 2px, transparent 2px 7px),
+        repeating-linear-gradient(88deg, rgba(255, 255, 255, 0.04) 0 1px, transparent 1px 11px),
+        linear-gradient(160deg, var(--radio-wood) 0%, var(--radio-wood-dark) 100%);
+    border: 3px solid #2a1408;
+    box-shadow:
+        inset 0 2px 0 rgba(255, 255, 255, 0.18),
+        inset 0 -6px 14px rgba(0, 0, 0, 0.45),
+        0 30px 50px -18px rgba(40, 20, 8, 0.6),
+        0 10px 0 -2px #2a1408;
+    color: var(--radio-cream);
+}
+
+/* speaker: cloth grille in a brass frame */
+.radio-grille {
+    max-width: none;
+    width: 100%;
+    aspect-ratio: 1 / 1.05;
+    border-radius: 14px;
+    border: 5px solid var(--radio-brass);
+    background:
+        repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.35) 0 2px, transparent 2px 9px),
+        repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.18) 0 2px, transparent 2px 6px),
+        radial-gradient(circle at 50% 40%, #b49a64, #7a6334 80%);
+    box-shadow: inset 0 6px 18px rgba(0, 0, 0, 0.55), 0 0 0 2px var(--radio-brass-dark);
+}
+
+.radio-grille::after {
+    border-radius: 14px;
+    border-color: rgba(255, 191, 94, 0.5);
+}
+
+.radio-brand {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-style: italic;
+    letter-spacing: 0.3em;
+    font-size: 15px;
+    color: var(--radio-brass);
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.6);
+}
+
+.radio-speaker { gap: 14px; justify-content: flex-start; }
+
+.radio-knobs { display: flex; gap: 22px; }
+
+.radio-dialknob {
+    display: block;
+    position: relative;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background:
+        repeating-conic-gradient(rgba(0, 0, 0, 0.35) 0 4deg, transparent 4deg 15deg),
+        radial-gradient(circle at 35% 30%, #4a4a4a, #111 70%);
+    border: 2px solid var(--radio-brass-dark);
+    box-shadow: 0 5px 8px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.radio-dialknob::after {
+    content: '';
+    position: absolute;
+    top: 4px;
+    left: 50%;
+    width: 3px;
+    height: 12px;
+    margin-left: -1.5px;
+    border-radius: 2px;
+    background: var(--radio-cream);
+}
+
+.radio-onair {
+    border-color: var(--radio-brass-dark);
+    background: rgba(0, 0, 0, 0.3);
+    color: var(--radio-dim);
+}
+
+.radio.is-playing .radio-onair {
+    color: var(--radio-cream);
+    background: rgba(214, 40, 40, 0.25);
+    border-color: var(--radio-signal);
+}
+
+/* tuning dial: backlit amber glass in a brass bezel */
+.radio-dial {
+    height: 76px;
+    border-radius: 12px;
+    border: 4px solid var(--radio-brass);
+    background: linear-gradient(180deg, #ffd88a 0%, #f0a93c 55%, #c47d1c 100%);
+    box-shadow: inset 0 4px 12px rgba(80, 40, 0, 0.6), 0 0 22px rgba(255, 170, 60, 0.35), 0 0 0 2px var(--radio-brass-dark);
+}
+
+.radio.is-playing .radio-dial { box-shadow: inset 0 4px 12px rgba(80, 40, 0, 0.5), 0 0 34px rgba(255, 170, 60, 0.65), 0 0 0 2px var(--radio-brass-dark); }
+
+.radio-scale span { color: #3a2208; font-weight: 700; font-family: Georgia, serif; }
+
+.radio-ticks {
+    background:
+        linear-gradient(90deg, rgba(58, 34, 8, 0.85) 1px, transparent 1px) left bottom / calc((100% - 1px) / 6) 18px repeat-x,
+        linear-gradient(90deg, rgba(58, 34, 8, 0.5) 1px, transparent 1px) left bottom / calc((100% - 1px) / 30) 8px repeat-x;
+}
+
+.radio-needle {
+    top: 4px;
+    bottom: 4px;
+    background: var(--radio-signal);
+    box-shadow: 0 0 6px rgba(214, 40, 40, 0.9);
+}
+
+.radio-freq { color: var(--radio-amber); text-shadow: 0 0 8px rgba(255, 191, 94, 0.6); }
+
+/* program readout: dark glass with amber text */
+.radio-display {
+    padding: 14px 18px;
+    border-radius: 10px;
+    background: #14100a;
+    border: 2px solid var(--radio-brass-dark);
+    box-shadow: inset 0 3px 10px rgba(0, 0, 0, 0.8);
+}
+
+.radio-channel, .radio-time { color: var(--radio-amber); opacity: 0.8; }
+.radio-title { color: var(--radio-amber); text-shadow: 0 0 10px rgba(255, 191, 94, 0.45); font-size: 22px; }
+
+.radio-seek,
+.radio-volume input {
+    background: linear-gradient(90deg, var(--radio-amber) var(--p, 0%), rgba(0, 0, 0, 0.45) var(--p, 0%));
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+.radio-seek::-webkit-slider-thumb,
+.radio-volume input::-webkit-slider-thumb { background: var(--radio-cream); border: 2px solid var(--radio-brass-dark); }
+.radio-seek::-moz-range-thumb,
+.radio-volume input::-moz-range-thumb { background: var(--radio-cream); border: 2px solid var(--radio-brass-dark); }
+
+/* big play button = ivory bakelite knob with brass ring */
+.radio-knob {
+    width: 72px;
+    height: 72px;
+    background: radial-gradient(circle at 35% 30%, #fff7e0, var(--radio-cream) 60%, #cdb98a);
+    color: #3a2208;
+    border: 4px solid var(--radio-brass);
+    box-shadow: 0 8px 14px rgba(0, 0, 0, 0.55), inset 0 -3px 6px rgba(0, 0, 0, 0.25);
+}
+.radio-knob:active { transform: scale(0.96); box-shadow: 0 3px 6px rgba(0, 0, 0, 0.55); }
+.radio-knob:focus-visible, .radio-seek:focus-visible, .radio-volume input:focus-visible { outline-color: var(--radio-amber); }
+
+@media (max-width: 768px) {
+    .radio::before { right: 10%; }
+    .radio-body { padding: 20px; gap: 18px; }
+    .radio-speaker { flex-direction: row; align-items: center; justify-content: space-between; }
+    .radio-grille { width: 64px; aspect-ratio: 1; flex-shrink: 0; border-width: 3px; }
+    .radio-dialknob { width: 38px; height: 38px; }
+    .radio-title { font-size: 18px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .radio-dialknob { transition: none; }
+}

@@ -104,6 +104,10 @@ export const RadioPlayer: React.FC<{ selected?: AudioTrack; showSchedule?: boole
                 <div className="radio-speaker" aria-hidden="true">
                     <div className="radio-grille" />
                     <div className="radio-brand">NKHB</div>
+                    <div className="radio-knobs" aria-hidden="true">
+                        <i className="radio-dialknob" style={{ transform: `rotate(${dialPosition(freqKhz) * 270 - 135}deg)` }} />
+                        <i className="radio-dialknob" style={{ transform: `rotate(${volume * 270 - 135}deg)` }} />
+                    </div>
                 </div>
 
                 <div className="radio-panel">
