@@ -3294,3 +3294,15 @@ footer {
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
 }
+
+.past-broadcasts { margin-top: 3rem; }
+.past-broadcasts h2 { font-size: 1.25rem; margin-bottom: 1rem; }
+.past-broadcasts ul { list-style: none; padding: 0; margin: 0; }
+.past-broadcasts button {
+    display: flex; justify-content: space-between; gap: 1rem; width: 100%;
+    padding: 0.9rem 1rem; background: none; border: 0; border-bottom: 1px solid rgba(128,128,128,.3);
+    color: inherit; font: inherit; text-align: left; cursor: pointer;
+}
+.past-broadcasts button:hover, .past-broadcasts button[aria-current="true"] { background: rgba(128,128,128,.12); }
+.past-broadcasts time { opacity: .6; white-space: nowrap; }
+.past-broadcasts .past-more { justify-content: center; margin-top: 1rem; border: 1px solid rgba(128,128,128,.4); border-radius: 8px; }

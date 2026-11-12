@@ -3,7 +3,8 @@ import { Play, Pause, Volume2 } from 'lucide-react';
 import { useI18n } from '../lib/i18n';
 import { supabase } from '../lib/supabase';
 
-interface AudioTrack {
+export interface AudioTrack {
+    publish_at?: string;
     id: string;
     title_ko: string;
     title_en: string;
@@ -44,9 +45,10 @@ const splitTitle = (raw: string) => {
 
 // Plays today's broadcast: the newest active track whose publish_at has passed.
 // Scheduled tracks take over automatically once their time comes.
-export const RadioPlayer: React.FC = () => {
+export const RadioPlayer: React.FC<{ selected?: AudioTrack }> = ({ selected }) => {
     const { lang } = useI18n();
-    const [track, setTrack] = useState<AudioTrack | null | undefined>(undefined);
+    const [todayTrack, setTrack] = useState<AudioTrack | null | undefined>(undefined);
+    const track = selected ?? todayTrack;
     const [freqKhz, setFreqKhz] = useState(DEFAULT_FREQ_KHZ);
     const [isPlaying, setIsPlaying] = useState(false);
     const [time, setTime] = useState(0);
@@ -119,7 +121,7 @@ export const RadioPlayer: React.FC = () => {
                     </div>
 
                     <div className="radio-display" aria-live="polite">
-                        <div className="radio-channel">TODAY{label && ` · ${label}`}</div>
+                        <div className="radio-channel">{selected ? 'ARCHIVE' : 'TODAY'}{label && ` · ${label}`}</div>
                         <div className="radio-title">{title}</div>
                         <div className="radio-time">{formatTime(time)} / {formatTime(duration)}</div>
                     </div>
@@ -161,6 +163,7 @@ export const RadioPlayer: React.FC = () => {
             <audio
                 ref={audioRef}
                 src={track?.url}
+                autoPlay={!!selected}
                 preload="metadata"
                 onPlay={() => setIsPlaying(true)}
                 onPause={() => setIsPlaying(false)}
