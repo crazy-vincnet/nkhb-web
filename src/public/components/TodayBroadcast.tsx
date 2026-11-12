@@ -36,7 +36,7 @@ const formatTime = (sec: number) => {
 
 // CMS titles look like "자유시리즈 01_자유란 무엇입니까?" or "02_말할 자유":
 // show the part before "_" as a small label and the rest as the title.
-const splitTitle = (raw: string) => {
+export const splitTitle = (raw: string) => {
     const i = raw.indexOf('_');
     if (i <= 0) return { label: '', title: raw.trim() };
     const label = raw.slice(0, i).trim();
