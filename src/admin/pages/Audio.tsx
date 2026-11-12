@@ -16,7 +16,8 @@ import {
   AlertCircle,
   Clock,
   Globe,
-  Radio
+  Radio,
+  Image as ImageIcon
 } from 'lucide-react';
 
 interface AudioTrack {
@@ -24,6 +25,7 @@ interface AudioTrack {
   title_ko: string;
   title_en: string;
   url: string;
+  schedule_url: string | null;
   is_active: boolean;
   publish_at: string;
   created_at: string;
@@ -47,6 +49,7 @@ const Audio = () => {
   const [titleKo, setTitleKo] = useState('');
   const [titleEn, setTitleEn] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [scheduleFile, setScheduleFile] = useState<File | null>(null);
   const [publishNow, setPublishNow] = useState(true);
   const [publishAt, setPublishAt] = useState('');
 
@@ -108,6 +111,7 @@ const Audio = () => {
     setTitleKo('');
     setTitleEn('');
     setSelectedFile(null);
+    setScheduleFile(null);
     setPublishNow(true);
     setPublishAt(toLocalInput(new Date().toISOString()));
     setShowModal(true);
@@ -118,6 +122,7 @@ const Audio = () => {
     setTitleKo(track.title_ko);
     setTitleEn(track.title_en);
     setSelectedFile(null);
+    setScheduleFile(null);
     // Editing keeps the existing publish time unless the admin changes it.
     setPublishNow(false);
     setPublishAt(toLocalInput(track.publish_at));
@@ -129,12 +134,18 @@ const Audio = () => {
     setUploading(true);
     
     try {
-      let finalUrl = tracks.find(t => t.id === editingId)?.url || '';
+      const existing = tracks.find(t => t.id === editingId);
+      let finalUrl = existing?.url || '';
+      let scheduleUrl = existing?.schedule_url ?? null;
 
       if (selectedFile) {
         const file = await fitAudioForUpload(selectedFile, setCompressProgress);
         setCompressProgress(null);
         finalUrl = await uploadFile('audio/broadcasts/', file, file.name.split('.').pop() || '');
+      }
+
+      if (scheduleFile) {
+        scheduleUrl = await uploadFile('audio/schedules/', scheduleFile, scheduleFile.name.split('.').pop() || 'jpg');
       }
 
       if (!finalUrl && !selectedFile) throw new Error('오디오 파일을 선택해주세요.');
@@ -149,6 +160,7 @@ const Audio = () => {
             title_ko: titleKo,
             title_en: titleEn,
             url: finalUrl,
+            schedule_url: scheduleUrl,
             publish_at
           })
           .eq('id', editingId);
@@ -160,11 +172,15 @@ const Audio = () => {
             title_ko: titleKo,
             title_en: titleEn,
             url: finalUrl,
+            schedule_url: scheduleUrl,
             is_active: true,
             publish_at
           }]);
         if (dbError) throw dbError;
       }
+
+      // Replaced schedule image is orphaned: drop it from storage (best effort).
+      if (scheduleFile && existing?.schedule_url) deleteFile(existing.schedule_url).catch(() => {});
 
       setShowModal(false);
       fetchTracks();
@@ -189,11 +205,12 @@ const Audio = () => {
     }
   };
 
-  const deleteTrack = async (id: string, url: string) => {
+  const deleteTrack = async (id: string, url: string, scheduleUrl?: string | null) => {
     if (!confirm('정말 이 트랙을 삭제하시겠습니까? 관련 파일도 모두 삭제됩니다.')) return;
 
     try {
       if (url) await deleteFile(url);
+      if (scheduleUrl) await deleteFile(scheduleUrl);
 
       const { error: dbError } = await supabase.from('audio_tracks').delete().eq('id', id);
       if (dbError) throw dbError;
@@ -342,7 +359,7 @@ const Audio = () => {
                 <Edit2 className="w-5 h-5" />
               </button>
               <button
-                onClick={() => deleteTrack(track.id, track.url)}
+                onClick={() => deleteTrack(track.id, track.url, track.schedule_url)}
                 className="p-3 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
                 title="삭제"
               >
@@ -437,6 +454,24 @@ const Audio = () => {
                       <AlertCircle className="w-3 h-3" /> 이미 업로드된 파일이 있습니다.
                     </div>
                   )}
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest px-1 flex items-center gap-2">
+                    <ImageIcon className="w-3 h-3" /> 편성표 이미지 (선택)
+                  </label>
+                  <label className="block w-full border-4 border-dashed border-gray-100 dark:border-gray-800 rounded-[2rem] p-6 text-center cursor-pointer hover:border-blue-200 transition-all">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setScheduleFile(e.target.files?.[0] || null)}
+                      className="hidden"
+                    />
+                    <span className="text-sm font-bold text-gray-500 break-all">
+                      {scheduleFile ? scheduleFile.name : editingId && tracks.find(t => t.id === editingId)?.schedule_url ? '편성표를 교체하려면 클릭 (현재 등록됨)' : '클릭하여 편성표 이미지 선택'}
+                    </span>
+                  </label>
+                  <p className="text-[11px] text-gray-400 font-medium px-1">방송듣기 페이지의 「오늘의 방송」 아래에 표시됩니다.</p>
                 </div>
 
                 <div className="space-y-2">

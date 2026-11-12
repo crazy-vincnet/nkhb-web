@@ -3369,3 +3369,20 @@ footer {
     .past-item { padding: 14px; gap: 12px; }
     .past-item time { display: none; }
 }
+
+/* Program schedule image under the player */
+.broadcast-schedule { margin-top: 48px; }
+.broadcast-schedule h2 {
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 20px;
+}
+.broadcast-schedule a {
+    display: block;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    overflow: hidden;
+    background: var(--bg-white);
+}
+.broadcast-schedule img { display: block; width: 100%; height: auto; }

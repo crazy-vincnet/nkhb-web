@@ -16,7 +16,7 @@ import { AwsClient } from 'aws4fetch';
  */
 
 // Folders the admin UI writes to; anything else is rejected.
-const ALLOWED_PREFIXES = ['assets/cms/', 'audio/posts/', 'audio/broadcasts/'];
+const ALLOWED_PREFIXES = ['assets/cms/', 'audio/posts/', 'audio/broadcasts/', 'audio/schedules/'];
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {

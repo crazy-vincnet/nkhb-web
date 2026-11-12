@@ -9,6 +9,7 @@ export interface AudioTrack {
     title_ko: string;
     title_en: string;
     url: string;
+    schedule_url?: string | null;
 }
 
 // Shortwave dial, evenly spaced 6–12 MHz so the needle can point at the real frequency.
@@ -45,7 +46,7 @@ export const splitTitle = (raw: string) => {
 
 // Plays today's broadcast: the newest active track whose publish_at has passed.
 // Scheduled tracks take over automatically once their time comes.
-export const RadioPlayer: React.FC<{ selected?: AudioTrack }> = ({ selected }) => {
+export const RadioPlayer: React.FC<{ selected?: AudioTrack; showSchedule?: boolean }> = ({ selected, showSchedule }) => {
     const { lang } = useI18n();
     const [todayTrack, setTrack] = useState<AudioTrack | null | undefined>(undefined);
     const track = selected ?? todayTrack;
@@ -60,7 +61,7 @@ export const RadioPlayer: React.FC<{ selected?: AudioTrack }> = ({ selected }) =
         Promise.all([
             supabase
                 .from('audio_tracks')
-                .select('id, title_ko, title_en, url')
+                .select('id, title_ko, title_en, url, schedule_url')
                 .eq('is_active', true)
                 .lte('publish_at', new Date().toISOString())
                 .order('publish_at', { ascending: false })
@@ -97,6 +98,7 @@ export const RadioPlayer: React.FC<{ selected?: AudioTrack }> = ({ selected }) =
         : { label: '', title: track === null ? t('오늘의 방송을 준비 중입니다.', 'Today\'s broadcast is coming soon.') : t('채널을 불러오는 중…', 'Tuning in…') };
 
     return (
+        <>
         <section className={`radio ${isPlaying ? 'is-playing' : ''}`} aria-label={t('라디오 플레이어', 'Radio player')}>
             <div className="radio-body">
                 <div className="radio-speaker" aria-hidden="true">
@@ -171,6 +173,15 @@ export const RadioPlayer: React.FC<{ selected?: AudioTrack }> = ({ selected }) =
                 onLoadedMetadata={e => setDuration(e.currentTarget.duration)}
             />
         </section>
+        {showSchedule && track?.schedule_url && (
+            <section className="broadcast-schedule">
+                <h2>{t('편성표', 'Program Schedule')}</h2>
+                <a href={track.schedule_url} target="_blank" rel="noopener noreferrer">
+                    <img src={track.schedule_url} alt={t('방송 편성표', 'Broadcast program schedule')} loading="lazy" />
+                </a>
+            </section>
+        )}
+        </>
     );
 };
 

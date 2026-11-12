@@ -26,7 +26,7 @@ const Listen: React.FC = () => {
     const load = (offset: number, all: boolean) =>
         supabase
             .from('audio_tracks')
-            .select('id, title_ko, title_en, url, publish_at')
+            .select('id, title_ko, title_en, url, schedule_url, publish_at')
             .eq('is_active', true)
             .lte('publish_at', new Date().toISOString())
             .order('publish_at', { ascending: false })
@@ -48,7 +48,7 @@ const Listen: React.FC = () => {
                     <h1>{t('오늘의 방송듣기', 'Today\'s Broadcast')}</h1>
                     <p>{t('북한의 밤하늘로 보내는 뉴코리아 희망방송을 지금 들어보세요.', 'Hear the New Korea Hope Broadcasting programs we send into the North Korean night.')}</p>
                 </div>
-                <RadioPlayer selected={selected} />
+                <RadioPlayer selected={selected} showSchedule />
                 {past.length > 0 && (
                     <section className="past-broadcasts">
                         <h2>{t('지난 방송', 'Past Broadcasts')}</h2>

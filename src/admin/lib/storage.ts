@@ -7,7 +7,7 @@
 
 import { supabase } from './supabase';
 
-export type StoragePrefix = 'assets/cms/' | 'audio/posts/' | 'audio/broadcasts/';
+export type StoragePrefix = 'assets/cms/' | 'audio/posts/' | 'audio/broadcasts/' | 'audio/schedules/';
 
 async function callR2<T>(body: Record<string, unknown>): Promise<T> {
     const { data: { session } } = await supabase.auth.getSession();
