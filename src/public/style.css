@@ -3396,7 +3396,6 @@ footer {
     --radio-brass: #c9a24b;
     --radio-brass-dark: #8a6a22;
     --radio-cream: #f1e4c3;
-    --radio-amber: #ffbf5e;
     --radio-line: rgba(0, 0, 0, 0.35);
     --radio-dim: rgba(241, 228, 195, 0.7);
     --radio-signal: #d62828;
@@ -3450,14 +3449,10 @@ footer {
     box-shadow: inset 0 6px 18px rgba(0, 0, 0, 0.55), 0 0 0 2px var(--radio-brass-dark);
 }
 
-.radio-grille::after {
-    border-radius: 14px;
-    border-color: rgba(255, 191, 94, 0.5);
-}
+.radio.is-playing .radio-grille::after { animation: none; }
 
 .radio-brand {
-    font-family: Georgia, 'Times New Roman', serif;
-    font-style: italic;
+    font-weight: 800;
     letter-spacing: 0.3em;
     font-size: 15px;
     color: var(--radio-brass);
@@ -3506,18 +3501,16 @@ footer {
     border-color: var(--radio-signal);
 }
 
-/* tuning dial: backlit amber glass in a brass bezel */
+/* tuning dial: aged cream dial plate in a brass bezel */
 .radio-dial {
     height: 76px;
     border-radius: 12px;
     border: 4px solid var(--radio-brass);
-    background: linear-gradient(180deg, #ffd88a 0%, #f0a93c 55%, #c47d1c 100%);
-    box-shadow: inset 0 4px 12px rgba(80, 40, 0, 0.6), 0 0 22px rgba(255, 170, 60, 0.35), 0 0 0 2px var(--radio-brass-dark);
+    background: linear-gradient(180deg, #efe2bd 0%, #e2d0a0 100%);
+    box-shadow: inset 0 3px 8px rgba(60, 35, 10, 0.5), 0 0 0 2px var(--radio-brass-dark);
 }
 
-.radio.is-playing .radio-dial { box-shadow: inset 0 4px 12px rgba(80, 40, 0, 0.5), 0 0 34px rgba(255, 170, 60, 0.65), 0 0 0 2px var(--radio-brass-dark); }
-
-.radio-scale span { color: #3a2208; font-weight: 700; font-family: Georgia, serif; }
+.radio-scale span { color: #3a2208; font-weight: 700; }
 
 .radio-ticks {
     background:
@@ -3529,26 +3522,26 @@ footer {
     top: 4px;
     bottom: 4px;
     background: var(--radio-signal);
-    box-shadow: 0 0 6px rgba(214, 40, 40, 0.9);
+    box-shadow: 1px 0 1px rgba(0, 0, 0, 0.35);
 }
 
-.radio-freq { color: var(--radio-amber); text-shadow: 0 0 8px rgba(255, 191, 94, 0.6); }
+.radio-freq { color: var(--radio-cream); }
 
-/* program readout: dark glass with amber text */
+/* program readout: engraved dark plate */
 .radio-display {
     padding: 14px 18px;
     border-radius: 10px;
-    background: #14100a;
+    background: #2b1a0e;
     border: 2px solid var(--radio-brass-dark);
-    box-shadow: inset 0 3px 10px rgba(0, 0, 0, 0.8);
+    box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.6);
 }
 
-.radio-channel, .radio-time { color: var(--radio-amber); opacity: 0.8; }
-.radio-title { color: var(--radio-amber); text-shadow: 0 0 10px rgba(255, 191, 94, 0.45); font-size: 22px; }
+.radio-channel, .radio-time { color: var(--radio-brass); }
+.radio-title { color: var(--radio-cream); font-size: 22px; }
 
 .radio-seek,
 .radio-volume input {
-    background: linear-gradient(90deg, var(--radio-amber) var(--p, 0%), rgba(0, 0, 0, 0.45) var(--p, 0%));
+    background: linear-gradient(90deg, var(--radio-brass) var(--p, 0%), rgba(0, 0, 0, 0.45) var(--p, 0%));
     box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6);
 }
 
@@ -3567,7 +3560,7 @@ footer {
     box-shadow: 0 8px 14px rgba(0, 0, 0, 0.55), inset 0 -3px 6px rgba(0, 0, 0, 0.25);
 }
 .radio-knob:active { transform: scale(0.96); box-shadow: 0 3px 6px rgba(0, 0, 0, 0.55); }
-.radio-knob:focus-visible, .radio-seek:focus-visible, .radio-volume input:focus-visible { outline-color: var(--radio-amber); }
+.radio-knob:focus-visible, .radio-seek:focus-visible, .radio-volume input:focus-visible { outline-color: var(--radio-brass); }
 
 @media (max-width: 768px) {
     .radio::before { right: 10%; }
@@ -3581,3 +3574,6 @@ footer {
 @media (prefers-reduced-motion: reduce) {
     .radio-dialknob { transition: none; }
 }
+
+/* indicator lamp: plain red lamp, no halo or blinking */
+.radio.is-playing .radio-onair i { box-shadow: none; animation: none; }
